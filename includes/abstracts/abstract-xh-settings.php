@@ -1,0 +1,1272 @@
+<?php
+if (! defined ( 'ABSPATH' ))
+	exit (); // Exit if accessed directly
+
+/**
+ * Abstract Settings API Class
+ *
+ * Admin Settings API used by login.
+ *
+ * @since 1.0.0
+ * @author ranj
+ */
+abstract class Abstract_XH_Social_Settings {
+	/**
+	 * The plugin ID.
+	 * Used for option names.
+	 * 
+	 * @var string
+	 */
+	public $plugin_id = 'xh_social_';
+	
+	/**
+	 * Method ID.
+	 * 
+	 * @var string
+	 */
+	public $id = '';
+
+	/**
+	 * Method title.
+	 * 
+	 * @var string
+	 */
+	public $title = '';
+	
+	/**
+	 * Method description.
+	 * 
+	 * @var string
+	 */
+	public $description = '';
+	
+	/**
+	 * 'yes' if the method is enabled.
+	 * 
+	 * @var string
+	 */
+	public $enabled;
+	
+	/**
+	 * Setting values.
+	 * 
+	 * @var array
+	 */
+	public $settings = array ();
+	
+	/**
+	 * Form option fields.
+	 * 
+	 * @var array
+	 */
+	public $form_fields = array ();
+	
+	/**
+	 * Validation errors.
+	 * 
+	 * @var array
+	 */
+	public $errors = array ();
+	
+	/**
+	 * Sanitized fields after validation.
+	 * 
+	 * @var array
+	 */
+	public $sanitized_fields = array ();
+	
+	public function admin_form_start(){
+	    if( isset($_POST['notice-'.$this->id])){
+	        if(wp_verify_nonce($_POST['notice-'.$this->id], XH_Social::instance()->session->get_notice('admin:form:'.$this->id,true))){
+	           $this->process_admin_options(); 
+	           
+	        }else{
+	            $this->errors[]=XH_Social_Error::err_code(701)->errmsg;
+	            $this->display_errors();
+	        }
+	    }
+	    ?><form method="post" id="mainform" action="" enctype="multipart/form-data"><?php
+	}
+	
+	/**
+	 * Admin Options.
+	 *
+	 * Setup the gateway settings screen.
+	 * Override this in your gateway.
+	 *
+	 * @since 1.0.0
+	 */
+	public function admin_options() {	    
+	      ?>
+	    <style type="text/css">
+            .form-table tr{display:block;}
+        </style>
+        <h3><?php echo ( ! empty( $this->title ) ) ? $this->title : __( 'Settings') ; ?></h3>
+        <?php echo ( ! empty( $this->description ) ) ? wpautop( $this->description ) : ''; ?>
+        
+        <?php do_action('xh_social_admin_options_header_'.$this->id)?>
+        
+        <input type="hidden" name="action" value="<?php print esc_attr($this->id)?>"/>
+        <table class="form-table">
+			<?php $this->generate_settings_html(); ?>
+		</table>
+		<?php
+	}
+	
+	public function admin_form_end(){
+	   ?><p class="submit">
+			<input type="hidden" name="notice-<?php print $this->id?>" value="<?php print wp_create_nonce ( XH_Social::instance()->session->get_notice('admin:form:'.$this->id));?>"/>
+			<input type="submit" value="<?php print __('Save Changes')?>" class="button-primary" />
+		 </p>
+		</form><?php
+	}
+	/**
+	 * Initialise Settings Form Fields.
+	 *
+	 * Add an array of fields to be displayed
+	 * on the gateway's settings screen.
+	 *
+	 * @since 1.0.0
+	 * @return string
+	 */
+	public function init_form_fields() {
+	    $this->form_fields=array();
+	}
+	
+	/**
+	 * Get the form fields after they are initialized.
+	 * 
+	 * @since 1.0.0
+	 * @return array of options
+	 */
+	public function get_form_fields() {
+		return apply_filters ( 'xh_social_settings_api_form_fields_' . $this->id, $this->form_fields );
+	}
+	/**
+	 * 获取页面下拉选项
+	 * @return array
+	 * @since 1.0.0
+	 */
+	public function get_page_options(){
+	    global $wpdb;
+	    $pages =$wpdb->get_results(
+	        "select ID,post_title
+	        from {$wpdb->prefix}posts
+	        where post_type='page'
+	              and post_status='publish';");
+	    $options = array(
+	        '0'=>__('Select...',XH_SOCIAL)
+	    );
+	    if($pages){
+	        foreach ($pages as $page){
+	            $options[$page->ID]=$page->post_title;
+	        }
+	    }
+	
+	    return $options;
+	}
+	
+	
+	/**
+	 * Admin Panel Options Processing.
+	 * - Saves the options to the DB.
+	 *
+	 * @since 1.0.0
+	 * @return bool
+	 */
+	public function process_admin_options() {
+		$this->validate_settings_fields ();
+		do_action('xh_social_process_admin_options_validate_'.$this->id);
+		if (count ( $this->errors ) > 0) {
+			$this->display_errors ();
+			return false;
+		} else {
+		    wp_cache_delete($this->plugin_id . $this->id . '_settings', 'options');
+			update_option ( $this->plugin_id . $this->id . '_settings', $this->sanitized_fields,false);
+			$this->init_settings ();
+			$this->display_success();
+			return true;
+		}
+	}
+	
+	/**
+	 * update_option function
+	 * 更新单个配置项
+	 * @param string $key
+	 * @param mixed $val
+	 * @since 1.0.0
+	 */
+	public function update_option($key,$val){
+	    $options = get_option($this->plugin_id . $this->id . '_settings',array());
+	    if(!$options||!is_array($options)){
+	        $options =array();
+	    }
+	    
+	    $options[$key]=$val;
+	    
+	    wp_cache_delete($this->plugin_id . $this->id . '_settings', 'options');
+	    update_option ( $this->plugin_id . $this->id . '_settings', $options ,false);
+	    $this->init_settings ();
+	    return true;
+	}
+
+	/**
+	 * get_option function.
+	 *
+	 * Gets and option from the settings API, using defaults if necessary to prevent undefined notices.
+	 *
+	 * @param string $key
+	 * @param mixed $empty_value
+	 * @return mixed The value specified for the option or a default value for the option.
+	 */
+	public function get_option($key, $empty_value = null) {
+	    if (empty ( $this->settings )) {
+	        $this->init_settings ();
+	    }
+	
+	    // Get option default if unset.
+	    if (! isset ( $this->settings [$key] )) {
+	        $form_fields = $this->get_form_fields ();
+	        $this->settings [$key] = isset ( $form_fields [$key] ['default'] ) ? $form_fields [$key] ['default'] : '';
+	    }
+	
+	    if (! is_null ( $empty_value ) && empty ( $this->settings [$key] ) && '' === $this->settings [$key]) {
+	        $this->settings [$key] = $empty_value;
+	    }
+	
+	    return $this->settings [$key];
+	}
+	
+	/**
+	 * Display admin success messages.
+	 *
+	 * @since 1.0.0
+	 */
+	public function display_success(){
+	    ?>
+	    <div id="message" class="success notice notice-success is-dismissible">
+   		<p><?php echo __('Data saved successfully!',XH_SOCIAL);?></p>
+   		<button type="button" class="notice-dismiss"><span class="screen-reader-text"><?php print __('Ignore')?></span></button>
+   		</div>
+	    <?php 
+	}
+		
+	/**
+	 * Display admin error messages.
+	 *
+	 * @since 1.0.0
+	 */
+	public function display_errors() {
+	    if(count( $this->errors)==0){
+	        return;
+	    }
+		?>
+		<div id="message" class="error notice notice-error is-dismissible">
+		<p>
+		<?php 
+		 foreach ($this->errors as $error){
+		     echo $error;
+		 }
+		?>
+		</p><button type="button" class="notice-dismiss"><span class="screen-reader-text"><?php print __('Ignore')?></span></button></div>
+		<?php 
+	}
+	
+	/**
+	 * Initialise Gateway Settings.
+	 *
+	 * Store all settings in a single database entry
+	 * and make sure the $settings array is either the default
+	 * or the settings stored in the database.
+	 *
+	 * @since 1.0.0
+	 * @uses get_option(), add_option()
+	 */
+	public function init_settings() {
+		
+		// Load form_field settings.
+		$this->settings = get_option ( $this->plugin_id . $this->id . '_settings', null );
+		
+		if (! $this->settings || ! is_array ( $this->settings )) {
+			
+			$this->settings = array ();
+			
+			// If there are no settings defined, load defaults.
+			$form_fields = $this->get_form_fields ();
+			if ($form_fields) {
+				
+				foreach ( $form_fields as $k => $v ) {
+					$this->settings [$k] = isset ( $v ['default'] ) ? $v ['default'] : '';
+				}
+			}
+		}
+		
+		if (! empty ( $this->settings ) && is_array ( $this->settings )) {
+			$this->settings = array_map ( array (
+					$this,
+					'format_settings' 
+			), $this->settings );
+			$this->enabled = isset ( $this->settings ['enabled'] ) && $this->settings ['enabled'] == 'yes' ? 'yes' : 'no';
+		}
+	}
+	
+	
+	/**
+	 * Prefix key for settings.
+	 *
+	 * @param mixed $key        	
+	 * @return string
+	 */
+	public function get_field_key($key) {
+		return $this->plugin_id . $this->id . '_' . $key;
+	}
+	
+	/**
+	 * Decode values for settings.
+	 *
+	 * @param mixed $value        	
+	 * @return array
+	 */
+	public function format_settings($value) {
+		return is_array ( $value ) ? $value : $value;
+	}
+	
+	/**
+	 * Generate Settings HTML.
+	 *
+	 * Generate the HTML for the fields on the "settings" screen.
+	 *
+	 * @param array $form_fields
+	 *        	(default: array())
+	 * @since 1.0.0
+	 * @uses method_exists()
+	 * @return string the html for the settings
+	 */
+	public function generate_settings_html($form_fields = array()) {
+		if (empty ( $form_fields )) {
+			$form_fields = $this->get_form_fields ();
+		}
+		
+		$html = '';
+		foreach ( $form_fields as $k => $v ) {
+			
+			if (! isset ( $v ['type'] ) || ($v ['type'] == '')) {
+				$v ['type'] = 'text'; // Default to "text" field type.
+			}
+			
+			if (method_exists ( $this, 'generate_' . $v ['type'] . '_html' )) {
+				$html .= $this->{'generate_' . $v ['type'] . '_html'} ( $k, $v );
+			} else {
+				$html .= $this->{'generate_text_html'} ( $k, $v );
+			}
+		}
+		
+		echo $html;
+	}
+	
+	/**
+	 * htmlspecialchars
+	 * 
+	 * @since 1.0.0
+	 * @param string $var
+	 * @return string
+	 */
+	function wc_sanitize_tooltip($var) {
+		return htmlspecialchars ( wp_kses ( html_entity_decode ( $var ), array (
+				'br' => array (),
+				'em' => array (),
+				'strong' => array (),
+				'small' => array (),
+				'span' => array (),
+				'ul' => array (),
+				'li' => array (),
+				'ol' => array (),
+				'p' => array () 
+		) ) );
+	}
+	
+	/**
+	 * Generate help tips
+	 * 
+	 * @since 1.0.0
+	 * @param string $tip
+	 * @param bool $allow_html
+	 * @return string
+	 */
+	function wc_help_tip($tip, $allow_html = false) {
+		if ($allow_html) {
+			// $tip = $this->wc_sanitize_tooltip( $tip );
+		} else {
+			$tip = esc_attr ( $tip );
+		}
+		
+		return '<span class="help-tip" data-tip="' . $tip . '"></span>';
+	}
+	
+	/**
+	 * Get HTML for tooltips.
+	 *
+	 * @since 1.0.0
+	 * @param array $data        	
+	 * @return string
+	 */
+	public function get_tooltip_html($data) {
+		if ($data ['desc_tip'] === true) {
+			$tip = $data ['description'];
+		} elseif (! empty ( $data ['desc_tip'] )) {
+			$tip = $data ['desc_tip'];
+		} else {
+			$tip = '';
+		}
+		
+		return $tip ? $this->wc_help_tip ( $tip, true ) : '';
+	}
+	
+	/**
+	 * Get HTML for descriptions.
+	 *
+	 * @since 1.0.0
+	 * @param array $data        	
+	 * @return string
+	 */
+	public function get_description_html($data) {
+		if ($data ['desc_tip'] === true) {
+			$description = '';
+		} elseif (! empty ( $data ['desc_tip'] )) {
+			$description = $data ['description'];
+		} elseif (! empty ( $data ['description'] )) {
+			$description = $data ['description'];
+		} else {
+			$description = '';
+		}
+		
+		return $description ? '<p class="description">' . wp_kses_post ( $description ) . '</p>' . "\n" : '';
+	}
+	
+	/**
+	 * Get custom attributes.
+	 *
+	 *@since 1.0.0
+	 * @param array $data        	
+	 * @return string
+	 */
+	public function get_custom_attribute_html($data) {
+		$custom_attributes = array ();
+		
+		if (! empty ( $data ['custom_attributes'] ) && is_array ( $data ['custom_attributes'] )) {
+			
+			foreach ( $data ['custom_attributes'] as $attribute => $attribute_value ) {
+				$custom_attributes [] = esc_attr ( $attribute ) . '="' . esc_attr ( $attribute_value ) . '"';
+			}
+		}
+		
+		return implode ( ' ', $custom_attributes );
+	}
+	
+	/**
+	 * Generate Text Input HTML.
+	 *
+	 * @param mixed $key        	
+	 * @param mixed $data        	
+	 * @since 1.0.0
+	 * @return string
+	 */
+	public function generate_text_html($key, $data) {
+		$field = $this->get_field_key ( $key );
+		$defaults = array (
+				'title' => '',
+				'disabled' => false,
+				'class' => '',
+				'css' => 'min-width:400px;',
+				'placeholder' => '',
+				'type' => 'text',
+				'desc_tip' => false,
+				'description' => '',
+				'custom_attributes' => array () 
+		);
+		
+		$data = wp_parse_args ( $data, $defaults );
+		
+		ob_start ();
+		?>
+        <tr valign="top" class="<?php echo isset($data['section'])?"section section-{$data['section']}":'';?>">
+        	<th scope="row" class="titledesc">
+        		<label for="<?php echo esc_attr( $field ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
+				<?php echo $this->get_tooltip_html( $data ); ?>
+			</th>
+        	<td class="forminp">
+        		<fieldset>
+        			<legend class="screen-reader-text">
+        				<span><?php echo wp_kses_post( $data['title'] ); ?></span>
+        			</legend>
+        			<input class="input-text regular-input <?php echo esc_attr( $data['class'] ); ?>" type="<?php echo esc_attr( $data['type'] ); ?>" name="<?php echo esc_attr( $field ); ?>" id="<?php echo esc_attr( $field ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" value="<?php echo esc_attr( $this->get_option( $key ) ); ?>" placeholder="<?php echo esc_attr( $data['placeholder'] ); ?>" <?php disabled( $data['disabled'], true ); ?> <?php echo $this->get_custom_attribute_html( $data ); ?> />
+					<?php echo $this->get_description_html( $data ); ?>
+				</fieldset>
+        	</td>
+        </tr>
+        <?php
+		
+		return ob_get_clean ();
+	}
+	
+	/**
+	 * Generate Price Input HTML.
+	 *
+	 * @param mixed $key        	
+	 * @param mixed $data        	
+	 * @since 1.0.0
+	 * @return string
+	 */
+	public function generate_price_html($key, $data) {
+		$field = $this->get_field_key ( $key );
+		$defaults = array (
+				'title' => '',
+				'disabled' => false,
+				'class' => '',
+				'css' => '',
+				'placeholder' => '',
+				'type' => 'text',
+				'desc_tip' => false,
+				'description' => '',
+				'custom_attributes' => array () 
+		);
+		
+		$data = wp_parse_args ( $data, $defaults );
+		
+		ob_start ();
+		?>
+            <tr valign="top" class="<?php echo isset($data['section'])?"section section-{$data['section']}":'';?>">
+            	<th scope="row" class="titledesc">
+            		<label for="<?php echo esc_attr( $field ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
+					<?php echo $this->get_tooltip_html( $data ); ?>
+				</th>
+            	<td class="forminp">
+            		<fieldset>
+            			<legend class="screen-reader-text">
+            				<span><?php echo wp_kses_post( $data['title'] ); ?></span>
+            			</legend>
+            			<input class="wc_input_price input-text regular-input <?php echo esc_attr( $data['class'] ); ?>" type="text" name="<?php echo esc_attr( $field ); ?>" id="<?php echo esc_attr( $field ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" value="<?php echo esc_attr( wc_format_localized_price( $this->get_option( $key ) ) ); ?>" placeholder="<?php echo esc_attr( $data['placeholder'] ); ?>" <?php disabled( $data['disabled'], true ); ?> <?php echo $this->get_custom_attribute_html( $data ); ?> />
+						<?php echo $this->get_description_html( $data ); ?>
+					</fieldset>
+            	</td>
+            </tr>
+            <?php
+		
+		return ob_get_clean ();
+	}
+	
+	/**
+	 * Generate Decimal Input HTML.
+	 *
+	 * @param mixed $key        	
+	 * @param mixed $data        	
+	 * @since 1.0.0
+	 * @return string
+	 */
+	public function generate_decimal_html($key, $data) {
+		$field = $this->get_field_key ( $key );
+		$defaults = array (
+				'title' => '',
+				'disabled' => false,
+				'class' => '',
+				'css' => '',
+				'placeholder' => '',
+				'type' => 'text',
+				'desc_tip' => false,
+				'description' => '',
+				'custom_attributes' => array () 
+		);
+		
+		$data = wp_parse_args ( $data, $defaults );
+		
+		ob_start ();
+		?>
+        <tr valign="top" class="<?php echo isset($data['section'])?"section section-{$data['section']}":'';?>">
+        	<th scope="row" class="titledesc">
+        		<label for="<?php echo esc_attr( $field ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
+        		<?php echo $this->get_tooltip_html( $data ); ?>
+        	</th>
+        	<td class="forminp">
+        		<fieldset>
+        			<legend class="screen-reader-text">
+        				<span><?php echo wp_kses_post( $data['title'] ); ?></span>
+        			</legend>
+        			<input class="wc_input_decimal input-text regular-input <?php echo esc_attr( $data['class'] ); ?>" type="text" name="<?php echo esc_attr( $field ); ?>" id="<?php echo esc_attr( $field ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" value="<?php echo esc_attr( wc_format_localized_decimal( $this->get_option( $key ) ) ); ?>" placeholder="<?php echo esc_attr( $data['placeholder'] ); ?>" <?php disabled( $data['disabled'], true ); ?> <?php echo $this->get_custom_attribute_html( $data ); ?> />
+        			<?php echo $this->get_description_html( $data ); ?>
+        		</fieldset>
+        	</td>
+        </tr>
+        <?php
+		
+		return ob_get_clean ();
+	}
+	
+	public function generate_image_html($key, $data) {
+	    $field = $this->get_field_key ( $key );
+	    $defaults = array (
+	        'title' => '',
+	        'disabled' => false,
+	        'class' => '',
+	        'css' => '',
+	        'placeholder' => '',
+	        'type' => 'text',
+	        'desc_tip' => false,
+	        'description' => '',
+	        'custom_attributes' => array ()
+	    );
+	
+	    $data = wp_parse_args ( $data, $defaults );
+	
+	    ob_start ();
+	    ?>
+	        <tr valign="top" class="<?php echo isset($data['section'])?"section section-{$data['section']}":'';?>">
+	        	<th scope="row" class="titledesc">
+	        		<label for="<?php echo esc_attr( $field ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
+	        		<?php echo $this->get_tooltip_html( $data ); ?>
+	        	</th>
+	        	<td class="forminp">
+	        		<fieldset>
+	        			<legend class="screen-reader-text">
+	        				<span><?php echo wp_kses_post( $data['title'] ); ?></span>
+	        			</legend>
+	        			
+	        			<script type="text/javascript">
+	        			if(!window.thickboxL10n){
+							window.thickboxL10n = {"next":"\u4e0b\u4e00\u9875 >","prev":"< \u4e0a\u4e00\u9875","image":"\u56fe\u50cf","of":"\/","close":"\u5173\u95ed","noiframes":"\u8fd9\u4e2a\u529f\u80fd\u9700\u8981iframe\u7684\u652f\u6301\u3002\u60a8\u53ef\u80fd\u7981\u6b62\u4e86iframe\u7684\u663e\u793a\uff0c\u6216\u60a8\u7684\u6d4f\u89c8\u5668\u4e0d\u652f\u6301\u6b64\u529f\u80fd\u3002","loadingAnimation":"http:\/\/ranj.mabaodian.com\/wp-includes\/js\/thickbox\/loadingAnimation.gif"};
+	        			}
+						</script>
+						<img id="<?php echo esc_attr( $field ); ?>-img" style="max-width:100px;max-height:100px;" src="<?php echo esc_attr(  $this->get_option( $key ) ); ?>">
+						<input type="hidden" name="<?php echo esc_attr( $field ); ?>" id="<?php echo esc_attr( $field ); ?>" value="<?php echo esc_attr(  $this->get_option( $key ) ); ?>" />
+						<input type="button" class="button" id="btn-<?php echo esc_attr( $field ); ?>-upload-img" value="<?php echo __('Upload Image',XH_SOCIAL)?>" />
+						<a href="javascript:void(0);" style="margin-left:5px;" id="btn-<?php echo esc_attr( $field ); ?>-remove"><?php echo __('Remove',XH_SOCIAL)?></a>
+						<script type="text/javascript">
+						(function($){
+							$('#btn-<?php echo esc_attr( $field ); ?>-upload-img').click(function() {  
+								 window.send_to_editor = function(html) { 
+									 var imgurl='';
+									 var $img = $(html).children('img');
+									 if($img.length>0){
+										 imgurl=$img.attr('src');  
+								    }else{
+								    	imgurl = $(html).attr('src');  
+									 }
+							      
+							          $('#<?php echo esc_attr( $field ); ?>').val(imgurl);
+							          $('#<?php echo esc_attr( $field ); ?>-img').attr('src',imgurl);
+							     
+							         tb_remove();   
+							    } ;   
+							    
+						         tb_show('', 'media-upload.php?type=image&amp;TB_iframe=true');   
+						         return false;   
+						    });   
+						    $('#btn-<?php echo esc_attr( $field ); ?>-remove').click(function(){
+								if(confirm('<?php echo __('Are you sure?',XH_SOCIAL)?>')){
+									$('#<?php echo esc_attr( $field ); ?>').val('');
+									$('#<?php echo esc_attr( $field ); ?>-img').attr('src','');
+								}
+							});
+						})(jQuery);
+						</script>
+	        			
+	        			<?php echo $this->get_description_html( $data ); ?>
+	        		</fieldset>
+	        	</td>
+	        </tr>
+	        <?php
+			
+			return ob_get_clean ();
+		}
+	
+	/**
+	 * Generate Password Input HTML.
+	 *
+	 * @param mixed $key        	
+	 * @param mixed $data        	
+	 * @since 1.0.0
+	 * @return string
+	 */
+	public function generate_password_html($key, $data) {
+		$data ['type'] = 'password';
+		return $this->generate_text_html ( $key, $data );
+	}
+	
+	/**
+	 * Generate Color Picker Input HTML.
+	 *
+	 * @param mixed $key        	
+	 * @param mixed $data        	
+	 * @since 1.0.0
+	 * @return string
+	 */
+	public function generate_color_html($key, $data) {
+		$field = $this->get_field_key ( $key );
+		$defaults = array (
+				'title' => '',
+				'disabled' => false,
+				'class' => '',
+				'css' => '',
+				'placeholder' => '',
+				'desc_tip' => false,
+				'description' => '',
+				'custom_attributes' => array () 
+		);
+		
+		$data = wp_parse_args ( $data, $defaults );
+		
+		ob_start ();
+		?>
+        <tr valign="top" class="<?php echo isset($data['section'])?"section section-{$data['section']}":'';?>">
+        	<th scope="row" class="titledesc">
+        		<label for="<?php echo esc_attr( $field ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
+				<?php echo $this->get_tooltip_html( $data ); ?>
+			</th>
+        	<td class="forminp">
+        		<fieldset>
+        			<legend class="screen-reader-text">
+        				<span><?php echo wp_kses_post( $data['title'] ); ?></span>
+        			</legend>
+        			<span class="colorpickpreview" style="background:<?php echo esc_attr( $this->get_option( $key ) ); ?>;"></span>
+        			<input class="colorpick <?php echo esc_attr( $data['class'] ); ?>" type="text" name="<?php echo esc_attr( $field ); ?>" id="<?php echo esc_attr( $field ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" value="<?php echo esc_attr( $this->get_option( $key ) ); ?>" placeholder="<?php echo esc_attr( $data['placeholder'] ); ?>" <?php disabled( $data['disabled'], true ); ?> <?php echo $this->get_custom_attribute_html( $data ); ?> />
+        			<div id="colorPickerDiv_<?php echo esc_attr( $field ); ?>" class="colorpickdiv" style="z-index: 100; background: #eee; border: 1px solid #ccc; position: absolute; display: none;"></div>
+					<?php echo $this->get_description_html( $data ); ?>
+				</fieldset>
+        	</td>
+        </tr>
+        <?php
+		
+		return ob_get_clean ();
+	}
+	
+	/**
+	 * Generate Textarea HTML.
+	 *
+	 * @param mixed $key        	
+	 * @param mixed $data        	
+	 * @since 1.0.0
+	 * @return string
+	 */
+	public function generate_textarea_html($key, $data) {
+		$field = $this->get_field_key ( $key );
+		$defaults = array (
+				'title' => '',
+				'disabled' => false,
+				'class' => '',
+				'css' => 'min-width:400px;',
+				'placeholder' => '',
+				'type' => 'text',
+				'desc_tip' => false,
+				'description' => '',
+				'custom_attributes' => array () 
+		);
+		
+		$data = wp_parse_args ( $data, $defaults );
+		
+		ob_start ();
+		?>
+            <tr valign="top" class="<?php echo isset($data['section'])?"section section-{$data['section']}":'';?>">
+            	<th scope="row" class="titledesc">
+            	<label for="<?php echo esc_attr( $field ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
+					<?php echo $this->get_tooltip_html( $data ); ?>
+				</th>
+            	<td class="forminp">
+            		<fieldset>
+            			<legend class="screen-reader-text">
+            				<span><?php echo wp_kses_post( $data['title'] ); ?></span>
+            			</legend>
+            			<textarea rows="3" cols="20" class="input-text wide-input <?php echo esc_attr( $data['class'] ); ?>"  name="<?php echo esc_attr( $field ); ?>" id="<?php echo esc_attr( $field ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" placeholder="<?php echo esc_attr( $data['placeholder'] ); ?>" <?php disabled( $data['disabled'], true ); ?> <?php echo $this->get_custom_attribute_html( $data ); ?>><?php echo esc_textarea( $this->get_option( $key ) ); ?></textarea>
+						<?php echo $this->get_description_html( $data ); ?>
+					</fieldset>
+            	</td>
+            </tr>
+            <?php
+		
+		return ob_get_clean ();
+	}
+	
+	/**
+	 * Generate Checkbox HTML.
+	 *
+	 * @param mixed $key        	
+	 * @param mixed $data        	
+	 * @since 1.0.0
+	 * @return string
+	 */
+	public function generate_checkbox_html($key, $data) {
+		$field = $this->get_field_key ( $key );
+		$defaults = array (
+				'title' => '',
+				'label' => '',
+				'disabled' => false,
+				'class' => '',
+				'css' => '',
+				'type' => 'text',
+				'desc_tip' => false,
+				'description' => '',
+				'custom_attributes' => array () 
+		);
+		
+		$data = wp_parse_args ( $data, $defaults );
+		
+		ob_start ();
+		?>
+        <tr valign="top" class="<?php echo isset($data['section'])?"section section-{$data['section']}":'';?>">
+        	<th scope="row" class="titledesc"><label
+        		for="<?php echo esc_attr( $field ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
+        					<?php echo $this->get_tooltip_html( $data ); ?>
+        				</th>
+        	<td class="forminp">
+        		<fieldset>
+        			<legend class="screen-reader-text">
+        				<span><?php echo wp_kses_post( $data['title'] ); ?></span>
+        			</legend>
+        			<label for="<?php echo esc_attr( $field ); ?>"> <input <?php disabled( $data['disabled'], true ); ?> class="<?php echo esc_attr( $data['class'] ); ?>" type="checkbox" name="<?php echo esc_attr( $field ); ?>" id="<?php echo esc_attr( $field ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" value="1" <?php checked( $this->get_option( $key ), 'yes' ); ?> <?php echo $this->get_custom_attribute_html( $data ); ?> /> <?php echo wp_kses_post( $data['label'] ); ?></label><br />
+        						<?php echo $this->get_description_html( $data ); ?>
+        					</fieldset>
+        	</td>
+        </tr>
+        <?php
+		
+		return ob_get_clean ();
+	}
+	
+	/**
+	 * Generate Select HTML.
+	 *
+	 * @param mixed $key        	
+	 * @param mixed $data        	
+	 * @since 1.0.0
+	 * @return string
+	 */
+	public function generate_select_html($key, $data) {
+
+		$field = $this->get_field_key ( $key );
+		$defaults = array (
+				'title' => '',
+				'disabled' => false,
+				'class' => '',
+				'css' => 'min-width:400px;',
+				'placeholder' => '',
+				'type' => 'text',
+				'desc_tip' => false,
+				'description' => '',
+				'custom_attributes' => array (),
+				'options' => array () 
+		);
+		
+		if(isset($data['func'])&&$data['func']){
+		    $data['options'] = call_user_func($data['options']);
+		}
+		
+		$data = wp_parse_args ( $data, $defaults );
+		
+		ob_start ();
+		?>
+        <tr valign="top" class="<?php echo isset($data['section'])?"section section-{$data['section']}":'';?>">
+        	<th scope="row" class="titledesc"><label
+        		for="<?php echo esc_attr( $field ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
+        					<?php echo $this->get_tooltip_html( $data ); ?>
+        				</th>
+        	<td class="forminp">
+        		<fieldset>
+        			<legend class="screen-reader-text">
+        				<span><?php echo wp_kses_post( $data['title'] ); ?></span>
+        			</legend>
+        			<select class="select <?php echo esc_attr( $data['class'] ); ?>" name="<?php echo esc_attr( $field ); ?>" id="<?php echo esc_attr( $field ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" <?php disabled( $data['disabled'], true ); ?> <?php echo $this->get_custom_attribute_html( $data ); ?>>
+        							<?php foreach ( (array) $data['options'] as $option_key => $option_value ) : ?>
+        								<option value="<?php echo esc_attr( $option_key ); ?>"
+        					<?php selected( $option_key, esc_attr( $this->get_option( $key ) ) ); ?>><?php echo esc_attr( $option_value ); ?></option>
+        							<?php endforeach; ?>
+        						</select>
+        						<?php echo $this->get_description_html( $data ); ?>
+        					</fieldset>
+        	</td>
+        </tr>
+        <?php
+		
+		return ob_get_clean ();
+	}
+	
+
+	/**
+	 * Generate Select HTML.
+	 *
+	 * @param mixed $key
+	 * @param mixed $data
+	 * @since 1.0.0
+	 * @return string
+	 */
+	public function generate_section_html($key, $data) {
+	
+	    $field = $this->get_field_key ( $key );
+	    $defaults = array (
+	        'title' => '',
+	        'disabled' => false,
+	        'class' => '',
+	        'css' => 'min-width:400px;',
+	        'placeholder' => '',
+	        'type' => 'text',
+	        'desc_tip' => false,
+	        'description' => '',
+	        'custom_attributes' => array (),
+	        'options' => array ()
+	    );
+	
+	    if(isset($data['func'])&&$data['func']){
+	        $data['options'] = call_user_func($data['options']);
+	    }
+	
+	    $data = wp_parse_args ( $data, $defaults );
+	
+	    ob_start ();
+	    ?>
+	        <tr valign="top" class="<?php echo isset($data['section'])?"section section-{$data['section']}":'';?>">
+	        	<th scope="row" class="titledesc"><label
+	        		for="<?php echo esc_attr( $field ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
+	        					<?php echo $this->get_tooltip_html( $data ); ?>
+	        				</th>
+	        	<td class="forminp">
+	        		<fieldset>
+	        			<legend class="screen-reader-text">
+	        				<span><?php echo wp_kses_post( $data['title'] ); ?></span>
+	        			</legend>
+	        			<select class="select <?php echo esc_attr( $data['class'] ); ?>" name="<?php echo esc_attr( $field ); ?>" id="<?php echo esc_attr( $field ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" <?php disabled( $data['disabled'], true ); ?> <?php echo $this->get_custom_attribute_html( $data ); ?>>
+						<?php foreach ( (array) $data['options'] as $option_key => $option_value ) : ?>
+							<option value="<?php echo esc_attr( $option_key ); ?>"
+				           <?php selected( $option_key, esc_attr( $this->get_option( $key ) ) ); ?>><?php echo esc_attr( $option_value ); ?></option>
+						<?php endforeach; ?>
+					</select>
+					<?php echo $this->get_description_html( $data ); ?>
+				</fieldset>
+	        	</td>
+	        </tr>
+	        <script type="text/javascript">
+				(function($){
+					window.on_<?php echo esc_attr( str_replace('-', '_', $field) ); ?>_change=function(){
+						<?php foreach ( $data['options'] as $key=>$val){
+						    ?>
+						    $('.form-table tr.section-<?php echo esc_attr($key)?>').css('display','none');
+						    <?php 
+						}?>
+						
+						$('.form-table tr.section-'+$('#<?php echo esc_attr( $field ); ?>').val()).css('display','block');
+					}
+					$(function(){
+						window.on_<?php echo esc_attr( str_replace('-', '_', $field) ); ?>_change();
+					});
+					$('#<?php echo esc_attr( $field ); ?>').change(function(){
+						window.on_<?php echo esc_attr( str_replace('-', '_', $field) ); ?>_change();
+					});
+				})(jQuery);
+			</script>
+	        <?php
+			
+			return ob_get_clean ();
+		}
+	
+	/**
+	 * Generate Multiselect HTML.
+	 *
+	 * @param mixed $key        	
+	 * @param mixed $data        	
+	 * @since 1.0.0
+	 * @return string
+	 */
+	public function generate_multiselect_html($key, $data) {
+		$field = $this->get_field_key ( $key );
+		$defaults = array (
+				'title' => '',
+				'disabled' => false,
+				'class' => '',
+				'css' => 'min-width:400px;',
+				'placeholder' => '',
+				'type' => 'text',
+				'desc_tip' => false,
+				'default'=>array(),
+				'description' => '',
+				'custom_attributes' => array (),
+				'options' => array () 
+		);
+		
+		$data = wp_parse_args ( $data, $defaults );
+		$value = ( array ) $this->get_option ( $key, isset($data['default'])&&is_array($data['default'])? $data['default']:array () );
+		ob_start ();
+		?>
+        <tr valign="top" class="<?php echo isset($data['section'])?"section section-{$data['section']}":'';?>">
+        	<th scope="row" class="titledesc"><label
+        		for="<?php echo esc_attr( $field ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
+        					<?php echo $this->get_tooltip_html( $data ); ?>
+        				</th>
+        	<td class="forminp">
+        		<fieldset>
+        			<legend class="screen-reader-text">
+        				<span><?php echo wp_kses_post( $data['title'] ); ?></span>
+        			</legend>
+        			
+        			<ul style="list-style: none; <?php echo esc_attr( $data['css'] ); ?>"  class="<?php echo esc_attr( $data['class'] ); ?>" id="<?php echo esc_attr( $field ); ?>" >
+        				
+        				<?php foreach ( (array) $data['options'] as $option_key => $option_value ) : ?>
+        					<li>
+        					<label><input name="<?php echo esc_attr( $field ); ?>[]" type="checkbox"  <?php disabled( $data['disabled'], true ); ?> <?php echo $this->get_custom_attribute_html( $data ); ?> value="<?php echo esc_attr( $option_key ); ?>"
+        						<?php checked( in_array( $option_key, $value ), true ); ?>> <?php echo esc_attr( $option_value ); ?></label>
+        					</li>
+        				<?php endforeach; ?>
+        							
+        			</ul>
+        			
+        			<?php echo $this->get_description_html( $data ); ?>
+        		</fieldset>
+        	</td>
+        </tr>
+        <?php
+		
+		return ob_get_clean ();
+	}
+
+	/**
+	 * Generate subtitle HTML.
+	 *
+	 * @param mixed $key
+	 * @param mixed $data
+	 * @since 1.0.0
+	 * @return string
+	 */
+	public function generate_subtitle_html($key, $data) {
+	    $field = $this->get_field_key ( $key );
+	    $defaults = array (
+	        'title' => '',
+	        'class' => ''
+	    );
+	
+	    $data = wp_parse_args ( $data, $defaults );
+	
+	    ob_start ();
+	    ?>
+	    </table>
+	    <hr/>
+	    <h4><?php echo wp_kses_post( $data['title'] ); ?> </h4>
+        <p class="description"><?php echo wp_kses_post( $data['description'] ); ?></p>
+	    <table class="form-table">
+		<?php
+		
+		return ob_get_clean ();
+	}
+	
+	/**
+	 * Validate the data on the "Settings" form.
+	 *
+	 * @since 1.0.0
+	 * @param array $form_fields
+	 *        	(default: array())
+	 */
+	public function validate_settings_fields($form_fields = array()) {
+
+		if (empty ( $form_fields )) {
+			$form_fields = $this->get_form_fields ();
+		}
+		
+		$this->sanitized_fields = array ();
+		
+		foreach ( $form_fields as $key => $field ) {
+			
+			// Default to "text" field type.
+			$type = empty ( $field ['type'] ) ? 'text' : $field ['type'];
+			
+			// Look for a validate_FIELDID_field method for special handling
+			if (method_exists ( $this, 'validate_' . $key . '_field' )) {
+				$field = $this->{'validate_' . $key . '_field'} ( $key );
+				
+				// Exclude certain types from saving
+			} elseif (in_array ( $type, array (
+					'title' 
+			) )) {
+				continue;
+				
+				// Look for a validate_FIELDTYPE_field method
+			} elseif (method_exists ( $this, 'validate_' . $type . '_field' )) {
+				$field = $this->{'validate_' . $type . '_field'} ( $key );
+				
+				// Fallback to text
+			} else {
+				$field = $this->validate_text_field ( $key );
+			}
+			
+			$this->sanitized_fields [$key] = $field;
+		}
+		
+	}
+	
+	/**
+	 * Validate Text Field.
+	 *
+	 * Make sure the data is escaped correctly, etc.
+	 *
+	 * @since 1.0.0
+	 * @param mixed $key        	
+	 * @return string
+	 */
+	public function validate_text_field($key) {
+		$text = $this->get_option ( $key );
+		$field = $this->get_field_key ( $key );
+		
+		if (isset ( $_POST [$field] )) {
+			$text = wp_kses_post ( trim ( stripslashes ( $_POST [$field] ) ) );
+		}
+		
+		return $text;
+	}
+	
+	/**
+	 * Validate Price Field.
+	 *
+	 * Make sure the data is escaped correctly, etc.
+	 *
+	 * @since 1.0.0
+	 * @param mixed $key        	
+	 * @return string
+	 */
+	public function validate_price_field($key) {
+		$text = $this->get_option ( $key );
+		$field = $this->get_field_key ( $key );
+		
+		if (isset ( $_POST [$field] )) {
+			
+			if ($_POST [$field] !== '') {
+				$text = wc_format_decimal ( trim ( stripslashes ( $_POST [$field] ) ) );
+			} else {
+				$text = '';
+			}
+		}
+		
+		return $text;
+	}
+	
+	/**
+	 * Validate Decimal Field.
+	 *
+	 * Make sure the data is escaped correctly, etc.
+	 * @since 1.0.0
+	 * @param mixed $key        	
+	 * @return string
+	 */
+	public function validate_decimal_field($key) {
+		$text = $this->get_option ( $key );
+		$field = $this->get_field_key ( $key );
+		
+		if (isset ( $_POST [$field] )) {
+			
+			if ($_POST [$field] !== '') {
+				$text = wc_format_decimal ( trim ( stripslashes ( $_POST [$field] ) ) );
+			} else {
+				$text = '';
+			}
+		}
+		
+		return $text;
+	}
+	
+	/**
+	 * Validate Password Field.
+	 *
+	 * Make sure the data is escaped correctly, etc.
+	 *
+	 * @param mixed $key        	
+	 * @since 1.0.0
+	 * @return string
+	 */
+	public function validate_password_field($key) {
+		$field = $this->get_field_key ( $key );
+		$value = wp_kses_post ( trim ( stripslashes ( $_POST [$field] ) ) );
+		return $value;
+	}
+	
+	/**
+	 * Validate Textarea Field.
+	 *
+	 * Make sure the data is escaped correctly, etc.
+	 *
+	 * @param mixed $key        	
+	 * @since 1.0.0
+	 * @return string
+	 */
+	public function validate_textarea_field($key) {
+		$text = $this->get_option ( $key );
+		$field = $this->get_field_key ( $key );
+		
+		if (isset ( $_POST [$field] )) {
+			
+			$text = wp_kses ( trim ( stripslashes ( $_POST [$field] ) ), array_merge ( array (
+					'iframe' => array (
+							'src' => true,
+							'style' => true,
+							'id' => true,
+							'class' => true 
+					) 
+			), wp_kses_allowed_html ( 'post' ) ) );
+		}
+		
+		return $text;
+	}
+	
+	/**
+	 * Validate Checkbox Field.
+	 *
+	 * If not set, return "no", otherwise return "yes".
+	 *
+	 * @param mixed $key        	
+	 * @since 1.0.0
+	 * @return string
+	 */
+	public function validate_checkbox_field($key) {
+		$status = 'no';
+		$field = $this->get_field_key ( $key );
+		
+		if (isset ( $_POST [$field] ) && (1 == $_POST [$field])) {
+			$status = 'yes';
+		}
+		
+		return $status;
+	}
+	
+	/**
+	 * Validate Select Field.
+	 *
+	 * Make sure the data is escaped correctly, etc.
+	 *
+	 * @param mixed $key        	
+	 * @since 1.0.0
+	 * @return string
+	 */
+	public function validate_select_field($key) {
+
+		$value = $this->get_option ( $key );
+		$field = $this->get_field_key ( $key );
+	
+		if (isset ( $_POST [$field] )) {
+			$value =stripslashes ( $_POST [$field] ) ;
+		}
+		
+		return $value;
+	}
+	
+	/**
+	 * Validate Multiselect Field.
+	 *
+	 * Make sure the data is escaped correctly, etc.
+	 *
+	 * @param mixed $key        	
+	 * @since 1.0.0
+	 * @return string
+	 */
+	public function validate_multiselect_field($key) {
+		$field = $this->get_field_key ( $key );
+		
+		if (isset ( $_POST [$field] )) {
+			$value = array_map ( 'stripslashes', ( array ) $_POST [$field] );
+		} else {
+			$value = '';
+		}
+		
+		return $value;
+	}
+}
