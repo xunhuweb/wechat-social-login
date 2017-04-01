@@ -192,7 +192,7 @@ abstract class Abstract_XH_Social_Add_Ons_Update extends Abstract_XH_Social_Add_
         <?php 
         $this->_uuu('update_admin_options',$this->id,function(){
             ?>
-            if(m.errcode==0){
+            if(m.errcode==0&&m.errmsg!=null&&m.errmsg.length>0){
 						            	
 				$('#update-info').html(m.errmsg).css('display','block');
 				return;
