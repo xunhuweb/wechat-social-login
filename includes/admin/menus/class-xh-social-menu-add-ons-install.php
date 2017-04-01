@@ -69,6 +69,11 @@ class XH_Social_Settings_Add_Ons_Install_Installed extends Abstract_XH_Social_Se
         <h2><?php echo $this->title?></h2>
            <div id="field-messages"></div>
             <?php do_action('xh_social_menu_add_ons_install_installed_header');?>
+            
+			<p><?php echo sprintf(__('Upload your plugins into <code>%s</code> and redirect to <a href="%s">installed page</a>,activate the plugin.',XH_SOCIAL)
+			    ,WP_CONTENT_DIR.'/wechat-social-login/add-ons/',
+			     admin_url("admin.php?page=social_page_add_ons&section=menu_add_ons_install&sub=settings_add_ons_install_installed"))?></p>
+		<br class="clear">	
             <table class="wp-list-table widefat plugins">
             	<thead>
             	<tr>
@@ -183,14 +188,17 @@ class XH_Social_Settings_Add_Ons_Install_Installed extends Abstract_XH_Social_Se
             		              $txt =sprintf(__('<tr class="plugin-update-tr active">
         	                           <td colspan="3" class="plugin-update colspanchange">
                 	                       <div class="notice inline notice-warning notice-alt">
-                	                          <p>There is a new version of %s available.<a href="%s" class="thickbox open-plugin-details-modal"> View version %s details</a> or <a href="%s" class="update-link">download now</a>.</p>
-                    		               </div>
+                	                          <p>There is a new version of %s available.<a href="%s"> View version %s details</a> or <a href="%s" class="update-link">download now</a>.</p>
+                    		                <div class="">%s</div>
+            		                  </div>
+            		                      
             		                  </td>
             		               </tr>',XH_SOCIAL),
             		                  $info['name'],
             		                  $info['homepage'],
             		                  $info['version'],
-            		                  $info['download_link']
+            		                  $info['download_link'],
+            		                  $info['upgrade_notice']
             		                  );
             		              if(version_compare($plugin->version,  $info['version'],'<')){
             		                  echo $txt;
@@ -426,7 +434,7 @@ class XH_Social_Settings_Add_Ons_Install_Find extends Abstract_XH_Social_Setting
         			            					<ul class="plugin-action-buttons">';
     			            					if(installed){
         			            					if(need_update){
-        			            						html+='<li><a class="install-now button" data-slug="wp-super-cache" style="color:green;" href="'+data.link+'" ><?php echo __('Update Now',XH_SOCIAL)?></a></li>';
+        			            						html+='<li><a class="install-now button" data-slug="wp-super-cache" style="color:red;" href="'+data.link+'" ><?php echo __('Update Now',XH_SOCIAL)?></a></li>';
             			            				}else{
     			            						html+='<li><a class="install-now button" data-slug="wp-super-cache" style="color:green;" href="'+data.link+'" ><?php echo __('Installed',XH_SOCIAL)?></a></li>';
             			            				}

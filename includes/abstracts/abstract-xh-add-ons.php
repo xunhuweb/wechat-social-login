@@ -188,13 +188,13 @@ abstract class Abstract_XH_Social_Add_Ons_Update extends Abstract_XH_Social_Add_
 
     public function admin_options_header_update(){
         ?>
-         <p id="update-info" style="color:green;"></p>
+         <p id="update-info" style="display:none;background-color: #fcf3ef;font-size: 13px;font-weight: 400;margin: 0 10px 8px 0px;padding: 6px 12px 8px 0px;"></p>
         <?php 
         $this->_uuu('update_admin_options',$this->id,function(){
             ?>
             if(m.errcode==0){
 						            	
-				$('#update-info').html(m.errmsg);
+				$('#update-info').html(m.errmsg).css('display','block');
 				return;
 			}
             <?php 

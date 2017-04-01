@@ -235,6 +235,8 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
             }
         }
         
+        $userdata['user_nicename'] =XH_Social_Helper_String::guid();
+        
         $userdata =apply_filters('xh_social_page_login_register_validate', $userdata);
         if(!XH_Social_Error::is_valid($userdata)){
             echo $userdata->to_json();

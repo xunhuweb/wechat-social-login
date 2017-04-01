@@ -4,7 +4,7 @@
  * Plugin URI: http://www.weixinsocial.com
  * Description: 支持国内最热门的社交媒体登录。如：微信、QQ、微博、手机登录、账号绑定和解绑，全新的注册页面取代原生注册页面，支持Ultimate Member、WooCommerce、Buddypress，兼容Open Social。部分扩展收费，查看详情：<a href="http://www.weixinsocial.com">www.weixinsocial.com</a>
  * Author: 迅虎网络
- * Version: 1.0.1
+ * Version: 1.0.2
  * Author URI:  http://www.wpweixin.net
  */
 
@@ -19,7 +19,7 @@ final class XH_Social {
      * @since 1.0.0
      * @var string
      */
-    public $version = '1.0.1';
+    public $version = '1.0.2';
     
     /**
      * License ID
@@ -123,7 +123,7 @@ final class XH_Social {
         add_action( 'init', array( $this,                       'init' ), 1 );
         add_action( 'init', array( 'XH_Social_Shortcodes',      'init' ), 10 );
         add_action( 'init', array( 'XH_Social_Ajax',            'init' ), 10 );
-        add_action( 'init', array( 'XH_Social_Hooks',            'init' ), 10 );
+        add_action( 'init', array( 'XH_Social_Hooks',           'init' ), 10 );
         
         //wp_enqueue_scripts,wp_loaded all required.
         add_action( 'wp_enqueue_scripts', array($this,'wp_enqueue_scripts'),10);
@@ -131,7 +131,7 @@ final class XH_Social {
         
         load_plugin_textdomain( XH_SOCIAL, false,dirname( plugin_basename( __FILE__ ) ) . '/lang/'  );
    
-        XH_Social_Log::instance( new XH_Social_Log_File_Handler ( WP_CONTENT_DIR . "/xh-social/logs/" . date ( 'Y/m/d' ) . '.log' ));
+        XH_Social_Log::instance( new XH_Social_Log_File_Handler ( WP_CONTENT_DIR . "/wechat-social-login/logs/" . date ( 'Y/m/d' ) . '.log' ));
         register_activation_hook ( XH_SOCIAL_FILE, array($this,'_register_activation_hook'),10 );
         register_deactivation_hook(XH_SOCIAL_FILE,  array($this,'_register_deactivation_hook'),10);        
         add_action ( 'plugin_action_links_'. plugin_basename( XH_SOCIAL_FILE ),array($this,'_plugin_action_links'),10,1);

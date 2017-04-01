@@ -92,7 +92,8 @@ class XH_Social_Channel_QQ extends Abstract_XH_Social_Settings_Channel{
                 'first_name '=>$ext_user_info['nickname'],
                 'user_email'=>null,
                 'display_name'=>$ext_user_info['nickname'],
-                'nickname'=>$ext_user_info['nickname']
+                'nickname'=>$ext_user_info['nickname'],
+                'user_pass'=>str_shuffle(time())
             );
             
             $wp_user_id =wp_insert_user($userdata);

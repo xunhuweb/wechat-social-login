@@ -516,11 +516,14 @@ class XH_Social_Ajax {
 	                   $txt =sprintf(__('<tr class="plugin-update-tr active">
 	                       <td colspan="3" class="plugin-update colspanchange">
 	                       <div class="notice inline notice-warning notice-alt">
-	                       <p>There is a new version of %s available.<a href="%s" class="thickbox open-plugin-details-modal"> View version %s details</a> or <a href="%s" class="update-link">download now</a>.</p></div></td></tr>',XH_SOCIAL),
+	                       <p>There is a new version of %s available.<a href="%s"> View version %s details</a> or <a href="%s" class="update-link">download now</a>.</p>
+	                       <div class="">%s</div>
+	                       </div></td></tr>',XH_SOCIAL),
 	                       $info['name'],
 	                       $info['homepage'],
 	                       $info['version'],
-	                       $info['download_link']
+	                       $info['download_link'],
+	                       $info['upgrade_notice']
 	                   );
 	                   $msg = new XH_Social_Error(0, version_compare($add_on->version,  $info['version'],'<')?$txt:'');
 	                   break; 

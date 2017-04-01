@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: wechat social\n"
-"POT-Creation-Date: 2017-03-29 15:16+0800\n"
-"PO-Revision-Date: 2017-03-29 15:16+0800\n"
+"POT-Creation-Date: 2017-04-01 10:01+0800\n"
+"PO-Revision-Date: 2017-04-01 10:02+0800\n"
 "Last-Translator: ranj <ranj@evget.com>\n"
 "Language-Team: 重庆迅虎网络有限公司 <jeff@xunhuweb.com>\n"
 "Language: zh_CN\n"
@@ -16,7 +16,7 @@ msgstr ""
 "X-Poedit-KeywordsList: __\n"
 "X-Poedit-SearchPath-0: .\n"
 
-#: add-ons/account-bind/init.php:45 add-ons/account-bind/init.php:653
+#: add-ons/account-bind/init.php:45 add-ons/account-bind/init.php:658
 msgid "Account Bind"
 msgstr "账户绑定"
 
@@ -65,10 +65,10 @@ msgstr "手机"
 msgid "When register a new account,mobile is required."
 msgstr "当注册一个新账号，手机是必选项"
 
-#: add-ons/account-bind/init.php:84 add-ons/login/init.php:83
+#: add-ons/account-bind/init.php:84
 msgid ""
-"Before enable,\"<a href=\"https://www.wpweixin.net/product/1090.html\" target=\"_blank"
-"\">Mobile(add-on)</a>\" must be activated."
+"Before enable,\"<a href=\"http://www.weixinsocial.com\" target=\"_blank\">Mobile(add-on)</a>"
+"\" must be activated."
 msgstr ""
 "启用之前,请安装\"<a href=\"https://www.wpweixin.net/product/1090.html\" target=\"_blank\">手机"
 "扩展</a>\""
@@ -101,7 +101,7 @@ msgstr "图片验证(登录时)"
 msgid "Iamge captcha in the login form(before submit button)."
 msgstr "图片验证码显示在登录表单(登录按钮之上)"
 
-#: add-ons/account-bind/init.php:153 add-ons/account-bind/init.php:891
+#: add-ons/account-bind/init.php:153 add-ons/account-bind/init.php:896
 msgid "Social - Account Bind"
 msgstr "Social - 账户绑定"
 
@@ -109,104 +109,100 @@ msgstr "Social - 账户绑定"
 msgid "login name or password is invalid!"
 msgstr "登录名或登录密码错误！"
 
-#: add-ons/account-bind/init.php:391 add-ons/login/init.php:265
+#: add-ons/account-bind/init.php:394 add-ons/login/init.php:267
 msgid "注册成功,但手机绑定失败(你可以在用户中心重新绑定)！"
 msgstr ""
 
-#: add-ons/account-bind/init.php:427 add-ons/login/init.php:569
+#: add-ons/account-bind/init.php:430 add-ons/login/init.php:568
 msgid "Agree and accept"
 msgstr "同意并接受"
 
-#: add-ons/account-bind/init.php:427 add-ons/login/init.php:569
+#: add-ons/account-bind/init.php:430 add-ons/login/init.php:568
 msgid "《Terms Of Service》"
 msgstr "《服务条款》"
 
-#: add-ons/account-bind/init.php:517 add-ons/account-bind/init.php:615
-#: add-ons/login/init.php:451 add-ons/login/init.php:499
+#: add-ons/account-bind/init.php:526 add-ons/account-bind/init.php:620
+#: add-ons/login/init.php:453 add-ons/login/init.php:501
 msgid "user login"
 msgstr "登录名"
 
-#: add-ons/account-bind/init.php:524 add-ons/account-bind/init.php:622
-#: add-ons/login/init.php:458 add-ons/login/init.php:505
+#: add-ons/account-bind/init.php:533 add-ons/account-bind/init.php:627
+#: add-ons/login/init.php:460 add-ons/login/init.php:507
 msgid "user login is required!"
 msgstr "请输入登录名！"
 
-#: add-ons/account-bind/init.php:528 add-ons/login/init.php:509
-msgid "user login characters count must be greater than 6!"
-msgstr "登录名字符数必须大于6！"
-
-#: add-ons/account-bind/init.php:540 add-ons/login/init.php:520
+#: add-ons/account-bind/init.php:545 add-ons/login/init.php:519
 msgid "user email"
 msgstr "邮箱"
 
-#: add-ons/account-bind/init.php:546 add-ons/login/init.php:525
+#: add-ons/account-bind/init.php:551 add-ons/login/init.php:524
 msgid "user email is invalid!"
 msgstr "请输入正确的用户邮箱！"
 
-#: add-ons/account-bind/init.php:594 add-ons/account-bind/init.php:633
-#: add-ons/login/init.php:470 add-ons/login/init.php:543
+#: add-ons/account-bind/init.php:599 add-ons/account-bind/init.php:638
+#: add-ons/login/init.php:472 add-ons/login/init.php:542
 msgid "password"
 msgstr "密码"
 
-#: add-ons/account-bind/init.php:601 add-ons/account-bind/init.php:638
-#: add-ons/login/init.php:476 add-ons/login/init.php:549
+#: add-ons/account-bind/init.php:606 add-ons/account-bind/init.php:643
+#: add-ons/login/init.php:478 add-ons/login/init.php:548
 msgid "password is required!"
 msgstr "密码不能为空！"
 
-#: add-ons/account-bind/init.php:618 add-ons/login/init.php:454
+#: add-ons/account-bind/init.php:623 add-ons/login/init.php:456
 msgid "Please enter userlogin/email/mobile"
 msgstr "请输入登录名/邮箱/手机号"
 
-#: add-ons/account-bind/init.php:662
+#: add-ons/account-bind/init.php:667
 msgid "<strong>Ops!</strong> Something is wrong."
 msgstr "<strong>抱歉!</strong> 系统异常！"
 
-#: add-ons/account-bind/init.php:673
+#: add-ons/account-bind/init.php:678
 #, php-format
 msgid "You are using: <a><img style=\"width:20px;\" src=\"%s\" /> %s</a>"
 msgstr "您正在使用 <a><img style=\"width:20px;\" src=\"%s\" /> %s</a>"
 
-#: add-ons/account-bind/init.php:684 add-ons/account-bind/init.php:786
-#: add-ons/login/init.php:714 add-ons/login/init.php:765
+#: add-ons/account-bind/init.php:689 add-ons/account-bind/init.php:791
+#: add-ons/login/init.php:713 add-ons/login/init.php:764
 msgid "Log In"
 msgstr "注册"
 
-#: add-ons/account-bind/init.php:699
+#: add-ons/account-bind/init.php:704
 msgid "Use the existing account"
 msgstr "使用现有账户"
 
-#: add-ons/account-bind/init.php:702
+#: add-ons/account-bind/init.php:707
 msgid "Skip"
 msgstr "跳过"
 
-#: add-ons/account-bind/init.php:715 add-ons/account-bind/init.php:840
-#: add-ons/login/init.php:604 add-ons/login/init.php:666 add-ons/social-mobile/init.php:667
+#: add-ons/account-bind/init.php:720 add-ons/account-bind/init.php:845
+#: add-ons/login/init.php:603 add-ons/login/init.php:665 add-ons/social-mobile/init.php:667
 #: add-ons/social-mobile/init.php:714
 msgid "Log On"
 msgstr "登录"
 
-#: add-ons/account-bind/init.php:717
+#: add-ons/account-bind/init.php:722
 msgid "Register a new account"
 msgstr "注册一个新账号"
 
-#: add-ons/account-bind/init.php:774 add-ons/account-bind/init.php:828
-#: add-ons/login/init.php:654 add-ons/login/init.php:753 add-ons/social-mobile/init.php:702
+#: add-ons/account-bind/init.php:779 add-ons/account-bind/init.php:833
+#: add-ons/login/init.php:653 add-ons/login/init.php:752 add-ons/social-mobile/init.php:702
 msgid "loading..."
 msgstr "加载中..."
 
-#: add-ons/account-bind/init.php:791 add-ons/login/init.php:770
+#: add-ons/account-bind/init.php:796 add-ons/login/init.php:769
 msgid "Congratulations, registered successfully!"
 msgstr "感谢，注册成功！"
 
-#: add-ons/account-bind/init.php:799 add-ons/account-bind/init.php:854
-#: add-ons/login/init.php:679 add-ons/login/init.php:784 add-ons/social-mobile/init.php:728
-#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:253
-#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:455
+#: add-ons/account-bind/init.php:804 add-ons/account-bind/init.php:859
+#: add-ons/login/init.php:678 add-ons/login/init.php:783 add-ons/social-mobile/init.php:728
+#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:261
+#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:463
 #: includes/admin/menus/class-xh-social-menu-add-ons-recommend.php:193 init.php:401
 msgid "Internal Server Error!"
 msgstr "系统内部错误！"
 
-#: add-ons/account-bind/init.php:846 add-ons/login/init.php:671
+#: add-ons/account-bind/init.php:851 add-ons/login/init.php:670
 #: add-ons/social-mobile/init.php:719
 msgid "Congratulations, log on successfully!"
 msgstr "感谢，登录成功！"
@@ -218,7 +214,7 @@ msgstr "感谢，登录成功！"
 msgid "Home"
 msgstr "首页"
 
-#: add-ons/account-bind/templates/account/bind.php:27 add-ons/login/init.php:705
+#: add-ons/account-bind/templates/account/bind.php:27 add-ons/login/init.php:704
 #: add-ons/login/templates/account/login.php:26
 #: add-ons/social-mobile/templates/account/mobile-login.php:24
 #: add-ons/social-mobile/templates/account/mobile/login.php:26
@@ -264,19 +260,27 @@ msgstr "登录页面"
 msgid "Register Page"
 msgstr "注册页面"
 
-#: add-ons/login/init.php:345 add-ons/login/init.php:365
+#: add-ons/login/init.php:83
+msgid ""
+"Before enable,\"<a href=\"https://www.wpweixin.net/product/1090.html\" target=\"_blank"
+"\">Mobile(add-on)</a>\" must be activated."
+msgstr ""
+"启用之前,请安装\"<a href=\"https://www.wpweixin.net/product/1090.html\" target=\"_blank\">手机"
+"扩展</a>\""
+
+#: add-ons/login/init.php:347 add-ons/login/init.php:367
 msgid "Social - Login"
 msgstr "Social - 登录"
 
-#: add-ons/login/init.php:346 add-ons/login/init.php:393
+#: add-ons/login/init.php:348 add-ons/login/init.php:395
 msgid "Social - Register"
 msgstr "Social - 注册"
 
-#: add-ons/login/init.php:594 add-ons/login/templates/account/register.php:26
+#: add-ons/login/init.php:593 add-ons/login/templates/account/register.php:26
 msgid "Login"
 msgstr "登录"
 
-#: add-ons/login/init.php:611
+#: add-ons/login/init.php:610
 msgid "Quick Login"
 msgstr "快速登录"
 
@@ -325,18 +329,18 @@ msgstr "php curl 组件未安装！"
 msgid "mobile field is required!"
 msgstr "手机不能为空！"
 
-#: add-ons/social-mobile/class-xh-social-channel-mobile.php:304
-#: includes/abstracts/abstract-xh-channel.php:112
+#: add-ons/social-mobile/class-xh-social-channel-mobile.php:311
+#: includes/abstracts/abstract-xh-channel.php:110
 msgid "Unbind"
 msgstr "解绑"
 
-#: add-ons/social-mobile/class-xh-social-channel-mobile.php:309
-#: includes/abstracts/abstract-xh-channel.php:115
+#: add-ons/social-mobile/class-xh-social-channel-mobile.php:316
+#: includes/abstracts/abstract-xh-channel.php:113
 msgid "Unbound"
 msgstr "未绑定"
 
-#: add-ons/social-mobile/class-xh-social-channel-mobile.php:309
-#: includes/abstracts/abstract-xh-channel.php:115
+#: add-ons/social-mobile/class-xh-social-channel-mobile.php:316
+#: includes/abstracts/abstract-xh-channel.php:113
 msgid "Bind"
 msgstr "绑定"
 
@@ -501,8 +505,8 @@ msgstr "网站回调域:%s"
 msgid "APP Key"
 msgstr "APP Key"
 
-#: add-ons/social-qq/class-xh-social-channel-qq.php:287
-#: add-ons/social-wechat/class-xh-social-channel-wechat.php:331
+#: add-ons/social-qq/class-xh-social-channel-qq.php:292
+#: add-ons/social-wechat/class-xh-social-channel-wechat.php:335
 msgid "Nothing callback when get user info!"
 msgstr "获取用户信息时，未收到返回数据"
 
@@ -702,16 +706,16 @@ msgstr ""
 "在电脑端（通过微信app扫描二维码） 登录，<a href=\"http://open.weixin.qq.com\" target=\"_blank"
 "\">查看详情</a>"
 
-#: add-ons/social-wechat/class-xh-social-channel-wechat.php:317
+#: add-ons/social-wechat/class-xh-social-channel-wechat.php:321
 msgid "Nothing callback when get access token!"
 msgstr "获取accesstoken时，为收到返回数据！"
 
-#: add-ons/social-wechat/class-xh-social-channel-wechat.php:394
+#: add-ons/social-wechat/class-xh-social-channel-wechat.php:398
 #, php-format
 msgid "[Warnning]openid with unionid not compared.(openid:%s,unionid:%s)."
 msgstr "[警告]openid和unionid不一一对应！(openid:%s,unionid:%s)."
 
-#: add-ons/social-wechat/class-xh-social-channel-wechat.php:484
+#: add-ons/social-wechat/class-xh-social-channel-wechat.php:488
 msgid "unknow error when insert wechat user info."
 msgstr "插入数据时发生未知错误！"
 
@@ -792,12 +796,12 @@ msgstr ""
 msgid "Invalid license key!"
 msgstr "授权编码验证错误！"
 
-#: includes/abstracts/abstract-xh-channel.php:112
+#: includes/abstracts/abstract-xh-channel.php:110
 msgid "Is binding"
 msgstr "已绑定"
 
 #: includes/abstracts/abstract-xh-settings.php:104
-#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:106
+#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:111
 #: includes/admin/menus/class-xh-social-page-default.php:35 init.php:286
 msgid "Settings"
 msgstr "设置"
@@ -816,10 +820,10 @@ msgstr "数据保存成功!"
 
 #: includes/abstracts/abstract-xh-settings.php:249
 #: includes/abstracts/abstract-xh-settings.php:271
-#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:263
 #: includes/admin/menus/class-xh-social-menu-add-ons-install.php:271
-#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:465
+#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:279
 #: includes/admin/menus/class-xh-social-menu-add-ons-install.php:473
+#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:481
 #: includes/admin/menus/class-xh-social-menu-add-ons-recommend.php:203
 #: includes/admin/menus/class-xh-social-menu-add-ons-recommend.php:211
 msgid "Ignore"
@@ -843,41 +847,49 @@ msgid "Add-Ons"
 msgstr "扩展"
 
 #: includes/admin/menus/class-xh-social-menu-add-ons-install.php:61
-#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:431
+#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:439
 msgid "Installed"
 msgstr "已安装"
 
-#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:76
-#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:206
+#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:73
+#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:335
+#, php-format
+msgid ""
+"Upload your plugins into <code>%s</code> and redirect to <a href=\"%s\">installed page</a>,"
+"activate the plugin."
+msgstr "上传插件到 <code>%s</code>，跳转到 <a href=\"%s\">installed page</a>，激活插件。"
+
+#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:81
+#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:214
 msgid "plugin"
 msgstr "插件"
 
-#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:77
-#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:207
+#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:82
+#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:215
 msgid "description"
 msgstr "描述"
 
-#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:119
+#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:124
 msgid "Deactivate"
 msgstr "停用"
 
-#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:130
-#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:169
+#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:135
+#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:174
 #, php-format
 msgid "By <a href=\"%s\">%s</a>"
 msgstr "由 <a href=\"%s\">%s</a>"
 
-#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:133
-#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:172
+#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:138
+#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:177
 #, php-format
 msgid "<a href=\"%s\">View details</a>"
 msgstr "<a href=\"%s\">查看详情</a>"
 
-#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:159
+#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:164
 msgid "Activate"
 msgstr "启用"
 
-#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:183
+#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:188
 #, php-format
 msgid ""
 "<tr class=\"plugin-update-tr active\">\n"
@@ -886,9 +898,11 @@ msgid ""
 "                \t                       <div class=\"notice inline notice-warning notice-alt"
 "\">\n"
 "                \t                          <p>There is a new version of %s available.<a href="
-"\"%s\" class=\"thickbox open-plugin-details-modal\"> View version %s details</a> or <a href="
-"\"%s\" class=\"update-link\">download now</a>.</p>\n"
-"                    \t\t               </div>\n"
+"\"%s\"> View version %s details</a> or <a href=\"%s\" class=\"update-link\">download now</a>."
+"</p>\n"
+"                    \t\t                <div class=\"\">%s</div>\n"
+"            \t\t                  </div>\n"
+"            \t\t                      \n"
 "            \t\t                  </td>\n"
 "            \t\t               </tr>"
 msgstr ""
@@ -897,78 +911,73 @@ msgstr ""
 "\">\n"
 "                \t                       <div class=\"notice inline notice-warning notice-alt"
 "\">\n"
-"                \t                          <p>有一个新的版本 %s 可用.<a href=\"%s\" class="
-"\"thickbox open-plugin-details-modal\"> 查看版本 %s 详情</a> or <a href=\"%s\" class=\"update-"
-"link\">立即下载</a>.</p>\n"
-"                    \t\t               </div>\n"
+"                \t                          <p>There is a new version of %s available.<a href="
+"\"%s\"> View version %s details</a> or <a href=\"%s\" class=\"update-link\">download now</a>."
+"</p>\n"
+"                    \t\t                <div class=\"\">%s</div>\n"
+"            \t\t                  </div>\n"
+"            \t\t                      \n"
 "            \t\t                  </td>\n"
 "            \t\t               </tr>"
 
-#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:304
+#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:312
 msgid "More Ext"
 msgstr "更多扩展"
 
-#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:315
+#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:323
 #: includes/admin/menus/class-xh-social-menu-add-ons-recommend.php:72
 msgid "All"
 msgstr "所有"
 
-#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:319
+#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:327
 #: includes/admin/menus/class-xh-social-menu-add-ons-recommend.php:82
 msgid "Search Plugins"
 msgstr "搜索插件"
 
-#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:320
+#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:328
 #: includes/admin/menus/class-xh-social-menu-add-ons-recommend.php:83
 msgid "Search plugins..."
 msgstr "搜索插件..."
 
-#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:322
+#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:330
 #: includes/admin/menus/class-xh-social-menu-add-ons-recommend.php:85
 msgid "Search"
 msgstr "查询"
 
-#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:327
-#, php-format
-msgid ""
-"Upload your plugins into <code>%s</code> and redirect to <a href=\"%s\">installed page</a>,"
-"activate the plugin."
-msgstr "上传插件到 <code>%s</code>，跳转到 <a href=\"%s\">installed page</a>，激活插件。"
-
-#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:333
+#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:341
 #: includes/admin/menus/class-xh-social-menu-add-ons-recommend.php:94
 msgid "Plugins list"
 msgstr "插件列表"
 
-#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:394
+#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:402
 #: includes/admin/menus/class-xh-social-menu-add-ons-recommend.php:152
 msgid "You do not appear to have any plugins available at this time."
 msgstr "没有搜索到可用的插件！"
 
-#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:429
+#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:437
 msgid "Update Now"
 msgstr "立即更新"
 
-#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:434
+#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:442
 msgid "View Details"
 msgstr "查看详情"
 
-#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:487
+#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:495
 #: includes/admin/menus/class-xh-social-menu-add-ons-recommend.php:225
 msgid "first page"
 msgstr "第一页"
 
-#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:488
+#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:496
 #: includes/admin/menus/class-xh-social-menu-add-ons-recommend.php:226
 msgid "prev page"
 msgstr "上一页"
 
-#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:497
+#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:505
 #: includes/admin/menus/class-xh-social-menu-add-ons-recommend.php:235
 msgid "next page"
 msgstr "下一页"
 
-#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:498
+#: includes/admin/menus/class-xh-social-menu-add-ons-install.php:506
 #: includes/admin/menus/class-xh-social-menu-add-ons-recommend.php:236
 msgid "last page"
 msgstr "最后一页"
@@ -1097,23 +1106,20 @@ msgid ""
 "<tr class=\"plugin-update-tr active\">\n"
 "\t                       <td colspan=\"3\" class=\"plugin-update colspanchange\">\n"
 "\t                       <div class=\"notice inline notice-warning notice-alt\">\n"
-"\t                       <p>There is a new version of %s available.<a href=\"%s\" class="
-"\"thickbox open-plugin-details-modal\"> View version %s details</a> or <a href=\"%s\" class="
-"\"update-link\">download now</a>.</p></div></td></tr>"
+"\t                       <p>There is a new version of %s available.<a href=\"%s\"> View "
+"version %s details</a> or <a href=\"%s\" class=\"update-link\">download now</a>.</p>\n"
+"\t                       <div class=\"\">%s</div>\n"
+"\t                       </div></td></tr>"
 msgstr ""
 "<tr class=\"plugin-update-tr active\">\n"
-"        \t                           <td colspan=\"3\" class=\"plugin-update colspanchange"
-"\">\n"
-"                \t                       <div class=\"notice inline notice-warning notice-alt"
-"\">\n"
-"                \t                          <p>有一个新的版本 %s 可用.<a href=\"%s\" class="
-"\"thickbox open-plugin-details-modal\"> 查看版本 %s 详情</a> or <a href=\"%s\" class=\"update-"
-"link\">立即下载</a>.</p>\n"
-"                    \t\t               </div>\n"
-"            \t\t                  </td>\n"
-"            \t\t               </tr>"
+"\t                       <td colspan=\"3\" class=\"plugin-update colspanchange\">\n"
+"\t                       <div class=\"notice inline notice-warning notice-alt\">\n"
+"\t                       <p>There is a new version of %s available.<a href=\"%s\"> View "
+"version %s details</a> or <a href=\"%s\" class=\"update-link\">download now</a>.</p>\n"
+"\t                       <div class=\"\">%s</div>\n"
+"\t                       </div></td></tr>"
 
-#: includes/social/class-xh-social-hooks.php:207
+#: includes/social/class-xh-social-hooks.php:205
 msgid "Account Binding/Unbundling"
 msgstr "账户绑定与解绑"
 
@@ -1121,19 +1127,19 @@ msgstr "账户绑定与解绑"
 msgid "Website Logo"
 msgstr "网站Logo"
 
-#: includes/social/class-xh-social-wp-api.php:130
+#: includes/social/class-xh-social-wp-api.php:123
 msgid "image captcha"
 msgstr "图形验证码"
 
-#: includes/social/class-xh-social-wp-api.php:174
+#: includes/social/class-xh-social-wp-api.php:167
 msgid "image captcha is required!"
 msgstr "请输入图片验证码！"
 
-#: includes/social/class-xh-social-wp-api.php:179
+#: includes/social/class-xh-social-wp-api.php:172
 msgid "Please refresh the image captcha!"
 msgstr "请刷新图片验证码！"
 
-#: includes/social/class-xh-social-wp-api.php:183
+#: includes/social/class-xh-social-wp-api.php:176
 msgid "image captcha is invalid!"
 msgstr "图片验证码错误！"
 
@@ -1144,6 +1150,9 @@ msgstr "Cheatin&#8217; huh?"
 #: init.php:400
 msgid "jQuery.js is required!"
 msgstr "jquery.js未加载成功！"
+
+#~ msgid "user login characters count must be greater than 6!"
+#~ msgstr "登录名字符数必须大于6！"
 
 #~ msgid "Enable account bind page to bind exists account or register new account."
 #~ msgstr "启用账户绑定页面，在第三方登陆成功后，绑定现有账户或注册一个新账户。"
