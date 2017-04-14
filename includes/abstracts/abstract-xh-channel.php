@@ -61,7 +61,7 @@ abstract class Abstract_XH_Social_Settings_Channel extends Abstract_XH_Social_Se
     }
 
     /**
-     * 
+     * 更新wp用户与扩展用户之间的关联
      * @param int $ext_user_id
      * @param int $wp_user_id                 
      * @return WP_User|XH_Social_Error
@@ -78,6 +78,28 @@ abstract class Abstract_XH_Social_Settings_Channel extends Abstract_XH_Social_Se
      * @since 1.0.0
      */
     public function get_ext_user_info($ext_user_id){
+        return null;
+    }
+    
+    /**
+     * 获取wp用户信息
+     * @param string $field
+     * @param string $field_val
+     * @return WP_User
+     * @since 1.0.2
+     */
+    public function get_wp_user($field,$field_val){
+        return null;
+    }
+    
+    /**
+     * 获取wp用户信息
+     * @param string $field
+     * @param string $field_val
+     * @return object
+     * @since 1.0.2
+     */
+    public function get_ext_user($field,$field_val){
         return null;
     }
     
@@ -100,6 +122,12 @@ abstract class Abstract_XH_Social_Settings_Channel extends Abstract_XH_Social_Se
         return XH_Social_Error::success();
     }
     
+    /**
+     * 绑定信息
+     * @param int $wp_user_id
+     * @return string
+     * @since 1.0.0
+     */
     public function bindinfo($wp_user_id){
         if($wp_user_id instanceof WP_User){
             $wp_user_id=$wp_user_id->ID;
@@ -118,7 +146,7 @@ abstract class Abstract_XH_Social_Settings_Channel extends Abstract_XH_Social_Se
     }
     
     /**
-     * 处理登录
+     * 执行登录
      * @param int $ext_user_id 扩展用户ID
      * @return string 回调地址
      * @since 1.0.0
@@ -128,7 +156,7 @@ abstract class Abstract_XH_Social_Settings_Channel extends Abstract_XH_Social_Se
         if(empty($login_location_uri)){
             $login_location_uri = home_url('/');
         }
-        
+      
         if(!$ext_user_id||$ext_user_id<=0){
             return $login_location_uri;
         }
@@ -163,12 +191,13 @@ abstract class Abstract_XH_Social_Settings_Channel extends Abstract_XH_Social_Se
             return $login_location_uri;
         }
         
-        if(!$skip){
-            $other_login_location_uri =apply_filters('xh_social_process_login','',$this,$ext_user_id,$login_location_uri);
+        if(!$skip){ 
+            $other_login_location_uri =apply_filters('xh_social_process_login','',$this,$ext_user_id,$login_location_uri);        
             if(!empty($other_login_location_uri)){
                 return $other_login_location_uri;
             } 
         }
+       
         //直接创建用户并登录跳转
         $wp_user = $this->update_wp_user_info($ext_user_id,$current_user->ID);
         if(!$wp_user||!$wp_user instanceof WP_User){

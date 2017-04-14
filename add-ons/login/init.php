@@ -235,14 +235,25 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
             }
         }
         
-        $userdata['user_nicename'] =XH_Social_Helper_String::guid();
-        
         $userdata =apply_filters('xh_social_page_login_register_validate', $userdata);
         if(!XH_Social_Error::is_valid($userdata)){
             echo $userdata->to_json();
             exit;
         }
-       
+        
+        if(!isset($userdata['user_nicename'])){
+            $userdata['user_nicename'] =XH_Social_Helper_String::guid();
+        }
+        
+        if(!isset($userdata['user_login'])||empty($userdata['user_login'])){
+            if(!isset($userdata['user_email'])||empty($userdata['user_email'])){
+                echo XH_Social_Error::error_custom(__('User email is required!',XH_SOCIAL))->to_json();
+                exit;
+            }
+            
+           $userdata['user_login']=XH_Social::instance()->WP->generate_user_login($userdata['user_email']);
+        }
+        
         $wp_user_id =wp_insert_user($userdata);
         if(is_wp_error($wp_user_id)){
             echo XH_Social_Error::wp_error($wp_user_id)->to_json();
@@ -575,18 +586,23 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
         return apply_filters('xh_social_page_login_register_fields',$fields,5); 
     }
     
-    
     public function page_login($attrs=array(), $innerhtml=''){
-        $log_on_callback_uri =XH_Social_Shortcodes::get_attr($attrs, 'redirect_to');
+        $log_on_callback_uri ='';
+        if(isset($_GET['redirect_to'])&&!empty($_GET['redirect_to'])){
+            $log_on_callback_uri =esc_url_raw(urldecode($_GET['redirect_to']));
+        }else{
+            $log_on_callback_uri=XH_Social_Shortcodes::get_attr($attrs, 'redirect_to');
+        }
         
         if(empty($log_on_callback_uri)){
-            if(isset($_GET['redirect_to'])&&!empty($_GET['redirect_to'])){
-                $log_on_callback_uri =esc_url_raw(urldecode($_GET['redirect_to']));
-            }else{
+            $log_on_callback_uri =home_url('/');
+        }else{
+            if(strcasecmp(XH_Social_Helper_Uri::get_location_uri(), $log_on_callback_uri)===0){
                 $log_on_callback_uri =home_url('/');
             }
+            XH_Social::instance()->session->set('social_login_location_uri',$log_on_callback_uri);
         }
-      
+        
         ob_start();
         ?>
             <div class="xh-regbox">
@@ -688,14 +704,20 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
        }
        
        public function page_register($attrs=array(), $innerhtml=''){
-            $log_on_callback_uri =XH_Social_Shortcodes::get_attr($attrs, 'redirect_to');
+            $log_on_callback_uri ='';
+            if(isset($_GET['redirect_to'])&&!empty($_GET['redirect_to'])){
+                $log_on_callback_uri =esc_url_raw(urldecode($_GET['redirect_to']));
+            }else{
+                $log_on_callback_uri=XH_Social_Shortcodes::get_attr($attrs, 'redirect_to');
+            }
             
             if(empty($log_on_callback_uri)){
-                if(isset($_GET['redirect_to'])&&!empty($_GET['redirect_to'])){
-                    $log_on_callback_uri =esc_url_raw(urldecode($_GET['redirect_to']));
-                }else{
+                $log_on_callback_uri =home_url('/');
+            }else{
+                if(strcasecmp(XH_Social_Helper_Uri::get_location_uri(), $log_on_callback_uri)===0){
                     $log_on_callback_uri =home_url('/');
                 }
+                XH_Social::instance()->session->set('social_login_location_uri',$log_on_callback_uri);
             }
        
            ob_start();

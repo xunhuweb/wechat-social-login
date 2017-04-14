@@ -11,7 +11,15 @@ global $wp_scripts;
 		<meta charset="<?php bloginfo( 'charset' ); ?>">
 		<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
 		<link media="all" type="text/css" rel="stylesheet" href="<?php print XH_SOCIAL_URL?>/assets/css/social.css">	
-		<script src="/wp-includes/js/jquery/jquery.js"></script>
+		<?php 
+		if(isset($wp_scripts->registered['jquery-core'])&&isset($wp_scripts->registered['jquery-core']->src)){
+		    ?>
+		    <script src="<?php echo $wp_scripts->base_url.$wp_scripts->registered['jquery-core']->src; ?>"></script>
+		    <?php 
+		}else{
+		    ?><script src="https://code.jquery.com/jquery-3.2.1.min.js"></script><?php 
+		}
+		?>
 		<style type="text/css">body{background:#f5f5f5;}</style>
 	</head>
 	<body>	

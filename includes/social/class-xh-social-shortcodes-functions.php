@@ -18,5 +18,4 @@ if(!function_exists('xh_social_accountbind')){
         return XH_Social_Hooks::accountbind();
     }
 }
-
 ?>

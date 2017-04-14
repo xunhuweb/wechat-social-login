@@ -4,7 +4,7 @@
  * Plugin URI: http://www.weixinsocial.com
  * Description: 支持国内最热门的社交媒体登录。如：微信、QQ、微博、手机登录、账号绑定和解绑，全新的注册页面取代原生注册页面，支持Ultimate Member、WooCommerce、Buddypress，兼容Open Social。部分扩展收费，查看详情：<a href="http://www.weixinsocial.com">www.weixinsocial.com</a>
  * Author: 迅虎网络
- * Version: 1.0.2
+ * Version: 1.0.4
  * Author URI:  http://www.wpweixin.net
  */
 
@@ -19,7 +19,7 @@ final class XH_Social {
      * @since 1.0.0
      * @var string
      */
-    public $version = '1.0.2';
+    public $version = '1.0.4';
     
     /**
      * License ID
@@ -131,7 +131,7 @@ final class XH_Social {
         
         load_plugin_textdomain( XH_SOCIAL, false,dirname( plugin_basename( __FILE__ ) ) . '/lang/'  );
    
-        XH_Social_Log::instance( new XH_Social_Log_File_Handler ( WP_CONTENT_DIR . "/wechat-social-login/logs/" . date ( 'Y/m/d' ) . '.log' ));
+        XH_Social_Log::instance( new XH_Social_Log_File_Handler ( XH_SOCIAL_DIR . "/logs/" . date ( 'Y/m/d' ) . '.log' ));
         register_activation_hook ( XH_SOCIAL_FILE, array($this,'_register_activation_hook'),10 );
         register_deactivation_hook(XH_SOCIAL_FILE,  array($this,'_register_deactivation_hook'),10);        
         add_action ( 'plugin_action_links_'. plugin_basename( XH_SOCIAL_FILE ),array($this,'_plugin_action_links'),10,1);
@@ -197,11 +197,14 @@ final class XH_Social {
      * @since 1.0.0
      */
     public function ajax_url($action='') {
-        $url = admin_url( 'admin-ajax.php', 'relative' );
-        if(strpos($url, 'http')!==0){
-            $url= rtrim(home_url(),'/').'/'.ltrim($url,'/');
-        }
-        
+        //2017年4月12日 11:13:37
+        //修改地址取值，在二级目录下出现错误路径的问题
+//         $url = admin_url( 'admin-ajax.php', 'relative' );
+       
+//         if(strpos($url, 'http')!==0){
+//             $url= rtrim(home_url(),'/').'/'.ltrim($url,'/');
+//         }
+        $url = admin_url( 'admin-ajax.php' );
         if(!empty($action)){
             $params=array();
             $url = XH_Social_Helper_Uri::get_uri_without_params($url,$params);
@@ -234,7 +237,7 @@ final class XH_Social {
     public function _register_activation_hook(){
         //第一次安装，所有插件自动安装
         $plugins_installed =get_option('xh_social_plugins_installed',null);
-        if(!is_array($plugins_installed)||is_null($plugins_installed)||$plugins_installed===''){
+        if(!is_array($plugins_installed)||count($plugins_installed)==0){
             wp_cache_delete('xh_social_plugins_installed','options');
             update_option('xh_social_plugins_installed', array(
                 XH_SOCIAL_DIR.'/add-ons/social-wechat/init.php',
@@ -275,7 +278,7 @@ final class XH_Social {
      */
     public function _plugin_action_links($links){
         $page =XH_Social_Helper_Array::first_or_default(XH_Social_Admin::instance()->get_admin_pages(),function($m){
-            return $m&&$m instanceof Abstract_XH_Social_Settings_Page;
+            return $m&&$m instanceof Abstract_XH_Social_Settings_Page&&count($m->menus())>0;
         });
         
         if(!$page){

@@ -45,25 +45,27 @@ class XH_Social_WP_Api{
         if(empty($nickname)){
             $nickname = XH_Social_Helper_String::guid();
         }
+        
+        if(mb_strlen($nickname)>32){
+            $nickname = mb_substr($nickname, 0,32);
+        }
+        
+        $pre_nickname =$nickname;
     
         $index=0;
         while (username_exists($nickname)){
-            if($index++==0){
-                $nickname=$nickname.'_'.date('yz');//年+一年中的第N天
-                continue;
-            }
-    
+            $index++;
             if($index==1){
-                $nickname=$nickname.'_'.date('ymdHis');//年+一年中的第N天
+                $nickname=$pre_nickname.'_'.date('yz');//年+一年中的第N天
                 continue;
             }
-    
+            
             //加随机数
             $nickname.=mt_rand(1000, 9999);
-            if(strlen($nickname)>40){
-                $nickname = XH_Social_Helper_String::guid();
+            if(strlen($nickname)>60){
+                $nickname = $pre_nickname.'_'.time();
             }
-    
+            
             //尝试次数过多
             if($index>5){
                 return XH_Social_Helper_String::guid();
@@ -79,10 +81,6 @@ class XH_Social_WP_Api{
      * @since 1.0.0
      */
     public function do_wp_login($wp_user){
-        if(headers_sent()){
-            return;
-        }
-    
         XH_Social::instance()->session->__unset('social_login_location_uri');
     
         $secure_cookie='';
@@ -191,9 +189,9 @@ class XH_Social_WP_Api{
      */
     public function get_plugin_list_from_system(){
         $base_dirs= array(
-            XH_SOCIAL_DIR.'/add-ons/',
+            WP_CONTENT_DIR.'/wechat-social-login/add-ons/',
             WP_CONTENT_DIR.'/xh-social/add-ons/',
-            WP_CONTENT_DIR.'/wechat-social-login/add-ons/'
+            XH_SOCIAL_DIR.'/add-ons/',
         );
     
         $plugins = array();

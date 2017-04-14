@@ -81,14 +81,10 @@ class XH_Social_Channel_Weibo extends Abstract_XH_Social_Settings_Channel{
         global $wpdb;
         if(!$wp_user_id){
             $user_login = XH_Social::instance()->WP->generate_user_login($ext_user_info['nickname']);
-            if(empty($user_login)){
-                XH_Social_Log::error("user login created failed,nickname:{$ext_user_info['nickname']}");
-                return XH_Social_Error::error_unknow();
-            }
             $userdata=array(
                 'user_login'=>$user_login,
                 'user_nicename'=>$ext_user_info['nicename'],
-                'first_name '=>$ext_user_info['nickname'],
+                'first_name'=>$ext_user_info['nickname'],
                 'user_email'=>null,
                 'display_name'=>$ext_user_info['nickname'],
                 'nickname'=>$ext_user_info['nickname'],
@@ -121,11 +117,46 @@ class XH_Social_Channel_Weibo extends Abstract_XH_Social_Settings_Channel{
             }
         }
         
+        $ext_user_info['wp_user_id']=$wp_user_id;
+        
         do_action('xh_social_channel_weibo_update_wp_user_info',$ext_user_info);
         update_user_meta($wp_user_id, '_social_img', $ext_user_info['user_img']);
         return $this->get_wp_user_info($ext_user_id);
     }
+    public function get_wp_user($field,$field_val){
+        if(!in_array($field, array(
+            'uid'
+        ))){
+            return null;
+        }
     
+        global $wpdb;
+        $ext_user_info =$wpdb->get_row($wpdb->prepare(
+            "select user_id
+            from {$wpdb->prefix}xh_social_channel_weibo
+            where $field=%s
+            limit 1;", $field_val));
+        if($ext_user_info&&$ext_user_info->user_id){
+            return get_userdata($ext_user_info->user_id);
+        }
+    
+        return null;
+    }
+    
+    public function get_ext_user($field,$field_val){
+        if(!in_array($field, array(
+            'uid'
+        ))){
+            return null;
+        }
+    
+        global $wpdb;
+        return $wpdb->get_row($wpdb->prepare(
+            "select *
+            from {$wpdb->prefix}xh_social_channel_weibo
+            where $field=%s
+            limit 1;", $field_val));
+    }
     /**
      * {@inheritDoc}
      * @see Abstract_XH_Social_Settings_Channel::get_wp_user_info($ext_user_id)
@@ -227,7 +258,7 @@ class XH_Social_Channel_Weibo extends Abstract_XH_Social_Settings_Channel{
         $guid=XH_Social_Helper_String::guid();
         $userinfo= array(
                 'nickname'=>$user->nickname,
-            'nicename'=>$guid,
+                'nicename'=>$guid,
                 'user_login'=>null,
                 'user_email'=>null,
                 'user_img'=>$user->img,
@@ -255,7 +286,6 @@ class XH_Social_Channel_Weibo extends Abstract_XH_Social_Settings_Channel{
     }
     
     private function _process_authorization_callback($login_location_uri){  
-       
         if(!isset($_GET['code'])){ 
             return array(
                'success'=>false,
@@ -263,58 +293,44 @@ class XH_Social_Channel_Weibo extends Abstract_XH_Social_Settings_Channel{
            );
         }
         
+        $redirect_uri = XH_Social::instance()->session->get('social_login_weibo_redirect_uri');
+        if(empty($redirect_uri)){
+            return array(
+                'success'=>false,
+                'redirect'=>$login_location_uri
+            );
+        }
+        
         $code = XH_Social_Helper_String::sanitize_key_ignorecase($_GET['code']);
        
         try {
-            global $wpdb;
-            $wpdb->last_error='';
-            
-            //获取accesstoken
-            $appid = $this->get_option("appid");
-            $appsecret = $this->get_option("appsecret");
-            $redirect_uri = XH_Social::instance()->session->get('social_login_weibo_redirect_uri');
-           
-            if(empty($redirect_uri)){
-                return array(
-                    'success'=>false,
-                    'redirect'=>$login_location_uri
-                );
+            if(!class_exists('SaeTOAuthV2')){
+                require_once 'saetv2.ex.class.php';
             }
             
-            $params=array(
-                'grant_type'=>'authorization_code',
+            $appid =$this->get_option('appid');
+            $appkey =$this->get_option('appsecret');
+            
+            $api = new SaeTOAuthV2($appid,$appkey);
+            $token = $api->getAccessToken( 'code', array(
                 'code'=>$code,
-                'client_id'=>$appid,
-                'client_secret'=>$appsecret,
                 'redirect_uri'=>$redirect_uri
-            );
-            $response  = XH_Social_Helper_Http::http_post('https://api.weibo.com/oauth2/access_token',$params);
-            $obj = json_decode($response,true);
-            if(!$obj){
-                throw new Exception(__("Unknow weibo callback data,detail:$response",XH_SOCIAL),500);
-            }
-           
-            //{"error":"HTTP METHOD is not suported for this request!","error_code":10021,"request":"/oauth2/access_token"}
-            if(isset($obj['error'])){
-                throw new Exception($obj['error'],isset($obj['error_code'])?$obj['error_code']:0);
+            )) ;
+            
+            if(!$token||isset($token['error'])){
+                throw new Exception(isset($token['error'])?$token['error']:XH_Social_Error::err_code(500),isset($token['error_code'])?$token['error_code']:0);
             }
             
-            //{"access_token":"2.00swX4HCHHkC2Dfc20b81d5505TXPp","remind_in":"157679999","expires_in":157679999,"uid":"1941312062"}
-            $access_token = isset($obj['access_token'])?$obj['access_token']:'';
-            if(empty($access_token)){
-                throw new Exception(__("Unknow weibo callback data,detail:$response",XH_SOCIAL),500);
+            $uapi = new SaeTClientV2( $appid , $appkey ,$token['access_token']);
+            $uid_get = $uapi->get_uid();
+            if(!$uid_get||isset($uid_get['error'])){
+                throw new Exception(isset($uid_get['error'])?$uid_get['error']:XH_Social_Error::err_code(500),isset($uid_get['error_code'])?$uid_get['error_code']:0);
             }
-           
-            $uid =$obj['uid'];
-            $response =  XH_Social_Helper_Http::http_get("https://api.weibo.com/2/users/show.json?access_token=$access_token&uid=$uid");
-            $obj = json_decode($response,true);
-            if(!$obj){
-                throw new Exception(__("Unknow weibo callback data,detail:$response",XH_SOCIAL),500);
-            }
-           
-            //{"error":"HTTP METHOD is not suported for this request!","error_code":10021,"request":"/oauth2/access_token"}
-            if(isset($obj['error'])){
-                throw new Exception($obj['error'],isset($obj['error_code'])?$obj['error_code']:0);
+            
+            $uid = $uid_get['uid'];
+            $obj = $uapi->show_user_by_id( $uid);
+            if(!$obj||isset($obj['error'])){
+                throw new Exception(isset($obj['error'])?$obj['error']:XH_Social_Error::err_code(500),isset($obj['error_code'])?$obj['error_code']:0);
             }
             
             $userdata = array(
@@ -429,14 +445,13 @@ class XH_Social_Channel_Weibo extends Abstract_XH_Social_Settings_Channel{
         $redirect_uri.="?".http_build_query($params);
         unset($params);
         XH_Social::instance()->session->set('social_login_weibo_redirect_uri', $redirect_uri);
-        $params=array(
-            'response_type'=>'code',
-            'client_id'=>$this->get_option('appid'),
-            'redirect_uri'=>$redirect_uri,
-            'state'=>str_shuffle(time())
-        );
         
-        return 'https://api.weibo.com/oauth2/authorize?'.http_build_query($params);
+        if(!class_exists('SaeTOAuthV2')){
+            require_once 'saetv2.ex.class.php';
+        }
+        
+        $api = new SaeTOAuthV2($this->get_option('appid'),$this->get_option('appsecret'));
+        return $api->getAuthorizeURL($redirect_uri);
     }
 }
 

@@ -82,14 +82,10 @@ class XH_Social_Channel_QQ extends Abstract_XH_Social_Settings_Channel{
         global $wpdb;
         if(!$wp_user_id){
             $user_login = XH_Social::instance()->WP->generate_user_login($ext_user_info['nickname']);
-            if(empty($user_login)){
-                XH_Social_Log::error("user login created failed,nickname:{$ext_user_info['nickname']}");
-                return XH_Social_Error::error_unknow();
-            }
             $userdata=array(
                 'user_login'=>$user_login,
                 'user_nicename'=>$ext_user_info['nicename'],
-                'first_name '=>$ext_user_info['nickname'],
+                'first_name'=>$ext_user_info['nickname'],
                 'user_email'=>null,
                 'display_name'=>$ext_user_info['nickname'],
                 'nickname'=>$ext_user_info['nickname'],
@@ -122,9 +118,9 @@ class XH_Social_Channel_QQ extends Abstract_XH_Social_Settings_Channel{
             }
         }
         
+        $ext_user_info['wp_user_id']=$wp_user_id;
         do_action('xh_social_channel_qq_update_wp_user_info',$ext_user_info);
         update_user_meta($wp_user_id, '_social_img', $ext_user_info['user_img']);
-        
         return $this->get_wp_user_info($ext_user_id);
     }
     
@@ -254,7 +250,40 @@ class XH_Social_Channel_QQ extends Abstract_XH_Social_Settings_Channel{
         }
         return $this->process_login($ext_user_id);
     }
+    public function get_wp_user($field,$field_val){
+        if(!in_array($field, array(
+            'openid'
+        ))){
+            return null;
+        }
     
+        global $wpdb;
+        $ext_user_info =$wpdb->get_row($wpdb->prepare(
+            "select user_id
+            from {$wpdb->prefix}xh_social_channel_qq
+            where $field=%s
+            limit 1;", $field_val));
+        if($ext_user_info&&$ext_user_info->user_id){
+            return get_userdata($ext_user_info->user_id);
+        }
+    
+        return null;
+    }
+    
+    public function get_ext_user($field,$field_val){
+        if(!in_array($field, array(
+            'openid'
+        ))){
+            return null;
+        }
+    
+        global $wpdb;
+        return $wpdb->get_row($wpdb->prepare(
+            "select *
+            from {$wpdb->prefix}xh_social_channel_qq
+            where $field=%s
+            limit 1;", $field_val));
+    }
     private function _process_authorization_callback($login_location_uri){  
         if(!isset($_GET['code'])){
             return array(

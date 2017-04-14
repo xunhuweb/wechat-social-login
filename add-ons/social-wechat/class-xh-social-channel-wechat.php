@@ -17,7 +17,8 @@ class XH_Social_Channel_Wechat extends Abstract_XH_Social_Settings_Channel{
     private static $_instance;
 
     /**
-     * @since  1.0.0
+     * @since 1.0.0
+     * @static
      * @return XH_Social_Channel_Wechat
      */
     public static function instance() {
@@ -106,21 +107,16 @@ class XH_Social_Channel_Wechat extends Abstract_XH_Social_Settings_Channel{
         global $wpdb;
         if(!$wp_user_id){
             $user_login = XH_Social::instance()->WP->generate_user_login($ext_user_info['nickname']);
-            if(empty($user_login)){
-                XH_Social_Log::error("user login created failed,nickname:{$ext_user_info['nickname']}");
-                return XH_Social_Error::error_unknow();
-            }
-            
             $userdata=array(
                 'user_login'=>$user_login,
                 'user_nicename'=>$ext_user_info['nicename'],
-                'first_name '=>$ext_user_info['nickname'],
+                'first_name'=>$ext_user_info['nickname'],
                 'user_email'=>null,
                 'display_name'=>$ext_user_info['nickname'],
                 'nickname'=>$ext_user_info['nickname'],
                 'user_pass'=>str_shuffle(time())
             );
-            
+      
             $wp_user_id =wp_insert_user($userdata);
             if(is_wp_error($wp_user_id)){
                 return XH_Social_Error::wp_error($wp_user_id);
@@ -146,8 +142,16 @@ class XH_Social_Channel_Wechat extends Abstract_XH_Social_Settings_Channel{
                 return XH_Social_Error::err_code(500);
             }
         }
+        
+        $ext_user_info['wp_user_id']=$wp_user_id;
+        
         do_action('xh_social_channel_wechat_update_wp_user_info',$ext_user_info);
         update_user_meta($wp_user_id, '_social_img', $ext_user_info['user_img']);
+        //兼容其他插件
+        if(isset($ext_user_info['mp_openid'])&& !empty($ext_user_info['mp_openid'])){
+            update_user_meta($wp_user_id, 'openid', $ext_user_info['mp_openid']);
+        }
+        
         return $this->get_wp_user_info($ext_user_id);
     }
     
@@ -160,10 +164,12 @@ class XH_Social_Channel_Wechat extends Abstract_XH_Social_Settings_Channel{
         if($userinfo){
             return $userinfo;
         }
+        
         $ext_user_id = intval($ext_user_id);
         global $wpdb;
         $user = $wpdb->get_row(
-           "select w.user_id
+           "select w.user_id,
+                   w.mp_openid
             from {$wpdb->prefix}xh_social_channel_wechat w
             where w.id=$ext_user_id
             limit 1;");
@@ -171,11 +177,15 @@ class XH_Social_Channel_Wechat extends Abstract_XH_Social_Settings_Channel{
             return null;
         }
         
-        $userinfo= get_userdata($user->user_id);
-        if($userinfo){
-            XH_Social_Temp_Helper::set('wp_user_info', $userinfo,'login:wechat');
+        if($user->user_id){
+            $userinfo= get_userdata($user->user_id);
+            if($userinfo){
+                XH_Social_Temp_Helper::set('wp_user_info', $userinfo,'login:wechat');
+                return $userinfo;
+            }
         }
-        return $userinfo;
+     
+        return null;
     }
     /**
      * {@inheritDoc}
@@ -260,13 +270,52 @@ class XH_Social_Channel_Wechat extends Abstract_XH_Social_Settings_Channel{
                 'wp_user_id'=>$user->user_id,
                 'ext_user_id'=>$user->id,
                 'uid'=>$user->unionid,
-                 'nicename'=>$guid,
+                'nicename'=>$guid,
                 'mp_openid'=>$user->mp_openid,
                 'op_openid'=>$user->op_openid,
         );
         
         XH_Social_Temp_Helper::set('ext_user_info',$userinfo, 'login:wechat');
         return $userinfo;
+    }
+    
+    public function get_wp_user($field,$field_val){
+        if(!in_array($field, array(
+            'mp_openid',
+            'op_openid',
+            'unionid'
+        ))){
+            return null;
+        }
+        
+        global $wpdb;
+        $ext_user_info =$wpdb->get_row($wpdb->prepare(
+                        "select user_id 
+                        from {$wpdb->prefix}xh_social_channel_wechat
+                        where $field=%s
+                        limit 1;", $field_val));
+        if($ext_user_info&&$ext_user_info->user_id){
+            return get_userdata($ext_user_info->user_id);
+        }
+        
+        return null;
+    }
+    
+    public function get_ext_user($field,$field_val){
+        if(!in_array($field, array(
+            'mp_openid',
+            'op_openid',
+            'unionid'
+        ))){
+            return null;
+        }
+    
+        global $wpdb;
+        return $wpdb->get_row($wpdb->prepare(
+            "select *
+            from {$wpdb->prefix}xh_social_channel_wechat
+            where $field=%s
+            limit 1;", $field_val));
     }
     
     public function process_authorization_callback($uid){
@@ -550,6 +599,7 @@ class XH_Social_Channel_Wechat extends Abstract_XH_Social_Settings_Channel{
     }
     
     public function login_get_wechatclient_authorization_uri($uid,$error_times=null){
+        
         $api = XH_Social_Add_On_Social_Wechat::instance();
      
         $params=array();
@@ -568,10 +618,10 @@ class XH_Social_Channel_Wechat extends Abstract_XH_Social_Settings_Channel{
         $state="mp";
         $uri=null;
         $uri = apply_filters('xh_social_channel_wechat_login_get_authorization_uri', $uri,$redirect_uri,$state,$uid);
-        if(!empty($uri)){
+        if(!empty($uri)){ 
             return $uri;
         }
-        
+     
         $params=array();
         $params["appid"] = $this->get_option('mp_id');
         $params["redirect_uri"] = $redirect_uri;
@@ -641,7 +691,10 @@ class XH_Social_Channel_Wechat_Model extends Abstract_XH_Social_Schema{
         $DB_NAME = DB_NAME;
         
         global $wpdb;
-        //创建uid字段
+
+        /**
+         * @since 1.0.1
+         */
         if($wpdb->get_var (
             "SELECT TABLE_NAME
             FROM INFORMATION_SCHEMA.COLUMNS

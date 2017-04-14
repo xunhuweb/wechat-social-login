@@ -37,7 +37,7 @@ class XH_Social_Settings_Default_Other_Default extends Abstract_XH_Social_Settin
             'logo'=>array(
                 'title'=>__('Website Logo',XH_SOCIAL),
                 'type'=>'image',
-                'default'=>admin_url('images/wordpress-logo.svg')
+                'default'=>XH_SOCIAL_URL.'/assets/image/wordpress-logo.png'
             )
         );
     }

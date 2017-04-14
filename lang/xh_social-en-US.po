@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: wechat social\n"
-"POT-Creation-Date: 2017-04-14 16:20+0800\n"
-"PO-Revision-Date: 2017-04-14 16:20+0800\n"
+"POT-Creation-Date: 2017-04-10 14:30+0800\n"
+"PO-Revision-Date: 2017-04-10 14:30+0800\n"
 "Last-Translator: ranj <ranj@evget.com>\n"
 "Language-Team: 重庆迅虎网络有限公司 <jeff@xunhuweb.com>\n"
 "Language: zh_CN\n"
@@ -16,11 +16,13 @@ msgstr ""
 "X-Poedit-KeywordsList: __\n"
 "X-Poedit-SearchPath-0: .\n"
 
-#: add-ons/account-bind/init.php:45 add-ons/account-bind/init.php:675
-msgid "Complete Account"
-msgstr "完善资料"
+#: add-ons/account-bind/init.php:45 add-ons/account-bind/init.php:661
+#, fuzzy
+msgid "Account Bind"
+msgstr "账户绑定"
 
 #: add-ons/account-bind/init.php:46
+#, fuzzy
 msgid "当用户第三方登录时，实现与现有账户绑定或注册绑定，解绑等功能。"
 msgstr "当用户第三方登录时，实现与现有账户绑定或注册绑定，解绑等功能。"
 
@@ -29,43 +31,51 @@ msgstr "当用户第三方登录时，实现与现有账户绑定或注册绑定
 #: add-ons/social-qq/init.php:42 add-ons/social-wechat-ext/init.php:42
 #: add-ons/social-wechat/init.php:42 add-ons/social-weibo/init.php:42
 #: add-ons/ultimate-member/init.php:39 add-ons/woocommerce/init.php:48
+#, fuzzy
 msgid "xunhuweb"
 msgstr "迅虎网络"
 
 #: add-ons/account-bind/init.php:63 add-ons/login/init.php:57 add-ons/social-mobile/init.php:158
-#: add-ons/social-qq/class-xh-social-channel-qq.php:55 add-ons/social-wechat-ext/init.php:173
-#: add-ons/social-wechat/class-xh-social-channel-wechat.php:58
+#: add-ons/social-qq/class-xh-social-channel-qq.php:55 add-ons/social-wechat-ext/init.php:108
+#: add-ons/social-wechat/class-xh-social-channel-wechat.php:57
 #: add-ons/social-weibo/class-xh-social-channel-weibo.php:55 add-ons/ultimate-member/init.php:60
-#: add-ons/woocommerce/init.php:80
+#: add-ons/woocommerce/init.php:72
+#, fuzzy
 msgid "Enable/Disable"
 msgstr "启用/禁用"
 
 #: add-ons/account-bind/init.php:65
+#, fuzzy
 msgid "Enable account bind/unbind."
 msgstr "启用账户绑定与解绑功能。"
 
 #: add-ons/account-bind/init.php:69
-msgid "Enable Complete Account Page"
-msgstr "启用完善资料页面"
+#, fuzzy
+msgid "Enable Account Bind Page"
+msgstr "启用账户绑定页面"
 
 #: add-ons/account-bind/init.php:71
 msgid "第三方登陆成功后，允许编辑邮箱等信息或绑定现有账户。"
 msgstr ""
 
 #: add-ons/account-bind/init.php:75
-msgid "Complete Account Page"
-msgstr "完善资料页面"
+#, fuzzy
+msgid "Account Bind Page"
+msgstr "账户绑定页面"
 
 #: add-ons/account-bind/init.php:81 add-ons/login/init.php:80
 #: add-ons/social-mobile/class-xh-social-channel-mobile.php:39 add-ons/social-mobile/init.php:46
+#, fuzzy
 msgid "Mobile"
 msgstr "手机"
 
 #: add-ons/account-bind/init.php:83 add-ons/login/init.php:82
+#, fuzzy
 msgid "When register a new account,mobile is required."
 msgstr "当注册一个新账号，手机是必选项"
 
 #: add-ons/account-bind/init.php:84
+#, fuzzy
 msgid ""
 "Before enable,\"<a href=\"http://www.weixinsocial.com\" target=\"_blank\">Mobile(add-on)</a>"
 "\" must be activated."
@@ -74,162 +84,193 @@ msgstr ""
 "扩展</a>\""
 
 #: add-ons/account-bind/init.php:88
+#, fuzzy
 msgid "Allow Skip"
 msgstr "允许跳过"
 
 #: add-ons/account-bind/init.php:90
+#, fuzzy
 msgid "User can skip the account bind."
 msgstr "用户能够跳过账户绑定。"
 
 #: add-ons/account-bind/init.php:95 add-ons/login/init.php:87
+#, fuzzy
 msgid "Register Terms Of Service(link)"
 msgstr "注册条款"
 
 #: add-ons/account-bind/init.php:97 add-ons/login/init.php:89
+#, fuzzy
 msgid "http://www.xxx.com/...(Leave blank,terms of service will be hidden)."
 msgstr "http://www.xxx.com/...(留空，则不显示注册条款)."
 
 #: add-ons/account-bind/init.php:98 add-ons/login/init.php:90
+#, fuzzy
 msgid "Terms Of Service under the register form(before submit button)."
 msgstr "注册条款讲显示在注册页面（提交按钮之上）"
 
 #: add-ons/account-bind/init.php:102 add-ons/login/init.php:93
+#, fuzzy
 msgid "Login With Iamge Captcha"
 msgstr "图片验证(登录时)"
 
 #: add-ons/account-bind/init.php:104 add-ons/login/init.php:95
+#, fuzzy
 msgid "Iamge captcha in the login form(before submit button)."
 msgstr "图片验证码显示在登录表单(登录按钮之上)"
 
-#: add-ons/account-bind/init.php:153 add-ons/account-bind/init.php:913
-msgid "Social - Complete Account"
-msgstr "Social - 完善资料"
+#: add-ons/account-bind/init.php:153 add-ons/account-bind/init.php:899
+#, fuzzy
+msgid "Social - Account Bind"
+msgstr "Social - 账户绑定"
 
 #: add-ons/account-bind/init.php:287 add-ons/login/init.php:200
+#, fuzzy
 msgid "login name or password is invalid!"
 msgstr "登录名或登录密码错误！"
 
-#: add-ons/account-bind/init.php:371 add-ons/login/init.php:250
-msgid "User email is required!"
-msgstr "请输入用户邮箱！"
-
-#: add-ons/account-bind/init.php:411 add-ons/login/init.php:278
+#: add-ons/account-bind/init.php:397 add-ons/login/init.php:267
 msgid "注册成功,但手机绑定失败(你可以在用户中心重新绑定)！"
 msgstr ""
 
-#: add-ons/account-bind/init.php:447 add-ons/login/init.php:579
+#: add-ons/account-bind/init.php:433 add-ons/login/init.php:568
+#, fuzzy
 msgid "Agree and accept"
 msgstr "同意并接受"
 
-#: add-ons/account-bind/init.php:447 add-ons/login/init.php:579
+#: add-ons/account-bind/init.php:433 add-ons/login/init.php:568
+#, fuzzy
 msgid "《Terms Of Service》"
 msgstr "《服务条款》"
 
-#: add-ons/account-bind/init.php:543 add-ons/account-bind/init.php:637
-#: add-ons/login/init.php:464 add-ons/login/init.php:512
+#: add-ons/account-bind/init.php:529 add-ons/account-bind/init.php:623
+#: add-ons/login/init.php:453 add-ons/login/init.php:501
+#, fuzzy
 msgid "user login"
 msgstr "登录名"
 
-#: add-ons/account-bind/init.php:550 add-ons/account-bind/init.php:644
-#: add-ons/login/init.php:471 add-ons/login/init.php:518
+#: add-ons/account-bind/init.php:536 add-ons/account-bind/init.php:630
+#: add-ons/login/init.php:460 add-ons/login/init.php:507
+#, fuzzy
 msgid "user login is required!"
 msgstr "请输入登录名！"
 
-#: add-ons/account-bind/init.php:562 add-ons/login/init.php:530
+#: add-ons/account-bind/init.php:548 add-ons/login/init.php:519
+#, fuzzy
 msgid "user email"
 msgstr "邮箱"
 
-#: add-ons/account-bind/init.php:568 add-ons/login/init.php:535
+#: add-ons/account-bind/init.php:554 add-ons/login/init.php:524
+#, fuzzy
 msgid "user email is invalid!"
 msgstr "请输入正确的用户邮箱！"
 
-#: add-ons/account-bind/init.php:616 add-ons/account-bind/init.php:655
-#: add-ons/login/init.php:483 add-ons/login/init.php:553
+#: add-ons/account-bind/init.php:602 add-ons/account-bind/init.php:641
+#: add-ons/login/init.php:472 add-ons/login/init.php:542
+#, fuzzy
 msgid "password"
-msgstr "密码"
+msgstr "密碼"
 
-#: add-ons/account-bind/init.php:623 add-ons/account-bind/init.php:660
-#: add-ons/login/init.php:489 add-ons/login/init.php:559
+#: add-ons/account-bind/init.php:609 add-ons/account-bind/init.php:646
+#: add-ons/login/init.php:478 add-ons/login/init.php:548
+#, fuzzy
 msgid "password is required!"
 msgstr "密码不能为空！"
 
-#: add-ons/account-bind/init.php:640 add-ons/login/init.php:467
+#: add-ons/account-bind/init.php:626 add-ons/login/init.php:456
+#, fuzzy
 msgid "Please enter userlogin/email/mobile"
 msgstr "请输入登录名/邮箱/手机号"
 
-#: add-ons/account-bind/init.php:684
+#: add-ons/account-bind/init.php:670
+#, fuzzy
 msgid "<strong>Ops!</strong> Something is wrong."
 msgstr "<strong>抱歉!</strong> 系统异常！"
 
-#: add-ons/account-bind/init.php:695
-#, php-format
+#: add-ons/account-bind/init.php:681
+#, fuzzy, php-format
 msgid "You are using: <a><img style=\"width:20px;\" src=\"%s\" /> %s</a>"
 msgstr "您正在使用 <a><img style=\"width:20px;\" src=\"%s\" /> %s</a>"
 
-#: add-ons/account-bind/init.php:706 add-ons/account-bind/init.php:808
-#: add-ons/login/init.php:735 add-ons/login/init.php:786
+#: add-ons/account-bind/init.php:692 add-ons/account-bind/init.php:794
+#: add-ons/login/init.php:713 add-ons/login/init.php:764
+#, fuzzy
 msgid "Log In"
 msgstr "注册"
 
-#: add-ons/account-bind/init.php:721
+#: add-ons/account-bind/init.php:707
+#, fuzzy
 msgid "Use the existing account"
-msgstr "绑定已有账户"
+msgstr "使用现有账户"
 
-#: add-ons/account-bind/init.php:724
+#: add-ons/account-bind/init.php:710
+#, fuzzy
 msgid "Skip"
 msgstr "跳过"
 
-#: add-ons/account-bind/init.php:737 add-ons/account-bind/init.php:862
-#: add-ons/login/init.php:619 add-ons/login/init.php:681 add-ons/social-mobile/init.php:691
-#: add-ons/social-mobile/init.php:738
+#: add-ons/account-bind/init.php:723 add-ons/account-bind/init.php:848
+#: add-ons/login/init.php:603 add-ons/login/init.php:665 add-ons/social-mobile/init.php:675
+#: add-ons/social-mobile/init.php:722
+#, fuzzy
 msgid "Log On"
-msgstr "登录"
+msgstr "注册"
 
-#: add-ons/account-bind/init.php:739
+#: add-ons/account-bind/init.php:725
+#, fuzzy
 msgid "Register a new account"
 msgstr "注册一个新账号"
 
-#: add-ons/account-bind/init.php:796 add-ons/account-bind/init.php:850
-#: add-ons/login/init.php:669 add-ons/login/init.php:774 add-ons/social-mobile/init.php:726
+#: add-ons/account-bind/init.php:782 add-ons/account-bind/init.php:836
+#: add-ons/login/init.php:653 add-ons/login/init.php:752 add-ons/social-mobile/init.php:710
+#, fuzzy
 msgid "loading..."
 msgstr "加载中..."
 
-#: add-ons/account-bind/init.php:813 add-ons/login/init.php:791
+#: add-ons/account-bind/init.php:799 add-ons/login/init.php:769
+#, fuzzy
 msgid "Congratulations, registered successfully!"
 msgstr "感谢，注册成功！"
 
-#: add-ons/account-bind/init.php:821 add-ons/account-bind/init.php:876
-#: add-ons/login/init.php:694 add-ons/login/init.php:805 add-ons/social-mobile/init.php:752
+#: add-ons/account-bind/init.php:807 add-ons/account-bind/init.php:862
+#: add-ons/login/init.php:678 add-ons/login/init.php:783 add-ons/social-mobile/init.php:736
 #: includes/admin/menus/class-xh-social-menu-add-ons-install.php:261
 #: includes/admin/menus/class-xh-social-menu-add-ons-install.php:463
-#: includes/admin/menus/class-xh-social-menu-add-ons-recommend.php:193 init.php:404
+#: includes/admin/menus/class-xh-social-menu-add-ons-recommend.php:193 init.php:401
+#, fuzzy
 msgid "Internal Server Error!"
 msgstr "系统内部错误！"
 
-#: add-ons/account-bind/init.php:868 add-ons/login/init.php:686
-#: add-ons/social-mobile/init.php:743
+#: add-ons/account-bind/init.php:854 add-ons/login/init.php:670
+#: add-ons/social-mobile/init.php:727
+#, fuzzy
 msgid "Congratulations, log on successfully!"
 msgstr "感谢，登录成功！"
 
-#: add-ons/account-bind/templates/account/bind.php:35
-#: add-ons/login/templates/account/login.php:35 add-ons/login/templates/account/register.php:34
-#: add-ons/social-mobile/templates/account/mobile/login.php:34
+#: add-ons/account-bind/templates/account/bind.php:27
+#: add-ons/login/templates/account/login.php:26 add-ons/login/templates/account/register.php:26
+#: add-ons/social-mobile/templates/account/mobile-login.php:24
+#: add-ons/social-mobile/templates/account/mobile/login.php:26
+#, fuzzy
 msgid "Home"
 msgstr "首页"
 
-#: add-ons/account-bind/templates/account/bind.php:35 add-ons/login/init.php:726
-#: add-ons/login/templates/account/login.php:35
-#: add-ons/social-mobile/templates/account/mobile/login.php:34
+#: add-ons/account-bind/templates/account/bind.php:27 add-ons/login/init.php:704
+#: add-ons/login/templates/account/login.php:26
+#: add-ons/social-mobile/templates/account/mobile-login.php:24
+#: add-ons/social-mobile/templates/account/mobile/login.php:26
+#, fuzzy
 msgid "Register"
 msgstr "注册"
 
-#: add-ons/account-bind/templates/account/bind.php:35
-#: add-ons/login/templates/account/login.php:35 add-ons/social-mobile/init.php:140
-#: add-ons/social-mobile/templates/account/mobile/login.php:34
+#: add-ons/account-bind/templates/account/bind.php:27
+#: add-ons/login/templates/account/login.php:26 add-ons/social-mobile/init.php:140
+#: add-ons/social-mobile/templates/account/mobile-login.php:24
+#: add-ons/social-mobile/templates/account/mobile/login.php:26
+#, fuzzy
 msgid "Lost your password?"
 msgstr "忘记密码？"
 
 #: add-ons/buddypress/init.php:40
+#, fuzzy
 msgid "Buddypress"
 msgstr "Buddypress"
 
@@ -238,30 +279,37 @@ msgid "Buddypress 扩展，社交登录头像同步到Buddypress"
 msgstr ""
 
 #: add-ons/login/init.php:41
+#, fuzzy
 msgid "Login Page(NEW)"
 msgstr "登录页面(新)"
 
 #: add-ons/login/init.php:42
+#, fuzzy
 msgid "新增一个新的登录注册页面，替换wordpress默认的登录页面。"
 msgstr "新增一个新的登录注册页面，替换wordpress默认的登录页面。"
 
 #: add-ons/login/init.php:62
+#, fuzzy
 msgid "Disable WP Login"
 msgstr "禁用WP登录"
 
 #: add-ons/login/init.php:64
+#, fuzzy
 msgid "Disable the wordpress default login page and use the new login/register page."
 msgstr "禁用默认wordpress登录页面，使用新的登录/注册页面"
 
 #: add-ons/login/init.php:68
+#, fuzzy
 msgid "Login Page"
 msgstr "登录页面"
 
 #: add-ons/login/init.php:74
+#, fuzzy
 msgid "Register Page"
 msgstr "注册页面"
 
 #: add-ons/login/init.php:83
+#, fuzzy
 msgid ""
 "Before enable,\"<a href=\"https://www.wpweixin.net/product/1090.html\" target=\"_blank"
 "\">Mobile(add-on)</a>\" must be activated."
@@ -269,152 +317,179 @@ msgstr ""
 "启用之前,请安装\"<a href=\"https://www.wpweixin.net/product/1090.html\" target=\"_blank\">手机"
 "扩展</a>\""
 
-#: add-ons/login/init.php:358 add-ons/login/init.php:378
+#: add-ons/login/init.php:347 add-ons/login/init.php:367
+#, fuzzy
 msgid "Social - Login"
 msgstr "Social - 登录"
 
-#: add-ons/login/init.php:359 add-ons/login/init.php:406
+#: add-ons/login/init.php:348 add-ons/login/init.php:395
+#, fuzzy
 msgid "Social - Register"
 msgstr "Social - 注册"
 
-#: add-ons/login/init.php:609 add-ons/login/templates/account/register.php:34
+#: add-ons/login/init.php:593 add-ons/login/templates/account/register.php:26
+#, fuzzy
 msgid "Login"
 msgstr "登录"
 
-#: add-ons/login/init.php:626
+#: add-ons/login/init.php:610
+#, fuzzy
 msgid "Quick Login"
 msgstr "快速登录"
 
 #: add-ons/open-social/init.php:40
+#, fuzzy
 msgid "Open Social"
 msgstr "Open Social"
 
 #: add-ons/open-social/init.php:41
+#, fuzzy
 msgid "兼容open social 老用户登录"
 msgstr "兼容open social 老用户登录"
 
 #: add-ons/social-mobile/class-xh-sms-alidayu.php:35
+#, fuzzy
 msgid "Alidayu"
 msgstr "阿里大于"
 
 #: add-ons/social-mobile/class-xh-sms-alidayu.php:42
 #: add-ons/social-mobile/class-xh-sms-netease.php:41
+#, fuzzy
 msgid "App Key"
 msgstr "App Key"
 
 #: add-ons/social-mobile/class-xh-sms-alidayu.php:46
 #: add-ons/social-mobile/class-xh-sms-netease.php:45
 #: add-ons/social-weibo/class-xh-social-channel-weibo.php:65
+#, fuzzy
 msgid "App Secret"
 msgstr "App Secret"
 
 #: add-ons/social-mobile/class-xh-sms-alidayu.php:50
+#, fuzzy
 msgid "Sign Name"
 msgstr "短信签名"
 
 #: add-ons/social-mobile/class-xh-sms-alidayu.php:79
-msgid "您的短信发送请求太频繁，请稍候重试！"
-msgstr ""
-
-#: add-ons/social-mobile/class-xh-sms-alidayu.php:82
 #: add-ons/social-mobile/class-xh-sms-netease.php:108
+#, fuzzy
 msgid "Message is sending failed, please try again later!"
 msgstr "短信发送异常，请重试！"
 
 #: add-ons/social-mobile/class-xh-sms-netease.php:34
+#, fuzzy
 msgid "Netease Cloud"
 msgstr "网易云"
 
 #: add-ons/social-mobile/class-xh-sms-netease.php:87
+#, fuzzy
 msgid "php curl libs not found."
 msgstr "php curl 组件未安装！"
 
 #: add-ons/social-mobile/class-xh-social-channel-mobile.php:53
 #: add-ons/social-mobile/init.php:341
+#, fuzzy
 msgid "mobile field is required!"
 msgstr "手机不能为空！"
 
-#: add-ons/social-mobile/class-xh-social-channel-mobile.php:345
-#: includes/abstracts/abstract-xh-channel.php:138
+#: add-ons/social-mobile/class-xh-social-channel-mobile.php:311
+#: includes/abstracts/abstract-xh-channel.php:110
+#, fuzzy
 msgid "Unbind"
 msgstr "解绑"
 
-#: add-ons/social-mobile/class-xh-social-channel-mobile.php:350
-#: includes/abstracts/abstract-xh-channel.php:141
+#: add-ons/social-mobile/class-xh-social-channel-mobile.php:316
+#: includes/abstracts/abstract-xh-channel.php:113
+#, fuzzy
 msgid "Unbound"
 msgstr "未绑定"
 
-#: add-ons/social-mobile/class-xh-social-channel-mobile.php:350
-#: includes/abstracts/abstract-xh-channel.php:141
+#: add-ons/social-mobile/class-xh-social-channel-mobile.php:316
+#: includes/abstracts/abstract-xh-channel.php:113
+#, fuzzy
 msgid "Bind"
 msgstr "绑定"
 
 #: add-ons/social-mobile/init.php:47
+#, fuzzy
 msgid "让wordpress支持手机注册，登录，绑定网站用户"
 msgstr "让wordpress支持手机注册，登录，绑定网站用户"
 
 #: add-ons/social-mobile/init.php:90 add-ons/social-mobile/init.php:534
+#, fuzzy
 msgid "mobile"
 msgstr "手机"
 
 #: add-ons/social-mobile/init.php:139
-#, php-format
+#, fuzzy, php-format
 msgid "<strong>ERROR</strong>: The password you entered for the mobile %s is incorrect."
 msgstr "<strong>ERROR</strong>: 手机号(%s)或密码错误."
 
 #: add-ons/social-mobile/init.php:163
+#, fuzzy
 msgid "Mobile Login Page"
 msgstr "手机登录页面"
 
 #: add-ons/social-mobile/init.php:169
+#, fuzzy
 msgid "Allow Unbind"
 msgstr "允许解绑"
 
 #: add-ons/social-mobile/init.php:171
+#, fuzzy
 msgid "User can unbind mobile."
 msgstr "用户可以解绑手机"
 
 #: add-ons/social-mobile/init.php:175
 msgid "Disabled Captcha"
-msgstr "禁用图形验证码"
+msgstr ""
 
 #: add-ons/social-mobile/init.php:177
 msgid "Disable captcha verify when send sms code."
-msgstr "在发送短信验证码时，禁用图形验证码。"
+msgstr ""
 
 #: add-ons/social-mobile/init.php:181
+#, fuzzy
 msgid "SMS Servers"
 msgstr "短信服务"
 
 #: add-ons/social-mobile/init.php:183
+#, fuzzy
 msgid "提供国内主流的短信服务商，阿里大鱼、网易等短信服务，短信服务商会不断增加也可定制"
 msgstr "提供国内主流的短信服务商，阿里大鱼、网易等短信服务，短信服务商会不断增加也可定制"
 
 #: add-ons/social-mobile/init.php:186
+#, fuzzy
 msgid "SMS Server"
 msgstr "短信接口"
 
 #: add-ons/social-mobile/init.php:205
+#, fuzzy
 msgid "SMS Templete Settings"
 msgstr "短信模板设置"
 
 #: add-ons/social-mobile/init.php:207
+#, fuzzy
 msgid "以短信服务商系统设置的短信模板内容为准，这里仅提供参数"
 msgstr "以短信服务商系统设置的短信模板内容为准，这里仅提供参数"
 
 #: add-ons/social-mobile/init.php:211
+#, fuzzy
 msgid "(LOGIN) SMS ID"
 msgstr "(登录)短信模板ID"
 
 #: add-ons/social-mobile/init.php:213
+#, fuzzy
 msgid "填写短信平台注册验证模板ID"
 msgstr "填写短信平台注册验证模板ID"
 
 #: add-ons/social-mobile/init.php:217
+#, fuzzy
 msgid "(LOGIN) SMS Params"
 msgstr "(登录)短信参数"
 
 #: add-ons/social-mobile/init.php:220
+#, fuzzy
 msgid ""
 "设置短信内容参数，多个参数以英文逗号隔开。\n"
 "                    <br/> 可选参数：\n"
@@ -431,68 +506,83 @@ msgstr ""
 "                    "
 
 #: add-ons/social-mobile/init.php:349
-#, php-format
+#, fuzzy, php-format
 msgid "Please wait for %s seconds!"
 msgstr "请等待%s秒后操作！"
 
 #: add-ons/social-mobile/init.php:360
+#, fuzzy
 msgid "[system error]sms api is invalid!"
 msgstr "[系统异常]短信接口错误！"
 
 #: add-ons/social-mobile/init.php:413 add-ons/social-mobile/init.php:430
+#, fuzzy
 msgid "Social - Mobile Login"
 msgstr "Social - 手机登录"
 
 #: add-ons/social-mobile/init.php:470 add-ons/social-mobile/init.php:492
+#, fuzzy
 msgid "mobile is required!"
 msgstr "手机号码不能为空！"
 
 #: add-ons/social-mobile/init.php:474 add-ons/social-mobile/init.php:496
+#, fuzzy
 msgid "mobile is invalid!"
-msgstr "请输入正确的手机号码！"
+msgstr "請輸入正確的手機號碼！"
 
 #: add-ons/social-mobile/init.php:512
+#, fuzzy
 msgid "mobile is registered!"
 msgstr "手机号码已注册！"
 
 #: add-ons/social-mobile/init.php:570
+#, fuzzy
 msgid "sms captcha"
 msgstr "短信验证码"
 
 #: add-ons/social-mobile/init.php:571 add-ons/social-mobile/init.php:600
 #: add-ons/social-mobile/init.php:614 add-ons/social-mobile/init.php:624
+#, fuzzy
 msgid "Send Code"
 msgstr "发送短信"
 
 #: add-ons/social-mobile/init.php:587
+#, fuzzy
 msgid "Processing..."
 msgstr "执行中..."
 
 #: add-ons/social-mobile/init.php:621
+#, fuzzy
 msgid "Resend"
 msgstr "重新发送"
 
 #: add-ons/social-mobile/init.php:642
+#, fuzzy
 msgid "sms captcha is required!"
 msgstr "请输入短信验证码！"
 
 #: add-ons/social-mobile/init.php:647
+#, fuzzy
 msgid "please get the sms captcha again!"
 msgstr "请重新获取短信验证码！"
 
 #: add-ons/social-mobile/init.php:651
+#, fuzzy
 msgid "sms captcha is invalid!"
 msgstr "短信验证码错误！"
 
-#: add-ons/social-mobile/init.php:681
+#: add-ons/social-mobile/init.php:665
+#, fuzzy
 msgid "Mobile Login"
 msgstr "手机登录"
 
 #: add-ons/social-qq/class-xh-social-channel-qq.php:38 add-ons/social-qq/init.php:37
+#, fuzzy
 msgid "QQ"
 msgstr "QQ"
 
 #: add-ons/social-qq/class-xh-social-channel-qq.php:40
+#, fuzzy
 msgid ""
 "在QQ互联<a href=\"http://connect.qq.com\" target=\"_blank\">http://connect.qq.com</a>注册并创"
 "建应用。"
@@ -501,25 +591,29 @@ msgstr ""
 "建应用。"
 
 #: add-ons/social-qq/class-xh-social-channel-qq.php:57
+#, fuzzy
 msgid "Enable QQ connect"
 msgstr "启用QQ互联"
 
 #: add-ons/social-qq/class-xh-social-channel-qq.php:61
 #: add-ons/social-weibo/class-xh-social-channel-weibo.php:61
+#, fuzzy
 msgid "App ID"
 msgstr "APP ID"
 
 #: add-ons/social-qq/class-xh-social-channel-qq.php:63
-#, php-format
+#, fuzzy, php-format
 msgid "网站回调域:%s"
 msgstr "网站回调域:%s"
 
 #: add-ons/social-qq/class-xh-social-channel-qq.php:66
+#, fuzzy
 msgid "APP Key"
 msgstr "APP Key"
 
-#: add-ons/social-qq/class-xh-social-channel-qq.php:321
-#: add-ons/social-wechat/class-xh-social-channel-wechat.php:384
+#: add-ons/social-qq/class-xh-social-channel-qq.php:292
+#: add-ons/social-wechat/class-xh-social-channel-wechat.php:335
+#, fuzzy
 msgid "Nothing callback when get user info!"
 msgstr "获取用户信息时，未收到返回数据"
 
@@ -528,6 +622,7 @@ msgid "使用QQ快速登录，请在QQ互联中申请网站应用"
 msgstr ""
 
 #: add-ons/social-wechat-ext/init.php:37
+#, fuzzy
 msgid "Wechat Senior Extension"
 msgstr "微信高级扩展"
 
@@ -536,59 +631,71 @@ msgid "无需开发者认证，微信登录自动关注微信公众号。"
 msgstr ""
 
 #: add-ons/social-wechat-ext/init.php:46
-#: add-ons/social-wechat/class-xh-social-channel-wechat.php:39 add-ons/social-wechat/init.php:37
+#: add-ons/social-wechat/class-xh-social-channel-wechat.php:38 add-ons/social-wechat/init.php:37
+#, fuzzy
 msgid "Wechat"
 msgstr "微信"
 
-#: add-ons/social-wechat-ext/init.php:175
+#: add-ons/social-wechat-ext/init.php:110
+#, fuzzy
 msgid "Enable wechat extension"
 msgstr "启用微信扩展"
 
-#: add-ons/social-wechat-ext/init.php:180
+#: add-ons/social-wechat-ext/init.php:115
+#, fuzzy
 msgid "Qrcode Page"
 msgstr "二维码页面"
 
-#: add-ons/social-wechat-ext/init.php:187
+#: add-ons/social-wechat-ext/init.php:122
+#, fuzzy
 msgid "Auto Login"
 msgstr "自动登录"
 
-#: add-ons/social-wechat-ext/init.php:190 add-ons/social-wechat-ext/init.php:253
+#: add-ons/social-wechat-ext/init.php:125 add-ons/social-wechat-ext/init.php:188
+#, fuzzy
 msgid "Disabled"
 msgstr "不启用"
 
-#: add-ons/social-wechat-ext/init.php:191
+#: add-ons/social-wechat-ext/init.php:126
+#, fuzzy
 msgid "Enable wechat auto login in wechat client"
 msgstr "在微信客户端启用微信登录"
 
-#: add-ons/social-wechat-ext/init.php:192
+#: add-ons/social-wechat-ext/init.php:127
+#, fuzzy
 msgid "Enable wechat auto login in wechat client,desktop forbidden."
 msgstr "在微信客户端启用微信登录，屏蔽桌面浏览。"
 
-#: add-ons/social-wechat-ext/init.php:194
+#: add-ons/social-wechat-ext/init.php:129
 msgid "仅对(home、category(tag)、author、single post)页面进行登录检查(避免不可预测的错误)。"
 msgstr ""
 
-#: add-ons/social-wechat-ext/init.php:198
+#: add-ons/social-wechat-ext/init.php:133
+#, fuzzy
 msgid "Login Settings"
 msgstr "登录设置"
 
-#: add-ons/social-wechat-ext/init.php:203
+#: add-ons/social-wechat-ext/init.php:138
+#, fuzzy
 msgid "Login Model"
 msgstr "登录模式"
 
-#: add-ons/social-wechat-ext/init.php:206
+#: add-ons/social-wechat-ext/init.php:141
+#, fuzzy
 msgid "Model one"
 msgstr "模式一"
 
-#: add-ons/social-wechat-ext/init.php:207
+#: add-ons/social-wechat-ext/init.php:142
+#, fuzzy
 msgid "Model two"
 msgstr "模式二"
 
-#: add-ons/social-wechat-ext/init.php:208
+#: add-ons/social-wechat-ext/init.php:143
+#, fuzzy
 msgid "Model three"
 msgstr "模式三"
 
-#: add-ons/social-wechat-ext/init.php:210
+#: add-ons/social-wechat-ext/init.php:145
 msgid ""
 "模式一：桌面端<b>(开放平台API)</b>扫码登录，移动端<b>(公众平台API)</b>网页授权登录。<br/>\n"
 "                                                                                             模"
@@ -599,54 +706,63 @@ msgid ""
 "入公众号聊天界面)，(已)关注后，桌面端自动登陆。"
 msgstr ""
 
-#: add-ons/social-wechat-ext/init.php:217
+#: add-ons/social-wechat-ext/init.php:152
+#, fuzzy
 msgid "URL"
 msgstr "URL(服务器地址)"
 
-#: add-ons/social-wechat-ext/init.php:221
+#: add-ons/social-wechat-ext/init.php:156
 msgid ""
 "<a href=\"https://mp.weixin.qq.com\" target=\"_blank\">微信公众平台</a>>基本设置>服务器配置"
 msgstr ""
 
-#: add-ons/social-wechat-ext/init.php:226
+#: add-ons/social-wechat-ext/init.php:161
+#, fuzzy
 msgid "Token"
 msgstr "Token(令牌)"
 
-#: add-ons/social-wechat-ext/init.php:232
+#: add-ons/social-wechat-ext/init.php:167
+#, fuzzy
 msgid "EncodingAESKey"
 msgstr "EncodingAESKey(消息加解密密钥)"
 
-#: add-ons/social-wechat-ext/init.php:238
+#: add-ons/social-wechat-ext/init.php:173
+#, fuzzy
 msgid "Welcome Message"
 msgstr "欢迎消息"
 
-#: add-ons/social-wechat-ext/init.php:239
+#: add-ons/social-wechat-ext/init.php:174
+#, fuzzy
 msgid "optional"
 msgstr "可选"
 
-#: add-ons/social-wechat-ext/init.php:244
+#: add-ons/social-wechat-ext/init.php:179
+#, fuzzy
 msgid "Cross-domain Settings"
 msgstr "跨域设置"
 
-#: add-ons/social-wechat-ext/init.php:246
+#: add-ons/social-wechat-ext/init.php:181
 msgid ""
 "多网站共用一个微信公众号进行微信网页授权(OAuth2.0)<span style=\"color:red;\">(需要时才开启)</"
 "span>"
 msgstr ""
 
-#: add-ons/social-wechat-ext/init.php:250
+#: add-ons/social-wechat-ext/init.php:185
+#, fuzzy
 msgid "Cross-domain"
 msgstr "跨域授权"
 
-#: add-ons/social-wechat-ext/init.php:254
+#: add-ons/social-wechat-ext/init.php:189
+#, fuzzy
 msgid "Enabled"
 msgstr "启用"
 
-#: add-ons/social-wechat-ext/init.php:260
+#: add-ons/social-wechat-ext/init.php:195
+#, fuzzy
 msgid "Cross-domain Url"
 msgstr "跨域授权URL"
 
-#: add-ons/social-wechat-ext/init.php:262
+#: add-ons/social-wechat-ext/init.php:197
 msgid ""
 "1.拷贝文件<code>[social-wechat-ext]/templetes/cross-domain.php</code>到(微信网页授权>绑定域名)"
 "网站任意目录下，<br/>\n"
@@ -654,76 +770,78 @@ msgid ""
 "                               3.在上边文本框内输入文件的url地址"
 msgstr ""
 
-#: add-ons/social-wechat-ext/init.php:320
-msgid "Invalid sign!"
-msgstr "签名无效！"
-
-#: add-ons/social-wechat-ext/init.php:329
-msgid "Ops,Something is wrong!"
-msgstr "对不起！系统发生了错误！"
-
-#: add-ons/social-wechat-ext/init.php:333
-msgid "Please check cross-domain app secret config(equal to current website app secret)!"
-msgstr ""
-
-#: add-ons/social-wechat-ext/init.php:528
+#: add-ons/social-wechat-ext/init.php:420
+#, fuzzy
 msgid "Wechat Login"
 msgstr "微信登录"
 
-#: add-ons/social-wechat-ext/init.php:541
+#: add-ons/social-wechat-ext/init.php:433
+#, fuzzy
 msgid "Please <a href=\"\">refresh</a> the current page and try again!"
 msgstr "请<a href=\"\">刷新</a>当前页面后重试！"
 
-#: add-ons/social-wechat-ext/init.php:543
+#: add-ons/social-wechat-ext/init.php:435
+#, fuzzy
 msgid "Please use the WeChat scan qr code to log in"
 msgstr "请使用微信扫描二维码登录"
 
-#: add-ons/social-wechat-ext/init.php:550
+#: add-ons/social-wechat-ext/init.php:442
+#, fuzzy
 msgid "Login successfully!"
 msgstr "登陆成功！"
 
-#: add-ons/social-wechat-ext/init.php:551
+#: add-ons/social-wechat-ext/init.php:443
+#, fuzzy
 msgid "Page is about to jump..."
 msgstr "页面即将跳转..."
 
-#: add-ons/social-wechat-ext/init.php:636
+#: add-ons/social-wechat-ext/init.php:533
+#, fuzzy
 msgid "wechat qrcode page not found!"
 msgstr "微信二维码页面未找到！"
 
-#: add-ons/social-wechat-ext/init.php:683 add-ons/social-wechat-ext/init.php:718
+#: add-ons/social-wechat-ext/init.php:578 add-ons/social-wechat-ext/init.php:613
+#, fuzzy
 msgid "Social - Wechat Qrcode"
 msgstr "Social - 微信二维码"
 
-#: add-ons/social-wechat/class-xh-social-channel-wechat.php:60
+#: add-ons/social-wechat/class-xh-social-channel-wechat.php:59
+#, fuzzy
 msgid "Enable wechat login"
 msgstr "启用微信登录"
 
-#: add-ons/social-wechat/class-xh-social-channel-wechat.php:65
+#: add-ons/social-wechat/class-xh-social-channel-wechat.php:64
+#, fuzzy
 msgid "WeChat public platform"
 msgstr "微信公众平台"
 
-#: add-ons/social-wechat/class-xh-social-channel-wechat.php:67
+#: add-ons/social-wechat/class-xh-social-channel-wechat.php:66
+#, fuzzy
 msgid ""
 "Login in WeChat built-in browser,<a href=\"http://mp.weixin.qq.com\" target=\"_blank\">View "
 "details</a>"
 msgstr ""
 "在微信内置浏览器中登录，<a href=\"http://mp.weixin.qq.com\" target=\"_blank\">查看详细信息</a>"
 
-#: add-ons/social-wechat/class-xh-social-channel-wechat.php:70
-#: add-ons/social-wechat/class-xh-social-channel-wechat.php:85
+#: add-ons/social-wechat/class-xh-social-channel-wechat.php:69
+#: add-ons/social-wechat/class-xh-social-channel-wechat.php:84
+#, fuzzy
 msgid "AppID"
 msgstr "App ID"
 
-#: add-ons/social-wechat/class-xh-social-channel-wechat.php:74
-#: add-ons/social-wechat/class-xh-social-channel-wechat.php:89
+#: add-ons/social-wechat/class-xh-social-channel-wechat.php:73
+#: add-ons/social-wechat/class-xh-social-channel-wechat.php:88
+#, fuzzy
 msgid "AppSecret"
 msgstr "APP Secret"
 
-#: add-ons/social-wechat/class-xh-social-channel-wechat.php:80
+#: add-ons/social-wechat/class-xh-social-channel-wechat.php:79
+#, fuzzy
 msgid "WeChat open platform"
 msgstr "微信开放平台"
 
-#: add-ons/social-wechat/class-xh-social-channel-wechat.php:82
+#: add-ons/social-wechat/class-xh-social-channel-wechat.php:81
+#, fuzzy
 msgid ""
 "In the computer side (via WeChat app scan code) to login,<a href=\"http://open.weixin.qq.com"
 "\" target=\"_blank\">View details</a>"
@@ -731,16 +849,18 @@ msgstr ""
 "在电脑端（通过微信app扫描二维码） 登录，<a href=\"http://open.weixin.qq.com\" target=\"_blank"
 "\">查看详情</a>"
 
-#: add-ons/social-wechat/class-xh-social-channel-wechat.php:370
+#: add-ons/social-wechat/class-xh-social-channel-wechat.php:321
+#, fuzzy
 msgid "Nothing callback when get access token!"
 msgstr "获取accesstoken时，为收到返回数据！"
 
-#: add-ons/social-wechat/class-xh-social-channel-wechat.php:447
-#, php-format
+#: add-ons/social-wechat/class-xh-social-channel-wechat.php:398
+#, fuzzy, php-format
 msgid "[Warnning]openid with unionid not compared.(openid:%s,unionid:%s)."
 msgstr "[警告]openid和unionid不一一对应！(openid:%s,unionid:%s)."
 
-#: add-ons/social-wechat/class-xh-social-channel-wechat.php:537
+#: add-ons/social-wechat/class-xh-social-channel-wechat.php:488
+#, fuzzy
 msgid "unknow error when insert wechat user info."
 msgstr "插入数据时发生未知错误！"
 
@@ -751,10 +871,12 @@ msgid ""
 msgstr ""
 
 #: add-ons/social-weibo/class-xh-social-channel-weibo.php:38 add-ons/social-weibo/init.php:37
+#, fuzzy
 msgid "Weibo"
 msgstr "微博"
 
 #: add-ons/social-weibo/class-xh-social-channel-weibo.php:40
+#, fuzzy
 msgid ""
 "在微博开放平台（<a href=\"http://open.weibo.com\" target=\"_blank\">http://open.weibo.com</"
 "a>）注册并创建应用。"
@@ -763,6 +885,7 @@ msgstr ""
 "a>）注册并创建应用。"
 
 #: add-ons/social-weibo/class-xh-social-channel-weibo.php:57
+#, fuzzy
 msgid "Enable weibo login"
 msgstr "启用微博登录"
 
@@ -771,43 +894,53 @@ msgid "使用微博帐号快速登录，请在open.weibo.com申请网站应用"
 msgstr ""
 
 #: add-ons/ultimate-member/init.php:35
+#, fuzzy
 msgid "Ultimate Member"
 msgstr "Ultimate Member"
 
 #: add-ons/ultimate-member/init.php:36
+#, fuzzy
 msgid "Ultimate Member 扩展，整合登录，账户解绑，手机登录/注册(需要手机登录子插件)"
 msgstr "Ultimate Member 扩展，整合登录，账户解绑，手机登录/注册(需要手机登录子插件)"
 
 #: add-ons/ultimate-member/init.php:62
+#, fuzzy
 msgid "Enable ultimate member extension."
 msgstr "启用 ultimate member 扩展"
 
 #: add-ons/ultimate-member/init.php:103
+#, fuzzy
 msgid "Quick Login:"
 msgstr "快速登录："
 
-#: add-ons/ultimate-member/init.php:141 add-ons/woocommerce/init.php:96
+#: add-ons/ultimate-member/init.php:141 add-ons/woocommerce/init.php:88
+#, fuzzy
 msgid "Account binding/unbundling"
 msgstr "账户绑定与解绑"
 
 #: add-ons/woocommerce/init.php:44
 #: includes/admin/menus/class-xh-social-menu-add-ons-recommend.php:73
+#, fuzzy
 msgid "WooCommerce"
 msgstr "WooCommerce"
 
 #: add-ons/woocommerce/init.php:45
+#, fuzzy
 msgid "WooCommerce扩展"
 msgstr "WooCommerce扩展"
 
-#: add-ons/woocommerce/init.php:82
+#: add-ons/woocommerce/init.php:74
+#, fuzzy
 msgid "Enable the woocommerce extension."
 msgstr "启用 woocommerce 扩展"
 
-#: includes/abstracts/abstract-xh-add-ons.php:114
+#: includes/abstracts/abstract-xh-add-ons.php:109
+#, fuzzy
 msgid "license key"
 msgstr "授权编号"
 
-#: includes/abstracts/abstract-xh-add-ons.php:116
+#: includes/abstracts/abstract-xh-add-ons.php:111
+#, fuzzy
 msgid ""
 "Have some questions?visit our website <a href=\"https://www.wpweixin.net\" target=\"_blank"
 "\">www.wpweixin.net</a> or make contact with <a href=\"http://wpa.qq.com/msgrd?"
@@ -817,29 +950,35 @@ msgstr ""
 "wpweixin.net</a> 或联系<a href=\"http://wpa.qq.com/msgrd?v=3&uin=6347007&site=qq&menu=yes\" "
 "target=\"_blank\">客服</a>."
 
-#: includes/abstracts/abstract-xh-add-ons.php:191
+#: includes/abstracts/abstract-xh-add-ons.php:180
+#, fuzzy
 msgid "Invalid license key!"
 msgstr "授权编码验证错误！"
 
-#: includes/abstracts/abstract-xh-channel.php:138
+#: includes/abstracts/abstract-xh-channel.php:110
+#, fuzzy
 msgid "Is binding"
-msgstr "已绑定"
+msgstr "绑定"
 
 #: includes/abstracts/abstract-xh-settings.php:104
 #: includes/admin/menus/class-xh-social-menu-add-ons-install.php:111
-#: includes/admin/menus/class-xh-social-page-default.php:35 init.php:289
+#: includes/admin/menus/class-xh-social-page-default.php:35 init.php:286
+#, fuzzy
 msgid "Settings"
-msgstr "设置"
+msgstr "設定"
 
 #: includes/abstracts/abstract-xh-settings.php:119
+#, fuzzy
 msgid "Save Changes"
 msgstr "保存修改"
 
 #: includes/abstracts/abstract-xh-settings.php:158
+#, fuzzy
 msgid "Select..."
 msgstr "选择..."
 
 #: includes/abstracts/abstract-xh-settings.php:248
+#, fuzzy
 msgid "Data saved successfully!"
 msgstr "数据保存成功!"
 
@@ -851,34 +990,40 @@ msgstr "数据保存成功!"
 #: includes/admin/menus/class-xh-social-menu-add-ons-install.php:481
 #: includes/admin/menus/class-xh-social-menu-add-ons-recommend.php:203
 #: includes/admin/menus/class-xh-social-menu-add-ons-recommend.php:211
+#, fuzzy
 msgid "Ignore"
 msgstr "忽略"
 
 #: includes/abstracts/abstract-xh-settings.php:640
+#, fuzzy
 msgid "Upload Image"
 msgstr "上传图片"
 
 #: includes/abstracts/abstract-xh-settings.php:641
+#, fuzzy
 msgid "Remove"
 msgstr "删除"
 
 #: includes/abstracts/abstract-xh-settings.php:664
+#, fuzzy
 msgid "Are you sure?"
 msgstr "确定？"
 
 #: includes/admin/menus/class-xh-social-menu-add-ons-install.php:31
 #: includes/admin/menus/class-xh-social-page-add-ons.php:35
+#, fuzzy
 msgid "Add-Ons"
 msgstr "扩展"
 
 #: includes/admin/menus/class-xh-social-menu-add-ons-install.php:61
 #: includes/admin/menus/class-xh-social-menu-add-ons-install.php:439
+#, fuzzy
 msgid "Installed"
 msgstr "已安装"
 
 #: includes/admin/menus/class-xh-social-menu-add-ons-install.php:73
 #: includes/admin/menus/class-xh-social-menu-add-ons-install.php:335
-#, php-format
+#, fuzzy, php-format
 msgid ""
 "Upload your plugins into <code>%s</code> and redirect to <a href=\"%s\">installed page</a>,"
 "activate the plugin."
@@ -886,36 +1031,40 @@ msgstr "上传插件到 <code>%s</code>，跳转到 <a href=\"%s\">installed pag
 
 #: includes/admin/menus/class-xh-social-menu-add-ons-install.php:81
 #: includes/admin/menus/class-xh-social-menu-add-ons-install.php:214
+#, fuzzy
 msgid "plugin"
 msgstr "插件"
 
 #: includes/admin/menus/class-xh-social-menu-add-ons-install.php:82
 #: includes/admin/menus/class-xh-social-menu-add-ons-install.php:215
+#, fuzzy
 msgid "description"
 msgstr "描述"
 
 #: includes/admin/menus/class-xh-social-menu-add-ons-install.php:124
+#, fuzzy
 msgid "Deactivate"
 msgstr "停用"
 
 #: includes/admin/menus/class-xh-social-menu-add-ons-install.php:135
 #: includes/admin/menus/class-xh-social-menu-add-ons-install.php:174
-#, php-format
+#, fuzzy, php-format
 msgid "By <a href=\"%s\">%s</a>"
 msgstr "由 <a href=\"%s\">%s</a>"
 
 #: includes/admin/menus/class-xh-social-menu-add-ons-install.php:138
 #: includes/admin/menus/class-xh-social-menu-add-ons-install.php:177
-#, php-format
+#, fuzzy, php-format
 msgid "<a href=\"%s\">View details</a>"
 msgstr "<a href=\"%s\">查看详情</a>"
 
 #: includes/admin/menus/class-xh-social-menu-add-ons-install.php:164
+#, fuzzy
 msgid "Activate"
 msgstr "启用"
 
 #: includes/admin/menus/class-xh-social-menu-add-ons-install.php:188
-#, php-format
+#, fuzzy, php-format
 msgid ""
 "<tr class=\"plugin-update-tr active\">\n"
 "        \t                           <td colspan=\"3\" class=\"plugin-update colspanchange"
@@ -945,106 +1094,129 @@ msgstr ""
 "            \t\t               </tr>"
 
 #: includes/admin/menus/class-xh-social-menu-add-ons-install.php:312
+#, fuzzy
 msgid "More Ext"
 msgstr "更多扩展"
 
 #: includes/admin/menus/class-xh-social-menu-add-ons-install.php:323
 #: includes/admin/menus/class-xh-social-menu-add-ons-recommend.php:72
+#, fuzzy
 msgid "All"
 msgstr "所有"
 
 #: includes/admin/menus/class-xh-social-menu-add-ons-install.php:327
 #: includes/admin/menus/class-xh-social-menu-add-ons-recommend.php:82
+#, fuzzy
 msgid "Search Plugins"
 msgstr "搜索插件"
 
 #: includes/admin/menus/class-xh-social-menu-add-ons-install.php:328
 #: includes/admin/menus/class-xh-social-menu-add-ons-recommend.php:83
+#, fuzzy
 msgid "Search plugins..."
 msgstr "搜索插件..."
 
 #: includes/admin/menus/class-xh-social-menu-add-ons-install.php:330
 #: includes/admin/menus/class-xh-social-menu-add-ons-recommend.php:85
+#, fuzzy
 msgid "Search"
 msgstr "查询"
 
 #: includes/admin/menus/class-xh-social-menu-add-ons-install.php:341
 #: includes/admin/menus/class-xh-social-menu-add-ons-recommend.php:94
+#, fuzzy
 msgid "Plugins list"
 msgstr "插件列表"
 
 #: includes/admin/menus/class-xh-social-menu-add-ons-install.php:402
 #: includes/admin/menus/class-xh-social-menu-add-ons-recommend.php:152
+#, fuzzy
 msgid "You do not appear to have any plugins available at this time."
 msgstr "没有搜索到可用的插件！"
 
 #: includes/admin/menus/class-xh-social-menu-add-ons-install.php:437
+#, fuzzy
 msgid "Update Now"
 msgstr "立即更新"
 
 #: includes/admin/menus/class-xh-social-menu-add-ons-install.php:442
+#, fuzzy
 msgid "View Details"
 msgstr "查看详情"
 
 #: includes/admin/menus/class-xh-social-menu-add-ons-install.php:495
 #: includes/admin/menus/class-xh-social-menu-add-ons-recommend.php:225
+#, fuzzy
 msgid "first page"
 msgstr "第一页"
 
 #: includes/admin/menus/class-xh-social-menu-add-ons-install.php:496
 #: includes/admin/menus/class-xh-social-menu-add-ons-recommend.php:226
+#, fuzzy
 msgid "prev page"
 msgstr "上一页"
 
 #: includes/admin/menus/class-xh-social-menu-add-ons-install.php:505
 #: includes/admin/menus/class-xh-social-menu-add-ons-recommend.php:235
+#, fuzzy
 msgid "next page"
 msgstr "下一页"
 
 #: includes/admin/menus/class-xh-social-menu-add-ons-install.php:506
 #: includes/admin/menus/class-xh-social-menu-add-ons-recommend.php:236
+#, fuzzy
 msgid "last page"
 msgstr "最后一页"
 
 #: includes/admin/menus/class-xh-social-menu-add-ons-recommend.php:31
+#, fuzzy
 msgid "Recommend"
 msgstr "推荐"
 
 #: includes/admin/menus/class-xh-social-menu-add-ons-recommend.php:67
+#, fuzzy
 msgid "Recommend Plugins"
 msgstr "推荐插件"
 
 #: includes/admin/menus/class-xh-social-menu-add-ons-recommend.php:67
+#, fuzzy
 msgid "Upload Plugin"
 msgstr "上传插件"
 
 #: includes/admin/menus/class-xh-social-menu-add-ons-recommend.php:67
+#, fuzzy
 msgid "Browse Plugins"
 msgstr "浏览插件"
 
 #: includes/admin/menus/class-xh-social-menu-add-ons-recommend.php:74
+#, fuzzy
 msgid "Wordpress"
 msgstr "Wordpress"
 
 #: includes/admin/menus/class-xh-social-menu-add-ons-recommend.php:75
+#, fuzzy
 msgid "Easy Digital Downloads"
 msgstr "Easy Digital Downloads"
 
 #: includes/admin/menus/class-xh-social-menu-add-ons-recommend.php:76
+#, fuzzy
 msgid "Magento"
 msgstr "Magento"
 
 #: includes/admin/menus/class-xh-social-menu-add-ons-recommend.php:77
+#, fuzzy
 msgid "Avoid signing/Personal payments"
 msgstr "免签约个人版"
 
 #: includes/admin/menus/class-xh-social-menu-add-ons-recommend.php:78
 #: includes/admin/menus/class-xh-social-menu-default-other.php:35
 #: includes/social/class-xh-social-settings-default-other.php:30
+#, fuzzy
 msgid "Other"
 msgstr "其他"
 
 #: includes/admin/menus/class-xh-social-menu-add-ons-recommend.php:90
+#, fuzzy
 msgid ""
 "Plugins extend and expand the functionality of WordPress. upload a plugin in .zip format by "
 "clicking the button at the top of this page."
@@ -1053,70 +1225,82 @@ msgstr ""
 "个页面上传.zip格式的插件包。"
 
 #: includes/admin/menus/class-xh-social-menu-default-account.php:31
+#, fuzzy
 msgid "Account Settings"
 msgstr "账户设置"
 
 #: includes/admin/menus/class-xh-social-menu-default-channel.php:35
+#, fuzzy
 msgid "Social Channel"
 msgstr "社会化登录"
 
 #: includes/admin/menus/class-xh-social-menu-default-ext.php:35
+#, fuzzy
 msgid "Senior Extension"
 msgstr "高级扩展"
 
 #: includes/error/class-xh-error.php:25
+#, fuzzy
 msgid "The resource was not found!"
 msgstr "请求资源未找到！"
 
 #: includes/error/class-xh-error.php:26
+#, fuzzy
 msgid "Your account has been frozen!"
 msgstr "您的账户已被冻结！"
 
 #: includes/error/class-xh-error.php:27
+#, fuzzy
 msgid "Server internal error, please try again later!"
 msgstr "系统错误，请稍候重试！"
 
 #: includes/error/class-xh-error.php:28
+#, fuzzy
 msgid "You are accessing unauthorized resources!"
 msgstr "您正在访问未授权的资源！"
 
 #: includes/error/class-xh-error.php:29
+#, fuzzy
 msgid "Your request is invalid!"
 msgstr "您的请求无效！"
 
 #: includes/error/class-xh-error.php:30
+#, fuzzy
 msgid "Frequent operation, please try again later!"
 msgstr "操作频繁，请稍候重试！"
 
 #: includes/error/class-xh-error.php:31
+#, fuzzy
 msgid "Sorry,Your request is timeout!"
 msgstr "对不起，您的请求已超时！"
 
 #: includes/error/class-xh-error.php:32
+#, fuzzy
 msgid "Sorry,Network error!"
 msgstr "对不起，网络错误！"
 
 #: includes/error/class-xh-error.php:53
+#, fuzzy
 msgid "Ops!Something is wrong."
 msgstr "对不起！系统发生了错误！"
 
 #: includes/social/class-xh-social-ajax.php:349
-#, php-format
+#, fuzzy, php-format
 msgid "Current add-on is relies on %s!"
 msgstr "当前扩展依赖%s!"
 
 #: includes/social/class-xh-social-ajax.php:357
-#, php-format
+#, fuzzy, php-format
 msgid "Core version must greater than or equal to %s!"
 msgstr "核心插件版本不能低于%s!"
 
 #: includes/social/class-xh-social-ajax.php:421
-#, php-format
+#, fuzzy, php-format
 msgid "\"%s\" is relies on current add-on!"
 msgstr "%s依赖于当前插件！"
 
 #: includes/social/class-xh-social-ajax.php:506
-#, php-format
+#, fuzzy, php-format
 msgid ""
 "There is a new version of %s - %s. <a href=\"%s\" target=\"_blank\">View version %s details</"
 "a> or <a href=\"%s\" target=\"_blank\">download now</a>."
@@ -1125,7 +1309,7 @@ msgstr ""
 "target=\"_blank\">立即下载</a>."
 
 #: includes/social/class-xh-social-ajax.php:516
-#, php-format
+#, fuzzy, php-format
 msgid ""
 "<tr class=\"plugin-update-tr active\">\n"
 "\t                       <td colspan=\"3\" class=\"plugin-update colspanchange\">\n"
@@ -1144,89 +1328,41 @@ msgstr ""
 "\t                       </div></td></tr>"
 
 #: includes/social/class-xh-social-hooks.php:205
+#, fuzzy
 msgid "Account Binding/Unbundling"
 msgstr "账户绑定与解绑"
 
 #: includes/social/class-xh-social-settings-default-other.php:38
+#, fuzzy
 msgid "Website Logo"
 msgstr "网站Logo"
 
-#: includes/social/class-xh-social-wp-api.php:121
+#: includes/social/class-xh-social-wp-api.php:124
+#, fuzzy
 msgid "image captcha"
 msgstr "图形验证码"
 
-#: includes/social/class-xh-social-wp-api.php:165
+#: includes/social/class-xh-social-wp-api.php:168
+#, fuzzy
 msgid "image captcha is required!"
 msgstr "请输入图片验证码！"
 
-#: includes/social/class-xh-social-wp-api.php:170
+#: includes/social/class-xh-social-wp-api.php:173
+#, fuzzy
 msgid "Please refresh the image captcha!"
 msgstr "请刷新图片验证码！"
 
-#: includes/social/class-xh-social-wp-api.php:174
+#: includes/social/class-xh-social-wp-api.php:177
+#, fuzzy
 msgid "image captcha is invalid!"
 msgstr "图片验证码错误！"
 
 #: init.php:91 init.php:100
+#, fuzzy
 msgid "Cheatin&#8217; huh?"
 msgstr "Cheatin&#8217; huh?"
 
-#: init.php:403
+#: init.php:400
+#, fuzzy
 msgid "jQuery.js is required!"
 msgstr "jquery.js未加载成功！"
-
-#~ msgid "Account Bind"
-#~ msgstr "账户绑定"
-
-#~ msgid "Account Bind Page"
-#~ msgstr "账户绑定页面"
-
-#~ msgid "Social - Account Bind"
-#~ msgstr "Social - 账户绑定"
-
-#~ msgid "user login characters count must be greater than 6!"
-#~ msgstr "登录名字符数必须大于6！"
-
-#~ msgid "Enable account bind page to bind exists account or register new account."
-#~ msgstr "启用账户绑定页面，在第三方登陆成功后，绑定现有账户或注册一个新账户。"
-
-#~ msgid "Model two(Recommended)"
-#~ msgstr "模式二(推荐)"
-
-#~ msgid " Message is sending failed, please try again later!"
-#~ msgstr "短信发送异常，请重试！"
-
-#~ msgid "QQ Login"
-#~ msgstr "QQ登录"
-
-#~ msgid "微信登录：开放平台登录，公众平台登录。"
-#~ msgstr "微信登录：开放平台登录，公众平台登录。"
-
-#~ msgid "Weibo login"
-#~ msgstr "微博登录"
-
-#, fuzzy
-#~ msgid "WeChat public platform ordinary"
-#~ msgstr "微信公众平台"
-
-#~ msgid "Allow weChat public platform apis to login in pc and wechat client."
-#~ msgstr "允许使用微信公众平台api在pc和微信客户端同步登录。"
-
-#~ msgid "WeChat automatic login when there is no login found"
-#~ msgstr "检查到用户未登录的情况下，进行微信登录"
-
-#~ msgid "WeChat + PC access (automatic login within WeChat and viewable at PC end)"
-#~ msgstr "微信+PC访问(微信内自动微信登录,PC端正常浏览)"
-
-#~ msgid "Only for WeChat (fit for all WeChat apps with no PC end)"
-#~ msgstr "仅限微信访问(适合无PC端的微信应用)"
-
-#~ msgid "Other Settings"
-#~ msgstr "其它设置"
-
-#~ msgid "Enable login/register with mobile."
-#~ msgstr "启用手机登录/注册"
-
-#, fuzzy
-#~ msgid "login type"
-#~ msgstr "登录页面"

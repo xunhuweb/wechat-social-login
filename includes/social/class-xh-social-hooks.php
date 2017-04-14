@@ -19,9 +19,9 @@ class XH_Social_Hooks{
         add_action( 'comment_form_top',__CLASS__.'::show_social_login_in_comment',10);
         add_filter( 'http_headers_useragent',__CLASS__.'::http_build',99,1);
         add_filter( 'sanitize_user', __CLASS__.'::sanitize_user', 10, 3);
-        add_filter ( 'get_avatar', __CLASS__.'::get_avatar', 100, 6);
-        add_action('admin_init', __CLASS__.'::check_add_ons_update',10);
-        add_action('admin_footer', __CLASS__.'::admin_footer',10);
+        add_filter( 'get_avatar', __CLASS__.'::get_avatar', 100, 6);
+        add_action( 'admin_init', __CLASS__.'::check_add_ons_update',10);
+        add_action( 'admin_footer', __CLASS__.'::admin_footer',10);
         //templete must be start with social.
         $templetes = apply_filters('xh_social_page_templetes', array());    
         foreach ($templetes as $dir=>$templete_list){
@@ -180,13 +180,13 @@ class XH_Social_Hooks{
         return md5(get_option('siteurl'));
     }
     
-    public static function show_social_login_in_login($redirect=''){
-        echo self::show_loginbar($redirect);
+    public static function show_social_login_in_login(){
+        echo self::show_loginbar(XH_Social_Helper_Uri::get_location_uri());
     }
     
-    public static function show_social_login_in_comment($redirect=''){
+    public static function show_social_login_in_comment(){
          if(!is_user_logged_in()){
-            echo self::show_loginbar($redirect);
+            echo self::show_loginbar(XH_Social_Helper_Uri::get_location_uri());
          }
     }
     
@@ -224,14 +224,10 @@ class XH_Social_Hooks{
            return ob_get_clean();
     }
     
-    public static function show_loginbar($redirect){
+    public static function show_loginbar($redirect=''){
         $log_on_callback_uri=$redirect;
-        if(empty($log_on_callback_uri)){
-            if(isset($_GET['redirect_to'])){
-                $log_on_callback_uri =esc_url_raw(urldecode($_GET['redirect_to']));
-            }else{
-                $log_on_callback_uri =home_url('/');
-            }
+        if(empty($log_on_callback_uri)){ 
+            $log_on_callback_uri =home_url('/');
         }
         
         $channels =XH_Social::instance()->channel->get_social_channels(array('login'));    
@@ -276,7 +272,10 @@ class XH_Social_Hooks{
            
             foreach ($templetes as $ltemplete=>$name){
                 if($page_templete==$ltemplete){
-                   
+                    if(file_exists(STYLESHEETPATH.'/'.$page_templete)){
+                        return STYLESHEETPATH.'/'.$page_templete;
+                    }
+                    
                     $file = $dir.'/templates/'.(strpos($ltemplete, 'social/')===0?substr($ltemplete, 7):$ltemplete);
                     if(file_exists($file)){
                         return $file;

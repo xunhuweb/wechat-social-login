@@ -67,7 +67,7 @@ class XH_Social_Add_On_Social_QQ extends Abstract_XH_Social_Add_Ons{
     
     public function do_ajax(){ 
         $datas = array(
-           'notice_str'=>isset($_REQUEST['notice_str'])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST['notice_str']):'',
+            'notice_str'=>isset($_REQUEST['notice_str'])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST['notice_str']):'',
             'action'=>isset($_REQUEST['action'])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST['action']):'',
             'tab'=>isset($_REQUEST['tab'])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST['tab']):'',
         );
@@ -77,7 +77,7 @@ class XH_Social_Add_On_Social_QQ extends Abstract_XH_Social_Add_Ons{
             echo (XH_Social_Error::err_code(701)->to_json());
             exit;
         }
-       
+     
         switch ($datas['tab']){
             case 'authorization':
                 $redirect_uri = XH_Social_Channel_QQ::instance()->process_authorization_callback();

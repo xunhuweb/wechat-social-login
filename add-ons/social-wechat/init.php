@@ -44,9 +44,9 @@ class XH_Social_Add_On_Social_Wechat extends Abstract_XH_Social_Add_Ons{
     }
 
     public function on_update($old_version){
-        $db = new XH_Social_Channel_Wechat_Model();
         if(version_compare($old_version,'1.0.1','<' )){
             try {
+                $db = new XH_Social_Channel_Wechat_Model();
                 $db->on_version_101();
             } catch (Exception $e) {
                 wp_die($e->getMessage());

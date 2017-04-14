@@ -16,29 +16,31 @@ abstract class Abstract_XH_Social_Add_Ons extends Abstract_XH_Social_Settings {
      * @var string
      * @since 1.0.0
      */
-    public $version;
+    public $version='1.0.0';
+    
     /**
      * 作者
      * @var string
      * @since 1.0.0
      */
     public $author;
+    
     /**
-     * 插件链接
+     * 插件介绍地址
      * @var string
      * @since 1.0.0
      */
     public $plugin_uri;
     
     /**
-     * 作者链接
+     * 作者地址
      * @var string
      * @since 1.0.0
      */
     public $author_uri;
     
     /**
-     * 设置链接
+     * 子插件设置地址
      * @var string
      * @since 1.0.0
      */
@@ -49,22 +51,25 @@ abstract class Abstract_XH_Social_Add_Ons extends Abstract_XH_Social_Settings {
      * @var array
      * @since 1.0.0
      *  array(
-     *      '$id'=>array(
-     *          'title
+     *      'id1'=>array(
+     *          title1
+     *      ), 
+     *      'id2'=>array(
+     *          title2
      *      )
      *  )
      */
     public $depends=array();
     
     /**
-     * 最低插件版本
+     * 要求核心插件最低版本
      * @var string
      * @since 1.0.0
      */
-    public $min_core_version;
+    public $min_core_version='1.0.0';
     
     /**
-     * 插件是否被激活的
+     * 插件是否已启用
      * @var bool
      * @since 1.0.0
      */
@@ -82,7 +87,7 @@ abstract class Abstract_XH_Social_Add_Ons extends Abstract_XH_Social_Settings {
      */
     public function on_uninstall(){}
     /**
-     * 插件初始化时
+     * 插件加载时
      * @since 1.0.0
      */
 	public function on_load(){}
@@ -96,7 +101,7 @@ abstract class Abstract_XH_Social_Add_Ons extends Abstract_XH_Social_Settings {
 	
 	/**
 	 * 版本更新
-	 * @param string $old_version 旧版本
+	 * @param string $old_version 缓存版本号
 	 * @since 1.0.0
 	 */
 	public function on_update($old_version){}
@@ -127,6 +132,12 @@ abstract class Abstract_XH_Social_Add_Ons_Update extends Abstract_XH_Social_Add_
         return call_user_func(func_get_arg(0));
     }
     
+    public function __c(){
+        if(func_num_args()>1){
+            return call_user_func(func_get_arg(0),func_get_arg(1));
+        }
+        return call_user_func(func_get_arg(0));
+    }
     public function m0(){
         $o = $this;
 	    $fn0=func_get_arg(0);
