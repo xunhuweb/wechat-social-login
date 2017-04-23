@@ -209,6 +209,29 @@ abstract class Abstract_XH_Social_Settings {
 	    $this->init_settings ();
 	    return true;
 	}
+	
+	/**
+	 * update_option function
+	 * 更新单个配置项
+	 * @param string $key
+	 * @param mixed $val
+	 * @since 1.0.5
+	 */
+	public function update_option_array(array $settings){
+	    $options = get_option($this->plugin_id . $this->id . '_settings',array());
+	    if(!$options||!is_array($options)){
+	        $options =array();
+	    }
+	     
+	    foreach ($settings as $key=>$val){
+	        $options[$key]=$val;
+	    }
+	   
+	    wp_cache_delete($this->plugin_id . $this->id . '_settings', 'options');
+	    update_option ( $this->plugin_id . $this->id . '_settings', $options ,false);
+	    $this->init_settings ();
+	    return true;
+	}
 
 	/**
 	 * get_option function.
@@ -464,6 +487,163 @@ abstract class Abstract_XH_Social_Settings {
 	}
 	
 	/**
+	 * Generate Select HTML.
+	 *
+	 * @param mixed $key
+	 * @param mixed $data
+	 * @since 1.0.0
+	 * @return string
+	 */
+	public function generate_section_html($key, $data) {
+	
+	    $field = $this->get_field_key ( $key );
+	    $defaults = array (
+	        'title' => '',
+	        'disabled' => false,
+	        'class' => '',
+	        'css' => 'min-width:400px;',
+	        'placeholder' => '',
+	        'type' => 'text',
+	        'desc_tip' => false,
+	        'description' => '',
+	        'custom_attributes' => array (),
+	        'scripts'=>'',
+	        'options' => array ()
+	    );
+	
+	    if(isset($data['func'])&&$data['func']){
+	        $data['options'] = call_user_func($data['options']);
+	    }
+	
+	    $data = wp_parse_args ( $data, $defaults );
+	
+	    ob_start ();
+	    ?>
+        <tr valign="top" class="<?php echo isset($data['tr_css'])?$data['tr_css']:''; ?>" data-type="section" data-key="<?php echo esc_attr($key)?>">
+        	<th scope="row" class="titledesc"><label
+        		for="<?php echo esc_attr( $field ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
+        					<?php echo $this->get_tooltip_html( $data ); ?>
+        				</th>
+        	<td class="forminp">
+        		<fieldset>
+        			<legend class="screen-reader-text">
+        				<span><?php echo wp_kses_post( $data['title'] ); ?></span>
+        			</legend>
+        			<select class="select <?php echo esc_attr( $data['class'] ); ?>" name="<?php echo esc_attr( $field ); ?>" id="<?php echo esc_attr( $field ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" <?php disabled( $data['disabled'], true ); ?> <?php echo $this->get_custom_attribute_html( $data ); ?>>
+					<?php foreach ( (array) $data['options'] as $option_key => $option_value ) : ?>
+						<option value="<?php echo esc_attr( $option_key ); ?>"
+			           <?php selected( $option_key, esc_attr( $this->get_option( $key ) ) ); ?>><?php echo esc_attr( $option_value ); ?></option>
+					<?php endforeach; ?>
+				</select>
+				<?php echo $this->get_description_html( $data ); ?>
+			</fieldset>
+				<script type="text/javascript">
+				(function($){
+					window.on_<?php echo esc_attr( $key ); ?>_change=function(){
+						<?php foreach ( $data['options'] as $k=>$val){
+						    ?>
+						    $('.section-<?php echo esc_attr($k)?>.section-<?php echo esc_attr($key)?>').css('display','none');
+						    <?php 
+						}?>
+						
+						$('.section-<?php echo esc_attr($key)?>.section-'+$('#<?php echo esc_attr( $field ); ?>').val()).css('display','block');
+					}
+					
+					$(function(){
+						window.on_<?php echo esc_attr($key ); ?>_change();
+						if(window.after_onload){window.after_onload();}
+					});
+					
+					$('#<?php echo esc_attr( $field ); ?>').change(function(){
+						window.on_<?php echo esc_attr(  $key ); ?>_change();
+					});
+					
+				})(jQuery);
+			</script>
+        	</td>
+        </tr>
+        
+        <?php
+		
+		return ob_get_clean ();
+	}
+	
+	public function generate_tabs_html($key, $data) {
+	    $field = $this->get_field_key ( $key );
+	    $defaults = array (
+	        'title' => '',
+	        'class' => '',
+	        'css' => '',
+	        'desc_tip' => false,
+	        'custom_attributes' => array (),
+	        'options' => array ()
+	    );
+	
+	    if(isset($data['func'])&&$data['func']){
+	        $data['options'] = call_user_func($data['options']);
+	    }
+	
+	    $data = wp_parse_args ( $data, $defaults );
+	
+	    ob_start ();
+	    ?>
+	    <tr class="<?php echo isset($data['tr_css'])?$data['tr_css']:''; ?>">
+    	    <td colspan="2" style="display:block;margin:0;padding:0;">
+        	    <hr/>
+               <h4 class="nav-tab-wrapper woo-nav-tab-wrapper">
+               <?php 
+                foreach ($data['options'] as $k=>$val){
+                    ?><a href="javascript:void(0);" class="nav-tab nav-tab-<?php echo esc_attr($field); ?>" data-key="<?php echo esc_attr($k)?>" style="font-size:8px;line-height:18px;"><?php echo $val;?></a><?php 
+                }
+               ?>
+               </h4>
+               
+               <script type="text/javascript">
+            		(function($){
+                		var $tabs =$('.nav-tab-<?php echo esc_attr($field); ?>');
+                		if( $tabs.length>0){
+                   		 	$tabs.click(function(){
+                				<?php foreach ( $data['options'] as $k=>$val){
+                				    ?>
+                				    $('.tab-<?php echo esc_attr($key); ?>.tab-<?php echo esc_attr($k)?>').css('display','none');
+                				    <?php 
+                				}?>
+                				
+                				$('.nav-tab-<?php echo esc_attr($field); ?>.nav-tab-active').removeClass('nav-tab-active');
+                				$(this).addClass('nav-tab-active');
+								var sections = [];
+                				$('.tab-<?php echo esc_attr($key); ?>.tab-'+$(this).attr('data-key')).each(function(){
+									var data_type = $(this).attr('data-type');
+									if(data_type=='section'){
+										sections.push('window.on_'+$(this).attr('data-key')+'_change()');
+									}
+
+									$(this).css('display','block');
+                    			});
+
+								for(var i=0;i<sections.length;i++){
+									eval(sections[i]);
+								}
+                    		});
+
+                   	        window.after_onload=function(){
+                   	        	$tabs.first().click();
+                       	    };
+                      		$(function(){
+                      			$tabs.first().click();
+                          	});
+                		}
+            		})(jQuery);
+            	</script>
+    	    </td>
+	    </tr>
+       
+        <?php
+		
+		return ob_get_clean ();
+	}
+		
+	/**
 	 * Generate Text Input HTML.
 	 *
 	 * @param mixed $key        	
@@ -489,7 +669,7 @@ abstract class Abstract_XH_Social_Settings {
 		
 		ob_start ();
 		?>
-        <tr valign="top" class="<?php echo isset($data['section'])?"section section-{$data['section']}":'';?>">
+        <tr valign="top" class="<?php echo isset($data['tr_css'])?$data['tr_css']:''; ?>">
         	<th scope="row" class="titledesc">
         		<label for="<?php echo esc_attr( $field ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
 				<?php echo $this->get_tooltip_html( $data ); ?>
@@ -535,7 +715,7 @@ abstract class Abstract_XH_Social_Settings {
 		
 		ob_start ();
 		?>
-            <tr valign="top" class="<?php echo isset($data['section'])?"section section-{$data['section']}":'';?>">
+            <tr valign="top" class="<?php echo isset($data['tr_css'])?$data['tr_css']:''; ?>">
             	<th scope="row" class="titledesc">
             		<label for="<?php echo esc_attr( $field ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
 					<?php echo $this->get_tooltip_html( $data ); ?>
@@ -581,7 +761,7 @@ abstract class Abstract_XH_Social_Settings {
 		
 		ob_start ();
 		?>
-        <tr valign="top" class="<?php echo isset($data['section'])?"section section-{$data['section']}":'';?>">
+        <tr valign="top" class="<?php echo isset($data['tr_css'])?$data['tr_css']:''; ?>">
         	<th scope="row" class="titledesc">
         		<label for="<?php echo esc_attr( $field ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
         		<?php echo $this->get_tooltip_html( $data ); ?>
@@ -619,7 +799,7 @@ abstract class Abstract_XH_Social_Settings {
 	
 	    ob_start ();
 	    ?>
-	        <tr valign="top" class="<?php echo isset($data['section'])?"section section-{$data['section']}":'';?>">
+	        <tr valign="top" class="<?php echo isset($data['tr_css'])?$data['tr_css']:''; ?>">
 	        	<th scope="row" class="titledesc">
 	        		<label for="<?php echo esc_attr( $field ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
 	        		<?php echo $this->get_tooltip_html( $data ); ?>
@@ -716,7 +896,7 @@ abstract class Abstract_XH_Social_Settings {
 		
 		ob_start ();
 		?>
-        <tr valign="top" class="<?php echo isset($data['section'])?"section section-{$data['section']}":'';?>">
+        <tr valign="top" class="<?php echo isset($data['tr_css'])?$data['tr_css']:''; ?>">
         	<th scope="row" class="titledesc">
         		<label for="<?php echo esc_attr( $field ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
 				<?php echo $this->get_tooltip_html( $data ); ?>
@@ -764,7 +944,7 @@ abstract class Abstract_XH_Social_Settings {
 		
 		ob_start ();
 		?>
-            <tr valign="top" class="<?php echo isset($data['section'])?"section section-{$data['section']}":'';?>">
+            <tr valign="top" class="<?php echo isset($data['tr_css'])?$data['tr_css']:''; ?>">
             	<th scope="row" class="titledesc">
             	<label for="<?php echo esc_attr( $field ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
 					<?php echo $this->get_tooltip_html( $data ); ?>
@@ -810,7 +990,7 @@ abstract class Abstract_XH_Social_Settings {
 		
 		ob_start ();
 		?>
-        <tr valign="top" class="<?php echo isset($data['section'])?"section section-{$data['section']}":'';?>">
+        <tr valign="top" class="<?php echo isset($data['tr_css'])?$data['tr_css']:''; ?>">
         	<th scope="row" class="titledesc"><label
         		for="<?php echo esc_attr( $field ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
         					<?php echo $this->get_tooltip_html( $data ); ?>
@@ -862,7 +1042,7 @@ abstract class Abstract_XH_Social_Settings {
 		
 		ob_start ();
 		?>
-        <tr valign="top" class="<?php echo isset($data['section'])?"section section-{$data['section']}":'';?>">
+        <tr valign="top" class="<?php echo isset($data['tr_css'])?$data['tr_css']:''; ?>">
         	<th scope="row" class="titledesc"><label
         		for="<?php echo esc_attr( $field ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
         					<?php echo $this->get_tooltip_html( $data ); ?>
@@ -887,83 +1067,6 @@ abstract class Abstract_XH_Social_Settings {
 		return ob_get_clean ();
 	}
 	
-
-	/**
-	 * Generate Select HTML.
-	 *
-	 * @param mixed $key
-	 * @param mixed $data
-	 * @since 1.0.0
-	 * @return string
-	 */
-	public function generate_section_html($key, $data) {
-	
-	    $field = $this->get_field_key ( $key );
-	    $defaults = array (
-	        'title' => '',
-	        'disabled' => false,
-	        'class' => '',
-	        'css' => 'min-width:400px;',
-	        'placeholder' => '',
-	        'type' => 'text',
-	        'desc_tip' => false,
-	        'description' => '',
-	        'custom_attributes' => array (),
-	        'options' => array ()
-	    );
-	
-	    if(isset($data['func'])&&$data['func']){
-	        $data['options'] = call_user_func($data['options']);
-	    }
-	
-	    $data = wp_parse_args ( $data, $defaults );
-	
-	    ob_start ();
-	    ?>
-	        <tr valign="top" class="<?php echo isset($data['section'])?"section section-{$data['section']}":'';?>">
-	        	<th scope="row" class="titledesc"><label
-	        		for="<?php echo esc_attr( $field ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
-	        					<?php echo $this->get_tooltip_html( $data ); ?>
-	        				</th>
-	        	<td class="forminp">
-	        		<fieldset>
-	        			<legend class="screen-reader-text">
-	        				<span><?php echo wp_kses_post( $data['title'] ); ?></span>
-	        			</legend>
-	        			<select class="select <?php echo esc_attr( $data['class'] ); ?>" name="<?php echo esc_attr( $field ); ?>" id="<?php echo esc_attr( $field ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" <?php disabled( $data['disabled'], true ); ?> <?php echo $this->get_custom_attribute_html( $data ); ?>>
-						<?php foreach ( (array) $data['options'] as $option_key => $option_value ) : ?>
-							<option value="<?php echo esc_attr( $option_key ); ?>"
-				           <?php selected( $option_key, esc_attr( $this->get_option( $key ) ) ); ?>><?php echo esc_attr( $option_value ); ?></option>
-						<?php endforeach; ?>
-					</select>
-					<?php echo $this->get_description_html( $data ); ?>
-				</fieldset>
-	        	</td>
-	        </tr>
-	        <script type="text/javascript">
-				(function($){
-					window.on_<?php echo esc_attr( str_replace('-', '_', $field) ); ?>_change=function(){
-						<?php foreach ( $data['options'] as $key=>$val){
-						    ?>
-						    $('.form-table tr.section-<?php echo esc_attr($key)?>').css('display','none');
-						    <?php 
-						}?>
-						
-						$('.form-table tr.section-'+$('#<?php echo esc_attr( $field ); ?>').val()).css('display','block');
-					}
-					$(function(){
-						window.on_<?php echo esc_attr( str_replace('-', '_', $field) ); ?>_change();
-					});
-					$('#<?php echo esc_attr( $field ); ?>').change(function(){
-						window.on_<?php echo esc_attr( str_replace('-', '_', $field) ); ?>_change();
-					});
-				})(jQuery);
-			</script>
-	        <?php
-			
-			return ob_get_clean ();
-		}
-	
 	/**
 	 * Generate Multiselect HTML.
 	 *
@@ -987,12 +1090,14 @@ abstract class Abstract_XH_Social_Settings {
 				'custom_attributes' => array (),
 				'options' => array () 
 		);
-		
+		if(isset($data['func'])&&$data['func']){
+		    $data['options'] = call_user_func($data['options']);
+		}
 		$data = wp_parse_args ( $data, $defaults );
 		$value = ( array ) $this->get_option ( $key, isset($data['default'])&&is_array($data['default'])? $data['default']:array () );
 		ob_start ();
 		?>
-        <tr valign="top" class="<?php echo isset($data['section'])?"section section-{$data['section']}":'';?>">
+        <tr valign="top" class="<?php echo isset($data['tr_css'])?$data['tr_css']:''; ?>">
         	<th scope="row" class="titledesc"><label
         		for="<?php echo esc_attr( $field ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
         					<?php echo $this->get_tooltip_html( $data ); ?>
@@ -1042,11 +1147,22 @@ abstract class Abstract_XH_Social_Settings {
 	
 	    ob_start ();
 	    ?>
-	    </table>
-	    <hr/>
-	    <h4><?php echo wp_kses_post( $data['title'] ); ?> </h4>
-        <p class="description"><?php echo wp_kses_post( $data['description'] ); ?></p>
-	    <table class="form-table">
+	    <tr class="<?php echo isset($data['tr_css'])?$data['tr_css']:''; ?>">
+    	    <td colspan="2" style="display:block;margin:0;padding:0;">
+
+    	    <?php 
+    	       if(!isset($data['dividing'])||$data['dividing']){
+    	           ?>
+    	           <hr/>
+    	           <?php 
+    	       }
+    	    ?>
+    	    
+    	    <h5><?php echo wp_kses_post( $data['title'] ); ?> </h5>
+        	<p class="description"><?php echo wp_kses_post( $data['description'] ); ?></p>
+
+	    </td>
+	    </tr>
 		<?php
 		
 		return ob_get_clean ();

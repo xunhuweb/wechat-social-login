@@ -50,7 +50,7 @@ class XH_Social_Channel_QQ extends Abstract_XH_Social_Settings_Channel{
      * @since 1.0.0
      */
     public function init_form_fields(){
-        $this->form_fields =array(
+        $fields =array(
             'enabled' => array (
                 'title' => __ ( 'Enable/Disable', XH_SOCIAL ),
                 'type' => 'checkbox',
@@ -60,13 +60,38 @@ class XH_Social_Channel_QQ extends Abstract_XH_Social_Settings_Channel{
             'appid'=>array(
                 'title' => __ ( 'App ID', XH_SOCIAL ),
                 'type' => 'textbox',
-                'description'=>sprintf(__('网站回调域:%s',XH_SOCIAL),admin_url('admin-ajax.php'))
+                'description'=>sprintf(__('QQ互联中，请设置网站回调域为:%s',XH_SOCIAL),admin_url('admin-ajax.php'))
             ),
             'appsecret'=>array(
                 'title' => __ ( 'APP Key', XH_SOCIAL ),
                 'type' => 'textbox'
             )
         );
+        
+        $fields['subtitle2']=array(
+            'title'=>__('Cross-domain Settings',XH_SOCIAL),
+            'type'=>'subtitle',
+            'description'=>__('多网站共用一个QQ互联平台应用进行网页授权<span style="color:red;">(需要时才开启)</span>',XH_SOCIAL)
+        );
+        
+        $fields['enabled_cross_domain']=array(
+            'title'=>__('Cross-domain',XH_SOCIAL),
+            'type'=>'section',
+            'options'=>array(
+                'cross_domain_disabled'=>__('Disabled',XH_SOCIAL),
+                'cross_domain_enabled'=>__('Enabled',XH_SOCIAL)
+            )
+        );
+        
+        $fields['cross_domain_url']=array(
+            'tr_css'=>'section-enabled_cross_domain section-cross_domain_enabled',
+            'title'=>__('Cross-domain Url',XH_SOCIAL),
+            'type'=>'text',
+            'placeholder'=>'http://other-domain.com/cross-domain-qq.php',
+            'description'=>__('如果：你需要用自己的公众号（qq，微博）作为代理，请购买：<a href="https://www.wpweixin.net/product/1211.html" target="_blank">跨域扩展</a>',XH_SOCIAL)
+        );
+           
+        $this->form_fields=apply_filters('xh_social_channel_qq_form_fields', $fields,$this);
     }
     
     /**
@@ -238,18 +263,211 @@ class XH_Social_Channel_QQ extends Abstract_XH_Social_Settings_Channel{
         return $userinfo;
     }
     
-    public function process_authorization_callback(){
+    public function process_authorization_callback($wp_user_id){
         $login_location_uri=XH_Social::instance()->session->get('social_login_location_uri');
         if(empty($login_location_uri)){
             $login_location_uri = home_url('/');
         }
         
-        $ext_user_id = $this->_process_authorization_callback($login_location_uri);
-        if(is_array($ext_user_id)){
-            return $ext_user_id['redirect'];
+        $userdata=array();
+        
+        if(isset($_POST['user_hash'])){
+            $userdata = isset($_POST['userdata'])? base64_decode($_POST['userdata']):null;
+            $user_hash = $_POST['user_hash'];
+            $userdata =$userdata?json_decode($userdata,true):null;
+            if(!$userdata){
+                return $login_location_uri;
+            }
+            
+            $ohash =XH_Social_Helper::generate_hash($userdata, $this->get_option('appsecret'));
+            if($user_hash!=$ohash){
+                XH_Social_Log::error(__('Please check cross-domain app secret config(equal to current website app secret)!',XH_SOCIAL));
+                return $login_location_uri;
+            }
+            
+            $userdata['last_update']=date_i18n('Y-m-d H:i');
+        }else{
+            if(!isset($_GET['code'])){
+               return $login_location_uri;
+            }
+            $code =XH_Social_Helper_String::sanitize_key_ignorecase($_GET['code']);
+             
+            try {
+                //获取accesstoken
+                $appid = $this->get_option("appid");
+                $appsecret = $this->get_option("appsecret");
+                $params=array();
+                $redirect_uri = XH_Social_Helper_Uri::get_uri_without_params(XH_Social_Helper_Uri::get_location_uri(),$params);
+                if(isset($params['code'])) unset($params['code']);
+                if(isset($params['state'])) unset($params['state']);
+                $redirect_uri.="?".http_build_query($params);
+            
+                $params=array(
+                    'grant_type'=>'authorization_code',
+                    'code'=>$code,
+                    'client_id'=>$appid,
+                    'client_secret'=>$appsecret,
+                    'redirect_uri'=>$redirect_uri
+                );
+                 
+                $response = XH_Social_Helper_Http::http_get('https://graph.qq.com/oauth2.0/token?'.http_build_query($params));
+                if(!$response){
+                    throw new Exception(__('Nothing callback when get user info!',XH_SOCIAL),500);
+                }
+            
+                if(strpos($response, "callback")!==false){
+                    throw new Exception($response,500);
+                }
+                //access_token=0030C012FB1355A1976846C544AE5DF9&expires_in=7776000&refresh_token=1985788C72B58754385737A919CD0E50
+                $access_token='';
+                $results =explode('&', $response);
+                foreach ($results as $param){
+                    $params = explode('=', $param);
+                    if(count($params)!==2){
+                        continue;
+                    }
+            
+                    if($params[0]==='access_token'){
+                        $access_token=$params[1];
+                        break;
+                    }
+                }
+                 
+                if(empty($access_token)){
+                    throw new Exception("error callback,details:$response",500);
+                }
+            
+                $response = XH_Social_Helper_Http::http_get("https://graph.qq.com/oauth2.0/me?access_token={$access_token}");
+                //callback( {"client_id":"101321683","openid":"A34E43E9A2E01B1BE9147A5C1B033BF7"} );
+                $openid='';
+                if(strpos($response, "callback")!==false){
+                    $lpos = strpos($response, "(");
+                    $rpos = strrpos($response, ")");
+                    $response  = substr($response, $lpos + 1, $rpos - $lpos -1);
+                    $msg = json_decode($response);
+            
+                    if(isset($msg->error)){
+                        throw new Exception("error:{$msg->error},desc:{$msg->error_description}",500);
+                    }
+            
+                    if(isset($msg->openid)){
+                        $openid=$msg->openid;
+                    }
+                }
+                 
+                if(empty($openid)){
+                    throw new Exception("get openid error callback,details:$response",500);
+                }
+            
+                $response = XH_Social_Helper_Http::http_get("https://graph.qq.com/user/get_user_info?access_token={$access_token}&oauth_consumer_key={$appid}&openid={$openid}");
+                if(strpos($response, "callback")!==false){
+                    throw new Exception($response,500);
+                }
+            
+                $obj = json_decode($response,true);
+                 
+                $userdata=array(
+                    'openid'=>$openid,
+                    'nickname'=>XH_Social_Helper_String::remove_emoji($obj['nickname']),
+                    'gender'=>$obj['gender'],
+                    'province'=>$obj['province'],
+                    'city'=>$obj['city'],
+                    'img'=>str_replace('http://', '//', $obj['figureurl_2']),
+                    'last_update'=>date_i18n('Y-m-d H:i')
+                );
+            } catch (Exception $e) {
+                XH_Social_Log::error($e);
+                $err_times = isset($_GET['err_times'])?intval($_GET['err_times']):3;
+                 
+                if($err_times>0){
+                    $err_times--;
+                    return $this->_login_get_authorization_uri($wp_user_id, $err_times);
+                }
+                
+                XH_Social::instance()->WP->set_wp_error($login_location_uri, $e->getMessage());
+                return $login_location_uri;
+            }
         }
-        return $this->process_login($ext_user_id);
+        
+        if(!$userdata||empty($userdata)){
+           return $login_location_uri;
+        }
+        
+        //获取到用户信息，存储且跳转
+        global $wpdb;
+        $ext_user_id = 0;
+        $wpdb->last_error='';
+        
+        try {
+            $ext_user_info = $wpdb->get_row(
+            $wpdb->prepare(
+               "select id,
+                        user_id
+                from {$wpdb->prefix}xh_social_channel_qq
+                where openid=%s
+                limit 1;", $userdata['openid']));
+        
+            if($wp_user_id
+                &&$wp_user_id>0
+                &&$ext_user_info
+                &&$ext_user_info->user_id
+                &&$ext_user_info->user_id!=$wp_user_id){
+                    $wp_user = get_userdata($ext_user_info->user_id);
+                    if($wp_user){
+                        throw new Exception(sprintf(__("对不起，您的QQ已与账户(%s)绑定，请解绑后重试！",XH_SOCIAL),$wp_user->nickname));
+                    }
+            }
+            
+            if($wp_user_id>0
+                &&(!$ext_user_info||$ext_user_info->user_id<>$wp_user_id)){
+                
+                $wpdb->query("delete from {$wpdb->prefix}xh_social_channel_qq where user_id=$wp_user_id ;");
+                if(!empty($wpdb->last_error)){
+                    XH_Social_Log::error($wpdb->last_error);
+                    throw new Exception(__($wpdb->last_error,XH_SOCIAL));
+                }
+            }
+            
+            if(!$ext_user_info){
+                $userdata['user_id']=$wp_user_id;
+                $wpdb->insert("{$wpdb->prefix}xh_social_channel_qq", $userdata);
+                if(!empty($wpdb->last_error)){
+                    throw new Exception($wpdb->last_error);
+                }
+        
+                if($wpdb->insert_id<=0){
+                    XH_Social_Log::error('insert qq user info failed');
+                    throw new Exception('insert qq user info failed');
+                }
+        
+                $ext_user_id=$wpdb->insert_id;
+            } else{
+                //user_id
+                if($wp_user_id>0){
+                    $userdata['user_id'] =$wp_user_id;
+                }
+                
+                $wpdb->update("{$wpdb->prefix}xh_social_channel_qq", $userdata,
+                array(
+                    'id'=>$ext_user_info->id
+                ));
+        
+                if(!empty($wpdb->last_error)){
+                    XH_Social_Log::error($wpdb->last_error);
+                    throw new Exception($wpdb->last_error);
+                }
+        
+                $ext_user_id=$ext_user_info->id;
+            }
+        
+             return $this->process_login($ext_user_id);
+        } catch (Exception $e) {
+            XH_Social_Log::error($e);
+            XH_Social::instance()->WP->set_wp_error($login_location_uri, $e->getMessage());
+            return $login_location_uri;
+        }
     }
+    
     public function get_wp_user($field,$field_val){
         if(!in_array($field, array(
             'openid'
@@ -284,170 +502,13 @@ class XH_Social_Channel_QQ extends Abstract_XH_Social_Settings_Channel{
             where $field=%s
             limit 1;", $field_val));
     }
-    private function _process_authorization_callback($login_location_uri){  
-        if(!isset($_GET['code'])){
-            return array(
-                'success'=>false,
-                'redirect'=>$login_location_uri
-            );
-        }
-        $code =XH_Social_Helper_String::sanitize_key_ignorecase($_GET['code']);
-       
-        try {
-            global $wpdb;
-            $wpdb->last_error='';
-            
-            //获取accesstoken
-            $appid = $this->get_option("appid");
-            $appsecret = $this->get_option("appsecret");
-            $redirect_uri=XH_Social::instance()->session->get('social_login_qq_redirect_uri');
-            if(empty($redirect_uri)){
-                return array(
-                    'success'=>false,
-                    'redirect'=>$login_location_uri
-                );
-            }
-            
-            $params=array(
-                'grant_type'=>'authorization_code',
-                'code'=>$code,
-                'client_id'=>$appid,
-                'client_secret'=>$appsecret,
-                'redirect_uri'=>$redirect_uri
-            );
-           
-            $response = XH_Social_Helper_Http::http_get('https://graph.qq.com/oauth2.0/token?'.http_build_query($params));
-            if(!$response){
-                throw new Exception(__('Nothing callback when get user info!',XH_SOCIAL),500);
-            }
-            
-            if(strpos($response, "callback")!==false){
-                throw new Exception($response,500); 
-            }
-            //access_token=0030C012FB1355A1976846C544AE5DF9&expires_in=7776000&refresh_token=1985788C72B58754385737A919CD0E50
-            $access_token='';
-            $results =explode('&', $response);
-            foreach ($results as $param){
-                $params = explode('=', $param);
-                if(count($params)!==2){
-                    continue;
-                }
-                
-                if($params[0]==='access_token'){
-                    $access_token=$params[1];
-                    break;
-                }
-            }
-           
-            if(empty($access_token)){
-                throw new Exception("error callback,details:$response",500);
-            }
-            
-            $response = XH_Social_Helper_Http::http_get("https://graph.qq.com/oauth2.0/me?access_token={$access_token}");
-         //callback( {"client_id":"101321683","openid":"A34E43E9A2E01B1BE9147A5C1B033BF7"} );
-            $openid='';
-            if(strpos($response, "callback")!==false){
-                $lpos = strpos($response, "(");
-                $rpos = strrpos($response, ")");
-                $response  = substr($response, $lpos + 1, $rpos - $lpos -1);
-                $msg = json_decode($response);
-            
-                if(isset($msg->error)){
-                    throw new Exception("error:{$msg->error},desc:{$msg->error_description}",500);
-                }
-                
-                if(isset($msg->openid)){
-                    $openid=$msg->openid;
-                }
-            }
-           
-            if(empty($openid)){
-                throw new Exception("get openid error callback,details:$response",500);
-            }
-            
-            $response = XH_Social_Helper_Http::http_get("https://graph.qq.com/user/get_user_info?access_token={$access_token}&oauth_consumer_key={$appid}&openid={$openid}");
-            if(strpos($response, "callback")!==false){
-                throw new Exception($response,500);
-            }
-            
-            $obj = json_decode($response,true);
-           
-            $userdata=array(
-                    'openid'=>$openid,
-                    'nickname'=>sanitize_user(XH_Social_Helper_String::remove_emoji($obj['nickname'])),
-                    'gender'=>$obj['gender'],
-                    'province'=>$obj['province'],
-                    'city'=>$obj['city'],
-                    'img'=>str_replace('http://', '//', $obj['figureurl_2']),
-                    'last_update'=>date_i18n('Y-m-d H:i')
-            );
-            
-            global $wpdb;
-            $ext_user_id = 0;
-            
-            $ext_user_info = $wpdb->get_row(
-                $wpdb->prepare(
-                    "select id,
-                            user_id
-                    from {$wpdb->prefix}xh_social_channel_qq
-                    where openid=%s
-                    limit 1;", $userdata['openid']));
-            
-            if(!$ext_user_info){
-                $wpdb->insert("{$wpdb->prefix}xh_social_channel_qq", $userdata);
-                if(!empty($wpdb->last_error)){
-                    throw new Exception($wpdb->last_error);
-                }
-        
-                if($wpdb->insert_id<=0){
-                    XH_Social_Log::error('insert qq user info failed');
-                    throw new Exception('insert qq user info failed');
-                }
-        
-                $ext_user_id=$wpdb->insert_id;
-            } else{
-                $wpdb->update("{$wpdb->prefix}xh_social_channel_qq", $userdata,
-                array(
-                    'id'=>$ext_user_info->id
-                ));
-        
-                if(!empty($wpdb->last_error)){
-                    XH_Social_Log::error($wpdb->last_error);
-                    throw new Exception($wpdb->last_error);
-                }
-        
-                if($ext_user_info->user_id){
-                    update_user_meta($ext_user_info->user_id, '_social_img', $userdata['img']);
-                }
-                
-                $ext_user_id=$ext_user_info->id;
-            }
-        
-            return $ext_user_id;
-            
-        } catch (Exception $e) {
-            XH_Social_Log::error($e);
-            if($e->getCode()!=500){
-                $err_times = isset($_GET['err_times'])?intval($_GET['err_times']):3;
-               
-                if($err_times>0){
-                    $err_times--;
-                    if(!headers_sent()){
-                        wp_redirect($this-> _login_get_authorization_uri($err_times));
-                    }
-                }
-            }
-        }
-        
-        return null;
-    }
-    
+
     /**
      * {@inheritDoc}
-     * @see Abstract_XH_Social_Settings_Channel::process_generate_authorization_uri()
+     * @see Abstract_XH_Social_Settings_Channel::generate_authorization_uri()
      */
-    public function process_generate_authorization_uri($login_location_uri){ 
-       return $this->_login_get_authorization_uri(null);
+    public function generate_authorization_uri($user_ID=0,$login_location_uri=null){
+       return $this->_login_get_authorization_uri(is_null($user_ID)?0:$user_ID,0);
     }
     
     /**
@@ -457,39 +518,54 @@ class XH_Social_Channel_QQ extends Abstract_XH_Social_Settings_Channel{
      * @return string
      * @since 1.0.0
      */
-    private function _login_get_authorization_uri($error_times=null){
-        $params=array();
-        
-        $url=XH_Social_Helper_Uri::get_uri_without_params(XH_Social::instance()->ajax_url(),$params);
-        $api = XH_Social_Add_On_Social_QQ::instance();
-        
-        $params['tab']='authorization';
-        $params['action']="xh_social_{$api->id}";
-        $params['notice_str']=str_shuffle(time());
-        $params['hash']=XH_Social_Helper::generate_hash($params, XH_Social::instance()->get_hash_key());
-        
-        $redirect_uri= $url."?".http_build_query($params);
-        
-        $params = array();
-        $redirect_uri= XH_Social_Helper_Uri::get_uri_without_params($redirect_uri,$params);
-        if(!is_null($error_times)){
-            $params['err_times']=$error_times;
+    private function _login_get_authorization_uri($user_ID=0,$error_times=null){
+        if('cross_domain_enabled'==$this->get_option('enabled_cross_domain')){
+            $params=array();
+            $url=XH_Social_Helper_Uri::get_uri_without_params(XH_Social::instance()->ajax_url(),$params);
+            $api = XH_Social_Add_On_Social_QQ::instance();
+            $params['tab']='authorization';
+            $params['action']="xh_social_{$api->id}";
+            $params['uid']=is_null($user_ID)?0:$user_ID;
+            $params['notice_str']=str_shuffle(time());
+            $params['hash']=XH_Social_Helper::generate_hash($params, XH_Social::instance()->get_hash_key());
+            if(!is_null($error_times)){
+                $params['err_times']=$error_times;
+            }
+           
+            $redirect_uri= $url."?".http_build_query($params);           
+            $params = array(
+                'callback'=>$redirect_uri
+            );
+            
+            $params['hash'] = XH_Social_Helper::generate_hash($params, $this->get_option('appsecret'));
+            $params_uri =array();
+            $cross_domain_uri = XH_Social_Helper_Uri::get_uri_without_params($this->get_option('cross_domain_url'),$params_uri);
+
+            return $cross_domain_uri."?".http_build_query(array_merge($params_uri,$params));
+           
+        }else{
+            $params=array();
+            $url=XH_Social_Helper_Uri::get_uri_without_params(XH_Social::instance()->ajax_url(),$params);
+            $api = XH_Social_Add_On_Social_QQ::instance();
+            $params['tab']='authorization';
+            $params['action']="xh_social_{$api->id}";
+            $params['uid']=is_null($user_ID)?0:$user_ID;
+            $params['notice_str']=str_shuffle(time());
+            $params['hash']=XH_Social_Helper::generate_hash($params, XH_Social::instance()->get_hash_key());
+            if(!is_null($error_times)){
+                $params['err_times']=$error_times;
+            }
+            $redirect_uri= $url."?".http_build_query($params);
+            $params=array(
+                'response_type'=>'code',
+                'client_id'=>$this->get_option('appid'),
+                'scope'=>'get_user_info',
+                'redirect_uri'=>$redirect_uri,
+                'state'=>str_shuffle(time())
+            );
+            
+            return 'https://graph.qq.com/oauth2.0/authorize?'.http_build_query($params);
         }
-        
-        $redirect_uri.="?".http_build_query($params);
-        unset($params);
-        
-        XH_Social::instance()->session->set('social_login_qq_redirect_uri', $redirect_uri);
-       
-        $params=array(
-            'response_type'=>'code',
-            'client_id'=>$this->get_option('appid'),
-            'scope'=>'get_user_info',
-            'redirect_uri'=>$redirect_uri,
-            'state'=>str_shuffle(time())
-        );
-        
-        return 'https://graph.qq.com/oauth2.0/authorize?'.http_build_query($params);
     }
 }
 

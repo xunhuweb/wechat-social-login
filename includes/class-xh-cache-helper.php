@@ -48,13 +48,13 @@ class XH_Social_Cache_Helper {
 class XH_Social_Temp_Helper{
     private static $_data=array();
     
-    public static function get($key,$group,$_default=null){
+    public static function get($key,$group='common',$_default=null){
         return isset(self::$_data[$group][$key])
         ?self::$_data[$group][$key]
         :$_default;
     }
     
-    public static function set($key,$val,$group){
+    public static function set($key,$val,$group='common'){
         self::$_data[$group][$key]=$val;
     }
 }

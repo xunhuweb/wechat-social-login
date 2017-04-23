@@ -22,6 +22,7 @@ class XH_Social_Error{
 		$this->errmsg = $errmsg;
 		$this->data = $data;
 		$this->errors = array (
+		    403 => __('Sorry!Your are offline.',XH_SOCIAL),
 		    404 => __('The resource was not found!',XH_SOCIAL),
 		    405 => __('Your account has been frozen!',XH_SOCIAL),
 		    500 => __('Server internal error, please try again later!',XH_SOCIAL),
@@ -29,7 +30,7 @@ class XH_Social_Error{
 		    600 =>__('Your request is invalid!',XH_SOCIAL),
 		    700 => __('Frequent operation, please try again later!',XH_SOCIAL),
 		    701 => __('Sorry,Your request is timeout!',XH_SOCIAL),
-		    1000 => __('Sorry,Network error!',XH_SOCIAL),
+		    1000 => __('Sorry,Network error!',XH_SOCIAL)
 		);
 	}
 	

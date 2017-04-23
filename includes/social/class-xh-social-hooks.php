@@ -202,8 +202,17 @@ class XH_Social_Hooks{
         ob_start();
             ?>
             <div class="xh-regbox" style="width: 100%;">
-              <div class="xh-title" style="margin-bottom:40px"><?php echo __('Account Binding/Unbundling',XH_SOCIAL)?></div>
-                    <hr>
+              <h4 class="xh-title" style="margin-bottom:40px"><?php echo __('Account Binding/Unbundling',XH_SOCIAL)?></h4>
+          
+              <?php 
+                 $error = XH_Social::instance()->WP->get_wp_error(XH_Social_Helper_Uri::get_location_uri());
+                if(!empty($error)){
+                    ?>
+                    <div class="xh-alert xh-alert-danger" role="alert"><?php echo $error;?></div>     
+                    <?php 
+                }
+              ?>
+               
               <div class="xh-form ">
               <?php if($channels){
         			    foreach ($channels as $channel){
@@ -225,11 +234,6 @@ class XH_Social_Hooks{
     }
     
     public static function show_loginbar($redirect=''){
-        $log_on_callback_uri=$redirect;
-        if(empty($log_on_callback_uri)){ 
-            $log_on_callback_uri =home_url('/');
-        }
-        
         $channels =XH_Social::instance()->channel->get_social_channels(array('login'));    
         ob_start();
         ?>
@@ -237,7 +241,7 @@ class XH_Social_Hooks{
     	   <?php 
 	        foreach ($channels as $channel){
     	        ?>
-    	        <a href="<?php echo XH_Social::instance()->channel->get_authorization_redirect_uri($channel->id,$log_on_callback_uri);?>" rel="noflow" style="background:url(<?php echo $channel->icon?>) no-repeat transparent;" class="xh_social_login_bar" title="<?php echo $channel->title;?>"></a>
+    	        <a href="<?php echo XH_Social::instance()->channel->get_authorization_redirect_uri($channel->id,$redirect);?>" rel="noflow" style="background:url(<?php echo $channel->icon?>) no-repeat transparent;" class="xh_social_login_bar" title="<?php echo $channel->title;?>"></a>
     	        <?php 
     	    }?>
 	    </div><?php 

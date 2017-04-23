@@ -72,7 +72,7 @@ abstract class Abstract_XH_Social_Session {
 		$key = XH_Social_Helper_String::sanitize_key_ignorecase( $key );
 		return isset( $this->_data[ $key ] ) ? maybe_unserialize( $this->_data[ $key ] ) : $default;
 	}
-
+	
 	/**
 	 * Set a session variable.
 	 *

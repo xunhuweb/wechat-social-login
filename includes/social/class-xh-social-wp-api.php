@@ -38,7 +38,9 @@ class XH_Social_WP_Api{
     
     /**
      * 根据昵称，创建user_login
-     * @param unknown $nickname
+     * @param string $nickname
+     * @return string
+     * @since 1.0.1
      */
     public function generate_user_login($nickname){
         $nickname = sanitize_user(XH_Social_Helper_String::remove_emoji($nickname));
@@ -73,6 +75,73 @@ class XH_Social_WP_Api{
         }
     
         return $nickname;
+    }
+    
+    /**
+     * 设置错误
+     * @param string $key
+     * @param string $error
+     * @since 1.0.5
+     */
+    public function set_wp_error($key,$error){
+        XH_Social::instance()->session->set("error_{$key}", $error);
+    }
+    
+    /**
+     * 清除错误
+     * @param string $key
+     * @param string $error
+     * @since 1.0.5
+     */
+    public function unset_wp_error($key){
+        XH_Social::instance()->session->__unset("error_{$key}");
+    }
+    
+    /**
+     * 获取错误
+     * @param string $key
+     * @param string $error
+     * @since 1.0.5
+     */
+    public function get_wp_error($key,$clear=true){
+        $cache_key ="error_{$key}";
+        $session =XH_Social::instance()->session;
+        $error = $session->get($cache_key);
+        if($clear){
+            $this->unset_wp_error($key);
+        }
+        return $error;
+    }
+    
+    public function wp_die($err=null){
+        if($err){
+            if($err instanceof Exception){
+                $err = "errcode:{$err->getCode()},errmsg:{$err->getMessage()}";
+            }
+        }
+        if(empty($err)){
+            $err = XH_Social_Error::err_code(500)->errmsg;
+        }
+        ?>
+        <!DOCTYPE html>
+        <html>
+            <head>
+            	<title>抱歉，出错了!</title>
+                <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
+                <link rel="stylesheet" type="text/css" href="<?php echo XH_SOCIAL_URL.'/assets/css/weui.css'?>">
+            </head>
+            <body>
+               <div class="weui_msg">
+               <div class="weui_icon_area"><i class="weui_icon_warn weui_icon_msg"></i></div>
+               <div class="weui_text_area">
+               <h4 class="weui_msg_title">抱歉，出错了!</h4>
+               <p class="weui_msg_desc"><?php echo $err;?></p>
+               </div>
+               </div>
+            </body>
+        </html>
+        <?php 
+        exit;
     }
     
     /**
@@ -158,7 +227,7 @@ class XH_Social_WP_Api{
                 <?php 
                 return ob_get_clean();
             },
-            'validate'=>function($name,$datas){
+            'validate'=>function($name,$datas,$settings){
                 //插件未启用，那么不验证图形验证码     
                 $code_post =isset($_POST[$name])?trim($_POST[$name]):'';
                 if(empty($code_post)){

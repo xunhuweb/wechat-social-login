@@ -180,7 +180,7 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
         if($fields){
             foreach ($fields as $name=>$settings){
                 if(isset($settings['validate'])){
-                    $userdata = call_user_func_ARRAY($settings['validate'],array($name,$userdata));
+                    $userdata = call_user_func_array($settings['validate'],array($name,$userdata,$settings));
                     if(!XH_Social_Error::is_valid($userdata)){
                         echo $userdata->to_json();
                         exit;
@@ -226,7 +226,7 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
                 }
                 
                 if(isset($settings['validate'])){
-                    $userdata = call_user_func_array($settings['validate'],array($name,$userdata));
+                    $userdata = call_user_func_array($settings['validate'],array($name,$userdata,$settings));
                     if(!XH_Social_Error::is_valid($userdata)){
                         echo $userdata->to_json();
                         exit;
@@ -465,10 +465,12 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
                 'type'=>'text',
                 'required'=>true,
                 'placeholder'=>__('Please enter userlogin/email/mobile',XH_SOCIAL),
-                'validate'=>function($name,$datas){
+                'validate'=>function($name,$datas,$settings){
                     $user_login =isset($_POST[$name])?sanitize_user(trim($_POST[$name])):'';
-                    if(empty($user_login)){
-                        return XH_Social_Error::error_custom(__('user login is required!',XH_SOCIAL));
+                    if(isset($settings['required'])&&$settings['required']){
+                        if(empty($user_login)){
+                            return XH_Social_Error::error_custom(__('user login is required!',XH_SOCIAL));
+                        }
                     }
                     
                     $datas['user_login']=$user_login;
@@ -483,10 +485,12 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
             'title'=>__('password',XH_SOCIAL),
             'type'=>'password',
             'required'=>true,
-            'validate'=>function($name,$datas){
+            'validate'=>function($name,$datas,$settings){
                 $password =isset($_POST[$name])?trim($_POST[$name]):'';
-                if(empty($password)){
-                    return XH_Social_Error::error_custom(__('password is required!',XH_SOCIAL));
+                if(isset($settings['required'])&&$settings['required']){
+                    if(empty($password)){
+                        return XH_Social_Error::error_custom(__('password is required!',XH_SOCIAL));
+                    }
                 }
                 
                 $datas['user_pass']=$password;
@@ -512,10 +516,12 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
             'title'=>__('user login',XH_SOCIAL),
             'type'=>'text',
             'required'=>true,
-            'validate'=>function($name,$datas){
-                $user_login = isset($_POST[$name])?sanitize_user(trim($_POST[$name])):'';
-                if(empty($user_login)){
-                    return XH_Social_Error::error_custom(__('user login is required!',XH_SOCIAL));
+            'validate'=>function($name,$datas,$settings){
+                $user_login = isset($_POST[$name])?sanitize_user(trim($_POST[$name])):'';   
+                if(isset($settings['required'])&&$settings['required']){
+                     if(empty($user_login)){
+                        return XH_Social_Error::error_custom(__('user login is required!',XH_SOCIAL));
+                     }
                 }
                 
                 $datas['user_login']=$user_login;
@@ -529,11 +535,18 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
         $fields['register_user_email']=array(
             'title'=>__('user email',XH_SOCIAL),
             'type'=>'email',
-            'validate'=>function($name,$datas){
+            'validate'=>function($name,$datas,$settings){
                 $email = isset($_POST[$name])?sanitize_email(trim($_POST[$name])):'';
+                
+                if(isset($settings['required'])&&$settings['required'])
+                if(empty($email)){
+                    return XH_Social_Error::error_custom(__('user email is required!',XH_SOCIAL));
+                }
+                
                 if(!empty($email)&&!is_email($email)){
                     return XH_Social_Error::error_custom(__('user email is invalid!',XH_SOCIAL));
                 }
+                
                 $datas['user_email']=$email;
                 return $datas;
             }
@@ -553,12 +566,14 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
             'title'=>__('password',XH_SOCIAL),
             'type'=>'text',
             'required'=>true,
-            'validate'=>function($name,$datas){
+            'validate'=>function($name,$datas,$settings){
                 $password = isset($_POST[$name])?trim($_POST[$name]):'';
-                if(empty($password)){
-                    return XH_Social_Error::error_custom(__('password is required!',XH_SOCIAL));
+                if(isset($settings['required'])&&$settings['required']){
+                     if(empty($password)){
+                        return XH_Social_Error::error_custom(__('password is required!',XH_SOCIAL));
+                     }
                 }
-                
+               
                 $datas['user_pass']=$password;
                 return $datas;
             }
@@ -587,22 +602,44 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
     }
     
     public function page_login($attrs=array(), $innerhtml=''){
-        $log_on_callback_uri ='';
-        if(isset($_GET['redirect_to'])&&!empty($_GET['redirect_to'])){
-            $log_on_callback_uri =esc_url_raw(urldecode($_GET['redirect_to']));
-        }else{
-            $log_on_callback_uri=XH_Social_Shortcodes::get_attr($attrs, 'redirect_to');
+        $log_on_callback_uri=esc_url_raw(XH_Social_Shortcodes::get_attr($attrs, 'redirect_to'));
+        if(empty($log_on_callback_uri)){
+            if(isset($_GET['redirect_to'])){  
+                $log_on_callback_uri =esc_url_raw(urldecode($_GET['redirect_to']));
+            }
         }
         
         if(empty($log_on_callback_uri)){
             $log_on_callback_uri =home_url('/');
-        }else{
-            if(strcasecmp(XH_Social_Helper_Uri::get_location_uri(), $log_on_callback_uri)===0){
-                $log_on_callback_uri =home_url('/');
-            }
-            XH_Social::instance()->session->set('social_login_location_uri',$log_on_callback_uri);
         }
         
+        if(strcasecmp(XH_Social_Helper_Uri::get_location_uri(), $log_on_callback_uri)===0){
+            $log_on_callback_uri =home_url('/');
+        }
+        
+        XH_Social::instance()->session->set('social_login_location_uri',$log_on_callback_uri);
+        
+        if(is_user_logged_in()){
+            $redirect_to='';
+            if(isset($_GET['social_logout'])){
+                $redirect_to=wp_logout_url(XH_Social_Helper_Uri::get_location_uri());
+            }else{
+                wp_logout();
+                $params = array();
+                $url = XH_Social_Helper_Uri::get_uri_without_params(XH_Social_Helper_Uri::get_location_uri(),$params);
+                $params['social_logout']=1;
+                $redirect_to=$url."?".http_build_query($params);
+            }
+             
+            ob_start();
+            ?>
+               <script type="text/javascript">
+                    location.href='<?php echo $redirect_to;?>';
+                </script>
+           <?php 
+           return ob_get_clean();
+        }
+                
         ob_start();
         ?>
             <div class="xh-regbox">
@@ -704,22 +741,42 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
        }
        
        public function page_register($attrs=array(), $innerhtml=''){
-            $log_on_callback_uri ='';
-            if(isset($_GET['redirect_to'])&&!empty($_GET['redirect_to'])){
-                $log_on_callback_uri =esc_url_raw(urldecode($_GET['redirect_to']));
-            }else{
-                $log_on_callback_uri=XH_Social_Shortcodes::get_attr($attrs, 'redirect_to');
+            $log_on_callback_uri=esc_url_raw(XH_Social_Shortcodes::get_attr($attrs, 'redirect_to'));
+            if(empty($log_on_callback_uri)){
+                if(isset($_GET['redirect_to'])){  
+                    $log_on_callback_uri =esc_url_raw(urldecode($_GET['redirect_to']));
+                }
             }
             
             if(empty($log_on_callback_uri)){
                 $log_on_callback_uri =home_url('/');
-            }else{
-                if(strcasecmp(XH_Social_Helper_Uri::get_location_uri(), $log_on_callback_uri)===0){
-                    $log_on_callback_uri =home_url('/');
-                }
-                XH_Social::instance()->session->set('social_login_location_uri',$log_on_callback_uri);
             }
-       
+            
+            if(strcasecmp(XH_Social_Helper_Uri::get_location_uri(), $log_on_callback_uri)===0){
+                $log_on_callback_uri =home_url('/');
+            }
+            
+            XH_Social::instance()->session->set('social_login_location_uri',$log_on_callback_uri);
+            if(is_user_logged_in()){
+                $redirect_to='';
+                if(isset($_GET['social_logout'])){
+                    $redirect_to=wp_logout_url(XH_Social_Helper_Uri::get_location_uri());
+                }else{
+                    wp_logout();
+                    $params = array();
+                    $url = XH_Social_Helper_Uri::get_uri_without_params(XH_Social_Helper_Uri::get_location_uri(),$params);
+                    $params['social_logout']=1;
+                    $redirect_to=$url."?".http_build_query($params);
+                }
+                 
+                ob_start();
+                ?>
+                   <script type="text/javascript">
+                    location.href='<?php echo $redirect_to;?>';
+                    </script>
+                <?php 
+               return ob_get_clean();
+            }
            ob_start();
            ?>
            <div class="xh-regbox">

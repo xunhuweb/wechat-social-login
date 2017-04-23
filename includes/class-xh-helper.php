@@ -34,13 +34,13 @@ class XH_Social_Helper{
                 $arg.="&";
             }
             
-            if(!is_string($val)||!is_integer($val)){
+            if(!is_string($val)&&!is_integer($val)){
                 continue;
             }
             $arg.="$key=$val";
             
         }
-         
+      
         if(get_magic_quotes_gpc()){
             $arg = stripslashes($arg);
         }

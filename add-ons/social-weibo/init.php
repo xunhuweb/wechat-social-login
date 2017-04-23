@@ -71,7 +71,11 @@ class XH_Social_Add_On_Social_Weibo extends Abstract_XH_Social_Add_Ons{
             'action'=>isset($_REQUEST['action'])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST['action']):'',
             'tab'=>isset($_REQUEST['tab'])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST['tab']):'',
         );
-         
+        
+        if(isset($_REQUEST['uid'])){
+            $datas['uid']=XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST['uid']);
+        }
+        
         $hash=XH_Social_Helper::generate_hash($datas, XH_Social::instance()->get_hash_key());
         if(!isset($_REQUEST['hash'])||$hash!=XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST['hash'])){
             echo (XH_Social_Error::err_code(701)->to_json());
@@ -80,7 +84,41 @@ class XH_Social_Add_On_Social_Weibo extends Abstract_XH_Social_Add_Ons{
         
         switch ($datas['tab']){
             case 'authorization':
-                $redirect_uri = XH_Social_Channel_Weibo::instance()->process_authorization_callback();
+                $wp_user_id=isset($datas['uid'])?$datas['uid']:0;
+                if(
+                    //wp_user_id>0 且登录用户id不等于wp_user_id
+                    ($wp_user_id>0&&is_user_logged_in()&&$wp_user_id!=get_current_user_id())
+                    ||
+                    //已登录的情况
+                    $wp_user_id<=0&&is_user_logged_in()
+                    ){
+                    
+                    if(isset($_GET['social_logout'])){
+                        wp_redirect(wp_logout_url(XH_Social_Helper_Uri::get_location_uri()));
+                        exit;
+                    }
+                    wp_logout();
+                    
+                    $params = array();
+                    $url = XH_Social_Helper_Uri::get_uri_without_params(XH_Social_Helper_Uri::get_location_uri(),$params);
+                    $params['social_logout']=1;
+                    wp_redirect($url."?".http_build_query($params));
+                    exit;
+                }
+                
+                $redirect_uri='';
+                $redirect_uri=apply_filters('xh_social_channel_weibo_authorization',$redirect_uri,$datas);
+                if(!empty($redirect_uri)){
+                    wp_redirect($redirect_uri);
+                    exit;
+                }
+                
+                $redirect_uri = XH_Social_Channel_Weibo::instance()->process_authorization_callback($wp_user_id);
+                $error = XH_Social::instance()->WP->get_wp_error($redirect_uri);
+                if(!empty($error)){
+                    XH_Social::instance()->WP->wp_die($error);
+                    exit;
+                }
                 wp_redirect($redirect_uri);
                 exit;
         }

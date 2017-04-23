@@ -67,36 +67,70 @@ class XH_Social_Ajax {
 	    
 	    $hash=XH_Social_Helper::generate_hash($params, XH_Social::instance()->get_hash_key());
 	    if(!isset($_REQUEST['hash'])||$hash!=XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST['hash'])){
-	        wp_die(XH_Social_Error::err_code(701)->errmsg);
+	        XH_Social::instance()->WP->wp_die(XH_Social_Error::err_code(701)->errmsg);
 	        exit;
 	    }
 	    
 	    $channel_id = $params['channel_id'];
 	    if(empty($channel_id)){
-	        wp_die(XH_Social_Error::err_code(404)->errmsg);
+	        XH_Social::instance()->WP->wp_die(XH_Social_Error::err_code(404)->errmsg);
 	        exit;
 	    }
 	    
 	    $channel = XH_Social::instance()->channel->get_social_channel($channel_id);
 	    if(!$channel){
-	        wp_die(XH_Social_Error::err_code(404)->errmsg);
+	        XH_Social::instance()->WP->wp_die(XH_Social_Error::err_code(404)->errmsg);
 	        exit;
 	    }
 	    
 	    switch ($params['tab']){
 	        case 'login_redirect_to_authorization_uri':
-	            $login_location_uri = isset($_REQUEST['redirect_to'])&&!empty($_REQUEST['redirect_to'])?sanitize_url(urldecode($_REQUEST['redirect_to'])):home_url('/');
-	            XH_Social::instance()->session->set('social_login_location_uri', $login_location_uri);
-	           
-	            $redirect_uri =$channel->process_generate_authorization_uri($login_location_uri);
-	          
-	            if(empty($redirect_uri)){
-	                $redirect_uri=home_url('/');
+	            if(is_user_logged_in()){
+	                if(isset($_GET['social_logout'])){
+	                    wp_redirect(wp_logout_url(XH_Social_Helper_Uri::get_location_uri()));
+                        exit;
+	                }
+	                
+	                wp_logout();
+	                $params = array();
+	                $location = XH_Social_Helper_Uri::get_uri_without_params(XH_Social_Helper_Uri::get_location_uri(),$params);
+	                $params['social_logout']=1;
+	                wp_redirect($location."?".http_build_query($params));
+	                exit;
 	            }
+	            
+	            $login_location_uri = isset($_REQUEST['redirect_to'])&&!empty($_REQUEST['redirect_to'])?esc_url_raw(urldecode($_REQUEST['redirect_to'])):home_url('/');
+	            XH_Social::instance()->session->set('social_login_location_uri', $login_location_uri);
+	            $redirect_uri =$channel->generate_authorization_uri(0, $login_location_uri);
+	            if(empty($redirect_uri)){
+	                XH_Social::instance()->WP->wp_die(XH_Social_Error::error_unknow());
+	                exit;
+	            }
+	            
 	            wp_redirect($redirect_uri);
 	            exit;
+	            
+            case 'bind_redirect_to_authorization_uri':
+                $login_location_uri = isset($_REQUEST['redirect_to'])&&!empty($_REQUEST['redirect_to'])?esc_url_raw(urldecode($_REQUEST['redirect_to'])):home_url('/');
+                global $current_user;
+                if(!is_user_logged_in()){
+                    wp_redirect(wp_login_url($login_location_uri));
+                    exit;
+                }
+                
+                XH_Social::instance()->session->set('social_login_location_uri', $login_location_uri);
+
+                $redirect_uri =$channel->generate_authorization_uri($current_user->ID, $login_location_uri);
+                if(empty($redirect_uri)){
+                    XH_Social::instance()->WP->wp_die(XH_Social_Error::error_unknow());
+                    exit;
+                }
+                
+                wp_redirect($redirect_uri);
+                exit;
+                
 	        case 'do_unbind':
-	            $redirect_to = isset($_REQUEST['redirect_to'])&&!empty($_REQUEST['redirect_to'])?sanitize_url(urldecode($_REQUEST['redirect_to'])):home_url('/');
+	            $redirect_to = isset($_REQUEST['redirect_to'])&&!empty($_REQUEST['redirect_to'])?esc_url_raw(urldecode($_REQUEST['redirect_to'])):home_url('/');
 	            global $current_user;
 	            if(!is_user_logged_in()){
 	                wp_redirect(wp_login_url($redirect_to));
@@ -104,18 +138,19 @@ class XH_Social_Ajax {
 	            }
 	            
 	            //判断是否允许解绑
-	            $allow_unbind = apply_filters('xh_social_unbind_allow', true,$channel);
-	            if(!$allow_unbind){
+	            $error = apply_filters('xh_social_channel_unbind_before',new WP_Error(), $channel);
+	            if($error&&$error instanceof  WP_Error && $error->get_error_code()){
 	                wp_redirect($redirect_to);
 	                exit;
 	            }
 	            
 	            $error = $channel->remove_ext_user_info_by_wp($current_user->ID);
 	            if(!XH_Social_Error::is_valid($error)){
-	                wp_die($error->errmsg);
+	                XH_Social::instance()->WP->wp_die($error->errmsg);
 	                exit;
 	            }
 	            
+	            do_action('xh_social_channel_unbind',$channel);
 	            wp_redirect($redirect_to);
 	            exit;
 	    }

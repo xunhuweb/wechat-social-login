@@ -48,18 +48,29 @@ abstract class Abstract_XH_Social_Settings_Channel extends Abstract_XH_Social_Se
         
         return true;
     }
-   
+    
     /**
-     * 获取登录跳转url
-     * @param string $location 登录发起地址
-     * @return string 登录授权链接
+     * 获取登录跳转地址
+     * @param string $login_location_uri
+     * @return string
      * @since 1.0.0
      */
-    public function process_generate_authorization_uri($login_location_uri){
+    public function process_generate_authorization_uri($login_location_uri=null){
+        return $this->generate_authorization_uri(0,$login_location_uri);
+    }
+    
+    /**
+     * 获取登录跳转地址
+     * @param int|NULL $user_ID
+     * @param string $login_location_uri
+     * @return string
+     * @since 1.0.6
+     */
+    public function generate_authorization_uri($user_ID=0,$login_location_uri=null){
         //执行登录跳转
         return '';
     }
-
+    
     /**
      * 更新wp用户与扩展用户之间的关联
      * @param int $ext_user_id
@@ -138,7 +149,7 @@ abstract class Abstract_XH_Social_Settings_Channel extends Abstract_XH_Social_Se
             <span class="xh-text"><?php echo __('Is binding',XH_SOCIAL)?></span> <a href="<?php echo XH_Social::instance()->channel->get_do_unbind_uri($this->id,XH_Social_Helper_Uri::get_location_uri());?>" class="xh-btn xh-btn-warring xh-btn-sm"><?php echo __('Unbind',XH_SOCIAL)?></a><?php 
         }else{
             ?>
-            <span class="xh-text"><?php echo __('Unbound',XH_SOCIAL)?></span> <a href="<?php echo XH_Social::instance()->channel->get_authorization_redirect_uri($this->id,XH_Social_Helper_Uri::get_location_uri())?>" class="xh-btn xh-btn-primary xh-btn-sm"><?php echo __('Bind',XH_SOCIAL)?></a>
+            <span class="xh-text"><?php echo __('Unbound',XH_SOCIAL)?></span> <a href="<?php echo XH_Social::instance()->channel->get_do_bind_redirect_uri($this->id,XH_Social_Helper_Uri::get_location_uri())?>" class="xh-btn xh-btn-primary xh-btn-sm"><?php echo __('Bind',XH_SOCIAL)?></a>
             <?php 
         }
         
@@ -156,27 +167,48 @@ abstract class Abstract_XH_Social_Settings_Channel extends Abstract_XH_Social_Se
         if(empty($login_location_uri)){
             $login_location_uri = home_url('/');
         }
-      
-        if(!$ext_user_id||$ext_user_id<=0){
-            return $login_location_uri;
-        }
         
-        global $current_user;
-        //若当前用户已登录，就绑定
-        if(is_user_logged_in()){
-            //未开启用户信息绑定，则直接创建用户并登录跳转
-            $wp_user = $this->update_wp_user_info($ext_user_id,$current_user->ID);
-            if(!$wp_user||!$wp_user instanceof WP_User){
-                return $login_location_uri;
-            }
-             
-            XH_Social::instance()->WP->do_wp_login($wp_user);
+        //清除上次错误数据
+        XH_Social::instance()->WP->unset_wp_error($login_location_uri);
+        if(!$ext_user_id||$ext_user_id<=0){
+            //未知错误！
+            XH_Social::instance()->WP->set_wp_error($login_location_uri, sprintf(__("对不起，%s用户绑定失败！错误：%s",XH_SOCIAL),$this->title,XH_Social_Error::err_code(500)->errmsg));
             return $login_location_uri;
         }
+//         //TODO:这里需要处理
+//         global $current_user;
+//         //若当前用户已登录，就绑定
+//         if(is_user_logged_in()){
+//             $wp_user =$this->get_wp_user_info($ext_user_id);
+//             if($wp_user&&$wp_user->ID!=$current_user->ID){
+//                 //当前扩展用户已绑定了其它用户
+//                 XH_Social::instance()->WP->set_wp_error($login_location_uri, sprintf(__("对不起，您的%s已与账户(%s)绑定，请解绑后重试！",XH_SOCIAL),$this->title,$wp_user->nickname));
+//                 return $login_location_uri;
+//             }
+            
+//             //未开启用户信息绑定，则直接创建用户并登录跳转
+//             $wp_user = $this->update_wp_user_info($ext_user_id,$current_user->ID);
+//             if($wp_user instanceof  XH_Social_Error){
+//                 XH_Social::instance()->WP->set_wp_error($login_location_uri,  sprintf(__("对不起，%s用户绑定失败！错误：%s",XH_SOCIAL),$this->title,$wp_user->errmsg));
+//                 return $login_location_uri;
+//             }
+             
+//             XH_Social::instance()->WP->do_wp_login($wp_user);
+//             return $login_location_uri;
+//         }
          
         $wp_user =$this->get_wp_user_info($ext_user_id);
         if($wp_user){
+            if(is_user_logged_in()&&get_current_user_id()!=$wp_user->ID){
+                XH_Social::instance()->WP->set_wp_error($login_location_uri,__("对不起，不允许在已登录的情况下登录其它账户!",XH_SOCIAL));
+                return $login_location_uri;
+            }
             XH_Social::instance()->WP->do_wp_login($wp_user);
+            return $login_location_uri;
+        }
+        
+        if(is_user_logged_in()){
+            XH_Social::instance()->WP->set_wp_error($login_location_uri,__("对不起，不允许在已登录的情况下登录其它账户!",XH_SOCIAL));
             return $login_location_uri;
         }
         
@@ -184,24 +216,28 @@ abstract class Abstract_XH_Social_Settings_Channel extends Abstract_XH_Social_Se
         $wp_user = apply_filters('xh_social_process_login_new_user',null, $this,$ext_user_id);
         if($wp_user){
             $wp_user = $this->update_wp_user_info($ext_user_id,$wp_user->ID);
-            if(!$wp_user||!$wp_user instanceof WP_User){
+            if($wp_user instanceof  XH_Social_Error){
+                XH_Social::instance()->WP->set_wp_error($login_location_uri,  sprintf(__("对不起，%s用户绑定失败！错误：%s",XH_SOCIAL),$this->title,$wp_user->errmsg));
                 return $login_location_uri;
             }
+            
             XH_Social::instance()->WP->do_wp_login($wp_user);
             return $login_location_uri;
         }
         
         if(!$skip){ 
-            $other_login_location_uri =apply_filters('xh_social_process_login','',$this,$ext_user_id,$login_location_uri);        
+            $other_login_location_uri='';
+            $other_login_location_uri =apply_filters('xh_social_process_login',$other_login_location_uri,$this,$ext_user_id,$login_location_uri);        
             if(!empty($other_login_location_uri)){
                 return $other_login_location_uri;
             } 
         }
        
         //直接创建用户并登录跳转
-        $wp_user = $this->update_wp_user_info($ext_user_id,$current_user->ID);
-        if(!$wp_user||!$wp_user instanceof WP_User){
-           return $login_location_uri;
+        $wp_user = $this->update_wp_user_info($ext_user_id,null);
+        if($wp_user instanceof  XH_Social_Error){
+            XH_Social::instance()->WP->set_wp_error($login_location_uri,  sprintf(__("对不起，%s用户绑定失败！错误：%s",XH_SOCIAL),$this->title,$wp_user->errmsg));
+            return $login_location_uri;
         }
        
         XH_Social::instance()->WP->do_wp_login($wp_user);
@@ -211,7 +247,7 @@ abstract class Abstract_XH_Social_Settings_Channel extends Abstract_XH_Social_Se
     /**
      * 获取wp用户信息
      * @param int $ext_user_id 扩展用户ID
-     * @return array
+     * @return WP_User
      * @since 1.0.0
      */
     public function get_wp_user_info($ext_user_id){

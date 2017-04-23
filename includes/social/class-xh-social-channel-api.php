@@ -73,20 +73,20 @@ class XH_Social_Channel_Api{
             }
     
             if(empty($redirect_to)){
-                $location_uri =XH_Social_Helper_Uri::get_location_uri();
-                if(strpos($location_uri, 'wp-login.php')!==false){
-                    $redirect_to= admin_url('/');
-                }else{
-                    $redirect_to= home_url('/');;
-                }
+                $redirect_to =XH_Social_Helper_Uri::get_location_uri(); 
             }
         }
-    
+        
+        if(strpos($redirect_to, 'wp-login.php')!==false){
+            $redirect_to= admin_url('/');
+        }
+        
         $redirect_to= apply_filters('xh_social_log_on_callback_uri', $redirect_to,$channel_id);
     
-        $params=array();
-        $ajax_url =XH_Social_Helper_Uri::get_uri_without_params(XH_Social::instance()->ajax_url(),$params);
+        $params1=array();
+        $ajax_url =XH_Social_Helper_Uri::get_uri_without_params(XH_Social::instance()->ajax_url(),$params1);
     
+        $params=array();
         $params['channel_id'] = $channel_id;
         $params['action']='xh_social_channel';
         $params['tab']='login_redirect_to_authorization_uri';
@@ -94,11 +94,48 @@ class XH_Social_Channel_Api{
         $params['hash']=XH_Social_Helper::generate_hash($params,  XH_Social::instance()->get_hash_key());
         $params['redirect_to']=$redirect_to;
     
-        return $ajax_url."?".http_build_query($params);
-    }    
+        return $ajax_url."?".http_build_query(array_merge($params,$params1));
+    } 
+    
+    /**
+     * 获取绑定地址
+     * @param unknown $channel_id
+     * @param string $redirect_to
+     * @return string
+     */
+    public function get_do_bind_redirect_uri($channel_id,$redirect_to =''){
+        if(empty($redirect_to)){
+            if(isset($_GET['redirect_to'])){
+                $redirect_to=esc_url_raw(urldecode($_GET['redirect_to']));
+            }
+    
+            if(empty($redirect_to)){
+                $redirect_to =XH_Social_Helper_Uri::get_location_uri();
+            }
+        }
+    
+        if(strpos($redirect_to, 'wp-login.php')!==false){
+            $redirect_to= admin_url('/');
+        }
+    
+        $redirect_to= apply_filters('xh_social_log_on_callback_uri', $redirect_to,$channel_id);
+    
+        $params1=array();
+        $ajax_url =XH_Social_Helper_Uri::get_uri_without_params(XH_Social::instance()->ajax_url(),$params1);
+    
+        $params=array();
+        $params['channel_id'] = $channel_id;
+        $params['action']='xh_social_channel';
+        $params['tab']='bind_redirect_to_authorization_uri';
+        $params['notice_str']=str_shuffle(time());
+        $params['hash']=XH_Social_Helper::generate_hash($params,  XH_Social::instance()->get_hash_key());
+        $params['redirect_to']=$redirect_to;
+    
+        return $ajax_url."?".http_build_query(array_merge($params,$params1));
+    }
         
     /**
-     * 获取所有登录接口
+     * 获取所有登录接口(已开启的)
      * @param array $action_includes 接口约束
      * @return Abstract_XH_Social_Settings_Channel[]
      * @since 1.0.0
@@ -121,7 +158,7 @@ class XH_Social_Channel_Api{
     }
     
     /**
-     * 获取登录接口
+     * 获取登录接口(已开启的)
      * @param string $id
      * @param array $action_includes 接口约束 
      * @return Abstract_XH_Social_Settings_Channel
