@@ -118,7 +118,17 @@ class XH_Social_WP_Api{
             if($err instanceof Exception){
                 $err = "errcode:{$err->getCode()},errmsg:{$err->getMessage()}";
             }
+            if($err instanceof XH_Social_Error){
+                $err = "errcode:{$err->errcode},errmsg:{$err->errmsg}";
+            }
+            if($err instanceof WP_Error){
+                $err = "errcode:{$err->get_error_code()},errmsg:{$err->get_error_message()}";
+            }
+            if(is_object($err)){
+                $err = print_r($err,true);
+            }
         }
+        
         if(empty($err)){
             $err = XH_Social_Error::err_code(500)->errmsg;
         }

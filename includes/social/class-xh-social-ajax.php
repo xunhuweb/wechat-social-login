@@ -57,7 +57,7 @@ class XH_Social_Ajax {
 	    exit;
 	}
 	
-	public static function channel(){
+	public static function channel(){    
 	    $params = array(
 	        'action'=>isset($_REQUEST['action'])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST['action']):'',
 	        'channel_id'=>isset($_REQUEST['channel_id'])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST['channel_id']):'',
@@ -70,19 +70,19 @@ class XH_Social_Ajax {
 	        XH_Social::instance()->WP->wp_die(XH_Social_Error::err_code(701)->errmsg);
 	        exit;
 	    }
-	    
+	  
 	    $channel_id = $params['channel_id'];
 	    if(empty($channel_id)){
 	        XH_Social::instance()->WP->wp_die(XH_Social_Error::err_code(404)->errmsg);
 	        exit;
 	    }
-	    
+	   
 	    $channel = XH_Social::instance()->channel->get_social_channel($channel_id);
 	    if(!$channel){
 	        XH_Social::instance()->WP->wp_die(XH_Social_Error::err_code(404)->errmsg);
 	        exit;
 	    }
-	    
+	   
 	    switch ($params['tab']){
 	        case 'login_redirect_to_authorization_uri':
 	            if(is_user_logged_in()){
@@ -100,8 +100,8 @@ class XH_Social_Ajax {
 	            }
 	            
 	            $login_location_uri = isset($_REQUEST['redirect_to'])&&!empty($_REQUEST['redirect_to'])?esc_url_raw(urldecode($_REQUEST['redirect_to'])):home_url('/');
-	            XH_Social::instance()->session->set('social_login_location_uri', $login_location_uri);
-	            $redirect_uri =$channel->generate_authorization_uri(0, $login_location_uri);
+	            XH_Social::instance()->session->set('social_login_location_uri', $login_location_uri);	          
+	            $redirect_uri =$channel->generate_authorization_uri(0, $login_location_uri);	          
 	            if(empty($redirect_uri)){
 	                XH_Social::instance()->WP->wp_die(XH_Social_Error::error_unknow());
 	                exit;

@@ -429,7 +429,10 @@ class XH_Social_Channel_Weibo extends Abstract_XH_Social_Settings_Channel{
             }
             
             if(!$ext_user_info){
-                $userdata['user_id']=$wp_user_id;
+                if($wp_user_id>0){
+                    $update['user_id']=$wp_user_id;
+                }
+                
                 $wpdb->insert("{$wpdb->prefix}xh_social_channel_weibo", $userdata);
                 if(!empty($wpdb->last_error)){
                     throw new Exception($wpdb->last_error);
@@ -473,8 +476,8 @@ class XH_Social_Channel_Weibo extends Abstract_XH_Social_Settings_Channel{
      * {@inheritDoc}
      * @see Abstract_XH_Social_Settings_Channel::generate_authorization_uri()
      */
-    public function generate_authorization_uri($wp_user_id=null,$login_location_uri=null){ 
-       return $this->_login_get_authorization_uri(is_null($wp_user_id)?0:$wp_user_id,null);
+    public function generate_authorization_uri($user_ID=0,$login_location_uri=null){ 
+       return $this->_login_get_authorization_uri(is_null($user_ID)?0:$user_ID,null);
     }
     
     /**

@@ -429,7 +429,9 @@ class XH_Social_Channel_QQ extends Abstract_XH_Social_Settings_Channel{
             }
             
             if(!$ext_user_info){
-                $userdata['user_id']=$wp_user_id;
+                if($wp_user_id>0){
+                    $update['user_id']=$wp_user_id;
+                }
                 $wpdb->insert("{$wpdb->prefix}xh_social_channel_qq", $userdata);
                 if(!empty($wpdb->last_error)){
                     throw new Exception($wpdb->last_error);
