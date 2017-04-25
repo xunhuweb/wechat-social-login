@@ -264,7 +264,7 @@ class XH_Social_Channel_QQ extends Abstract_XH_Social_Settings_Channel{
     }
     
     public function process_authorization_callback($wp_user_id){
-        $login_location_uri=XH_Social::instance()->session->get('social_login_location_uri');
+        $login_location_uri=XH_Social::instance()->session->get('social_login_location_uri');  
         if(empty($login_location_uri)){
             $login_location_uri = home_url('/');
         }

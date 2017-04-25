@@ -181,12 +181,12 @@ class XH_Social_Hooks{
     }
     
     public static function show_social_login_in_login(){
-        echo self::show_loginbar(XH_Social_Helper_Uri::get_location_uri());
+        echo self::show_loginbar();
     }
     
     public static function show_social_login_in_comment(){
          if(!is_user_logged_in()){
-            echo self::show_loginbar(XH_Social_Helper_Uri::get_location_uri());
+            echo self::show_loginbar();
          }
     }
     
@@ -202,17 +202,7 @@ class XH_Social_Hooks{
         ob_start();
             ?>
             <div class="xh-regbox" style="width: 100%;">
-              <h4 class="xh-title" style="margin-bottom:40px"><?php echo __('Account Binding/Unbundling',XH_SOCIAL)?></h4>
-          
-              <?php 
-                 $error = XH_Social::instance()->WP->get_wp_error(XH_Social_Helper_Uri::get_location_uri());
-                if(!empty($error)){
-                    ?>
-                    <div class="xh-alert xh-alert-danger" role="alert"><?php echo $error;?></div>     
-                    <?php 
-                }
-              ?>
-               
+              <h4 class="xh-title" style="margin-bottom:40px"><?php echo __('Account Binding/Unbundling',XH_SOCIAL)?></h4> 
               <div class="xh-form ">
               <?php if($channels){
         			    foreach ($channels as $channel){
