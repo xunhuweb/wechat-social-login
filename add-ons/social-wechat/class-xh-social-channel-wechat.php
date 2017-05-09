@@ -188,7 +188,7 @@ class XH_Social_Channel_Wechat extends Abstract_XH_Social_Settings_Channel{
         $params1['hash'] = XH_Social_Helper::generate_hash($params1, XH_Social::instance()->get_hash_key());
         
         return array(
-            'link'=>$ajax_url."?".http_build_query(array_merge($params,$params1)),
+            'link'=>$ajax_url."?".http_build_query(array_merge($params,$params1))."&url=".urlencode(XH_Social_Helper_Uri::get_location_uri()),
             'width'=>450,
             'height'=>400
         );
