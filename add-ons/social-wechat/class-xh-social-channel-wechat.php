@@ -43,7 +43,10 @@ class XH_Social_Channel_Wechat extends Abstract_XH_Social_Settings_Channel{
         
         $this->init_form_fields();
         
-        $this->supports=array('login','share');
+        if(!XH_Social_Helper_Uri::is_wechat_app()){
+            $this->supports=array('login','share');
+        }
+        
         $this->enabled = 'yes'==$this->get_option('enabled');
     }
   
