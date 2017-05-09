@@ -38,9 +38,8 @@ class XH_Social_Add_On_WP_Open extends Abstract_XH_Social_Add_Ons{
         $this->author_uri='https://www.wpweixin.net';
         $this->setting_uri = admin_url('admin.php?page=social_page_wp_open&section=menu_wp_open_default&sub=settings_wp_open_default');
   
-        $this->enabled ='yes'== $this->get_option('enabled');
-
         $this->init_form_fields();
+        $this->enabled ='yes'== $this->get_option('enabled');
     }
 
     public function on_init(){

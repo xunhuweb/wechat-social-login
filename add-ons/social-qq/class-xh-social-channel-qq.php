@@ -36,9 +36,11 @@ class XH_Social_Channel_QQ extends Abstract_XH_Social_Settings_Channel{
         
         $this->icon =XH_SOCIAL_URL.'/assets/image/qq-icon.png';
         $this->title =__('QQ', XH_SOCIAL);
-        $this->enabled ='yes'== $this->get_option('enabled');
         $this->description=__('在QQ互联<a href="http://connect.qq.com" target="_blank">http://connect.qq.com</a>注册并创建应用。',XH_SOCIAL);
         $this->init_form_fields(); 
+        
+        $this->supports=array('login','share');
+        $this->enabled ='yes'== $this->get_option('enabled');
     }
   
     
@@ -211,6 +213,18 @@ class XH_Social_Channel_QQ extends Abstract_XH_Social_Settings_Channel{
         
         XH_Social_Temp_Helper::set('ext_user_info_by_wp',$userinfo, 'login:qq');
         return $userinfo;
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see Abstract_XH_Social_Settings_Channel::get_share_link()
+     */
+    public function get_share_link(){
+        return array(
+            'link'=>"http://connect.qq.com/widget/shareqq/index.html?url={url}&title={title}&summary={summary}&pics={img}",
+            'width'=>770,
+            'height'=>580
+        );
     }
     
     /**

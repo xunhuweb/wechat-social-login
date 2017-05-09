@@ -36,7 +36,7 @@ class XH_Social_Add_On_Social_Weibo extends Abstract_XH_Social_Add_Ons{
         $this->id='add_ons_social_weibo';
         $this->title=__('Weibo',XH_SOCIAL);
         $this->description=__('使用微博帐号快速登录，请在open.weibo.com申请网站应用',XH_SOCIAL);
-        $this->version='1.0.0';
+        $this->version='1.0.3';
         $this->setting_uri = admin_url('admin.php?page=social_page_default&section=menu_default_channel&sub=social_weibo');
         $this->min_core_version = '1.0.0';
         $this->author=__('xunhuweb',XH_SOCIAL);

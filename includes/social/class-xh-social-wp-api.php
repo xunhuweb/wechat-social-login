@@ -58,7 +58,7 @@ class XH_Social_WP_Api{
         while (username_exists($nickname)){
             $index++;
             if($index==1){
-                $nickname=$pre_nickname.'_'.date('yz');//年+一年中的第N天
+                $nickname=$pre_nickname.'_'.time();//年+一年中的第N天
                 continue;
             }
             
@@ -111,6 +111,28 @@ class XH_Social_WP_Api{
             $this->unset_wp_error($key);
         }
         return $error;
+    }
+    
+    public function wp_loggout_html($log_on_callback_uri=null){
+        if(empty($log_on_callback_uri)){
+            $log_on_callback_uri = home_url('/');
+        }
+        ob_start();
+        ?>
+        <div class="xh-regbox">
+			<div class="xh-title"><?php echo __('You have logged in, log out?',XH_SOCIAL)?></div>
+			<div class="xh-form">
+                <div class="xh-form-group" style="margin-top:25px;">
+                    <a href="<?php echo wp_logout_url(XH_Social_Helper_Uri::get_location_uri())?>" class="xh-btn xh-btn-primary xh-btn-block xh-btn-lg"><?php echo __('Log out',XH_SOCIAL)?></a>
+                </div>
+ 				<div class="xh-form-group xh-mT20">
+                <p style="text-align: center;"><a href="<?php echo $log_on_callback_uri;?>"><?php echo __('back',XH_SOCIAL)?></a></p>
+            </div>
+			</div>
+
+		</div>
+        <?php 
+        return ob_get_clean();
     }
     
     public function wp_die($err=null){

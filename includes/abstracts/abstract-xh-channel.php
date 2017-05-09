@@ -72,6 +72,19 @@ abstract class Abstract_XH_Social_Settings_Channel extends Abstract_XH_Social_Se
     }
     
     /**
+     * 获取分享链接
+     * @return array 
+     * @since 1.0.7
+     */
+    public function get_share_link(){
+        return array(
+            'link'=>'',
+            'width'=>450,
+            'height'=>'450'
+        );
+    }
+    
+    /**
      * 更新wp用户与扩展用户之间的关联
      * @param int $ext_user_id
      * @param int $wp_user_id                 

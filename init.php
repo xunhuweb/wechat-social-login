@@ -4,7 +4,7 @@
  * Plugin URI: http://www.weixinsocial.com
  * Description: 支持国内最热门的社交媒体登录。如：微信、QQ、微博、手机登录、账号绑定和解绑，全新的注册页面取代原生注册页面，支持Ultimate Member、WooCommerce、Buddypress，兼容Open Social。部分扩展收费，查看详情：<a href="http://www.weixinsocial.com">www.weixinsocial.com</a>
  * Author: 迅虎网络
- * Version: 1.0.6
+ * Version: 1.0.7
  * Author URI:  http://www.wpweixin.net
  */
 
@@ -19,7 +19,7 @@ final class XH_Social {
      * @since 1.0.0
      * @var string
      */
-    public $version = '1.0.6';
+    public $version = '1.0.7';
     
     /**
      * License ID
@@ -394,17 +394,17 @@ final class XH_Social {
     
    
     public function wp_enqueue_scripts(){
-        //current plugins require jquery.js
         if($this->_scritps_tag){
             return;
         }
+        
         $this->_scritps_tag=true;
-        wp_enqueue_script('xh-social-js',XH_SOCIAL_URL.'/assets/js/social.js',array('jquery'),$this->version);
-        wp_localize_script('xh-social-js','xh_social',array(
-            'ajax_url'=>$this->ajax_url(),
-            'msg_jquery_not_found'=>__('jQuery.js is required!',XH_SOCIAL),
-            'msg_server_error'=>__('Internal Server Error!',XH_SOCIAL)
-        ));
+        
+        if(is_admin()){
+            //current plugins require jquery.js
+            wp_enqueue_script('xh-social-js',XH_SOCIAL_URL.'/assets/js/jquery-loading.js',array('jquery'),$this->version);
+        }
+        
         wp_enqueue_style('xh-social-css',XH_SOCIAL_URL.'/assets/css/social.css',array(),$this->version);
     }
 }

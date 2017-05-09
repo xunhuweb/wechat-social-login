@@ -36,9 +36,12 @@ class XH_Social_Channel_Weibo extends Abstract_XH_Social_Settings_Channel{
         
         $this->icon =XH_SOCIAL_URL.'/assets/image/weibo-icon.png';
         $this->title =__('Weibo', XH_SOCIAL);
-        $this->enabled = 'yes'==$this->get_option('enabled');
+        
         $this->description=__('在微博开放平台（<a href="http://open.weibo.com" target="_blank">http://open.weibo.com</a>）注册并创建应用。',XH_SOCIAL);
         $this->init_form_fields();
+        
+        $this->supports=array('login','share');
+        $this->enabled = 'yes'==$this->get_option('enabled');
     }
   
     
@@ -92,6 +95,18 @@ class XH_Social_Channel_Weibo extends Abstract_XH_Social_Settings_Channel{
         );
          
         $this->form_fields=apply_filters('xh_social_channel_weibo_form_fields', $fields,$this);
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see Abstract_XH_Social_Settings_Channel::get_share_link()
+     */
+    public function get_share_link(){
+        return array(
+            'link'=>"http://v.t.sina.com.cn/share/share.php?url={url}&title={title}&pic={img}&appkey=&ralateUid=&language=zh_cn&searchPic=true",
+            'width'=>600,
+            'height'=>350
+        );
     }
     
     /**

@@ -38,11 +38,13 @@ class XH_Social_Channel_Wechat extends Abstract_XH_Social_Settings_Channel{
         
         $this->icon =XH_SOCIAL_URL.'/assets/image/weixin-icon.png';
         $this->title =__('Wechat', XH_SOCIAL);
-        $this->enabled = 'yes'==$this->get_option('enabled');
-       
+
         $this->description="微信内置浏览器：公众平台api登录；移动|PC浏览器：开放平台api登录。";
         
         $this->init_form_fields();
+        
+        $this->supports=array('login','share');
+        $this->enabled = 'yes'==$this->get_option('enabled');
     }
   
     /**
@@ -163,6 +165,30 @@ class XH_Social_Channel_Wechat extends Abstract_XH_Social_Settings_Channel{
                 'description'=>__('如果：你需要用自己的公众号（qq，微博）作为代理，请购买：<a href="https://www.wpweixin.net/product/1211.html" target="_blank">跨域扩展</a>',XH_SOCIAL)
             );
        $this->form_fields= apply_filters('xh_social_channel_wechat_form_fields',  array_merge($fields,$fields2));
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see Abstract_XH_Social_Settings_Channel::get_share_link()
+     */
+    public function get_share_link(){
+        $params = array();
+        $ajax_url =XH_Social_Helper_Uri::get_uri_without_params( XH_Social::instance()->ajax_url(),$params);
+        
+        $api =XH_Social_Add_On_Social_Wechat::instance();
+        $params1 = array(
+                'action'=>"xh_social_{$api->id}",
+                'tab'=>'share_qrcode',
+                'notice_str'=>str_shuffle(time())
+        );
+        
+        $params1['hash'] = XH_Social_Helper::generate_hash($params1, XH_Social::instance()->get_hash_key());
+        
+        return array(
+            'link'=>$ajax_url."?".http_build_query(array_merge($params,$params1)),
+            'width'=>450,
+            'height'=>400
+        );
     }
     
     /**

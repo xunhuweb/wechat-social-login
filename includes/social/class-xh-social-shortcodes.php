@@ -21,7 +21,7 @@ class XH_Social_Shortcodes {
 		     */
 			'xh_social_loginbar'=> __CLASS__ . '::loginbar',
 		    'xh_social_accountbind'=> __CLASS__ . '::accountbind',
-		    
+		    'xh_social_share'=> __CLASS__ . '::share',
 		);
 		
 		$shortcodes =apply_filters('xh_social_shortcodes', $shortcodes);
@@ -32,7 +32,21 @@ class XH_Social_Shortcodes {
 		unset($shortcodes);
 	}
 	
-	public static function accountbind(){
+	/**
+	 * @since 1.0.7
+	 * @param array $attrs
+	 * @param string $innerhtml
+	 */
+	public static function share($attrs=array(), $innerhtml=''){
+	    return xh_social_share(false);
+	}
+	
+	/**
+	 * @since 1.0.0
+	 * @param array $attrs
+	 * @param string $innerhtml
+	 */
+	public static function accountbind($attrs=array(), $innerhtml=''){
 	    return XH_Social_Hooks::accountbind();
 	}
 	
@@ -47,6 +61,11 @@ class XH_Social_Shortcodes {
 	    return XH_Social_Hooks::show_loginbar($redirect);
 	}
 	
+	/**
+	 * @since 1.0.0
+	 * @param unknown $attrs
+	 * @param unknown $property
+	 */
 	public static function get_attr($attrs,$property){
 	    if($attrs){
 	        foreach ($attrs as $key=>$val){

@@ -22,11 +22,21 @@ class XH_Social_Hooks{
         add_filter( 'get_avatar', __CLASS__.'::get_avatar', 100, 6);
         add_action( 'admin_init', __CLASS__.'::check_add_ons_update',10);
         add_action( 'admin_footer', __CLASS__.'::admin_footer',10);
+        add_action('the_content', __CLASS__.'::share',10,1);
+        
         //templete must be start with social.
         $templetes = apply_filters('xh_social_page_templetes', array());    
         foreach ($templetes as $dir=>$templete_list){
             self::$page_templetes[$dir]=$templete_list;
         }
+    }
+    
+    public static function share($content){
+        if(!is_single()){
+            return $content;
+        }
+        
+        return $content.xh_social_share(false);
     }
     
     public static function admin_footer(){

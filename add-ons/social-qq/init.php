@@ -3,7 +3,7 @@ if (! defined ( 'ABSPATH' ))
     exit (); // Exit if accessed directly
 
 require_once 'class-xh-social-channel-qq.php';
-
+require_once 'class-xh-social-channel-qzone.php';
 /**
  * 微信登录
  * 
@@ -36,7 +36,7 @@ class XH_Social_Add_On_Social_QQ extends Abstract_XH_Social_Add_Ons{
         $this->id='add_ons_social_qq';
         $this->title=__('QQ',XH_SOCIAL);
         $this->description=__('使用QQ快速登录，请在QQ互联中申请网站应用',XH_SOCIAL);
-        $this->version='1.0.0';
+        $this->version='1.0.3';
         $this->setting_uri = admin_url('admin.php?page=social_page_default&section=menu_default_channel&sub=social_qq');
         $this->min_core_version = '1.0.0';
         $this->author=__('xunhuweb',XH_SOCIAL);
@@ -131,6 +131,7 @@ class XH_Social_Add_On_Social_QQ extends Abstract_XH_Social_Add_Ons{
      */
     public function add_channels($channels){
         $channels[]=XH_Social_Channel_QQ::instance();
+        $channels[]=XH_Social_Channel_Qzone::instance();
         return $channels;
     }
     

@@ -46,9 +46,10 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
         $this->author_uri='https://www.wpweixin.net';
         $this->setting_uri = admin_url('admin.php?page=social_page_default&section=menu_default_account&sub=add_ons_login');
         $this->dir= rtrim ( plugin_dir_path ( __FILE__ ), '/' );
-        $this->enabled ='yes'== $this->get_option('enabled');
 
         $this->init_form_fields();
+        
+        $this->enabled ='yes'== $this->get_option('enabled');
     }
 
     public function init_form_fields(){
@@ -618,26 +619,16 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
         }
         
         XH_Social::instance()->session->set('social_login_location_uri',$log_on_callback_uri);
+       
+        do_action('xh_social_page_login_before');
+        
+        $action = apply_filters('xh_social_page_login_before', null);
+        if(!empty($action)){
+            return $action;
+        }
         
         if(is_user_logged_in()){
-            $redirect_to='';
-            if(isset($_GET['social_logout'])){
-                $redirect_to=wp_logout_url(XH_Social_Helper_Uri::get_location_uri());
-            }else{
-                wp_logout();
-                $params = array();
-                $url = XH_Social_Helper_Uri::get_uri_without_params(XH_Social_Helper_Uri::get_location_uri(),$params);
-                $params['social_logout']=1;
-                $redirect_to=$url."?".http_build_query($params);
-            }
-             
-            ob_start();
-            ?>
-               <script type="text/javascript">
-                    location.href='<?php echo $redirect_to;?>';
-                </script>
-           <?php 
-           return ob_get_clean();
+           return XH_Social::instance()->WP->wp_loggout_html($log_on_callback_uri);
         }
                 
         ob_start();
@@ -757,26 +748,17 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
             }
             
             XH_Social::instance()->session->set('social_login_location_uri',$log_on_callback_uri);
-            if(is_user_logged_in()){
-                $redirect_to='';
-                if(isset($_GET['social_logout'])){
-                    $redirect_to=wp_logout_url(XH_Social_Helper_Uri::get_location_uri());
-                }else{
-                    wp_logout();
-                    $params = array();
-                    $url = XH_Social_Helper_Uri::get_uri_without_params(XH_Social_Helper_Uri::get_location_uri(),$params);
-                    $params['social_logout']=1;
-                    $redirect_to=$url."?".http_build_query($params);
-                }
-                 
-                ob_start();
-                ?>
-                   <script type="text/javascript">
-                    location.href='<?php echo $redirect_to;?>';
-                    </script>
-                <?php 
-               return ob_get_clean();
+            do_action('xh_social_page_register_before');
+            
+            $action = apply_filters('xh_social_page_register_before', null);
+            if(!empty($action)){
+                return $action;
             }
+            
+            if(is_user_logged_in()){
+                 return XH_Social::instance()->WP->wp_loggout_html($log_on_callback_uri);
+            }
+            
            ob_start();
            ?>
            <div class="xh-regbox">

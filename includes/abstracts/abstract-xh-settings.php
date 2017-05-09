@@ -1127,7 +1127,33 @@ abstract class Abstract_XH_Social_Settings {
 		
 		return ob_get_clean ();
 	}
-
+	
+	public function generate_custom_html($key, $data) {
+	    $field = $this->get_field_key ( $key );
+	    $defaults = array (
+	        'func' => null
+	    );
+	
+	    $data = wp_parse_args ( $data, $defaults );
+	
+	    ob_start ();
+	    ?>
+	    <tr class="<?php echo isset($data['tr_css'])?$data['tr_css']:''; ?>">
+    	    <?php 
+    	    if(isset($data['func'])&&$data['func']){
+    	        echo call_user_func_array($data['func'],array(
+    	            $key,
+    	            $data,
+    	            $this
+    	        ));
+    	    }
+    	    ?>
+	    </tr>
+		<?php
+		
+		return ob_get_clean ();
+	}
+		
 	/**
 	 * Generate subtitle HTML.
 	 *
@@ -1184,7 +1210,14 @@ abstract class Abstract_XH_Social_Settings {
 		$this->sanitized_fields = array ();
 		
 		foreach ( $form_fields as $key => $field ) {
-			
+		    if(isset($field['ignore'])){
+		        continue;
+		    }
+		    
+		    if(!isset ( $_POST [$this->get_field_key ( $key )] )){
+		        continue;
+		    }
+		    
 			// Default to "text" field type.
 			$type = empty ( $field ['type'] ) ? 'text' : $field ['type'];
 			
