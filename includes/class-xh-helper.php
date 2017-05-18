@@ -124,6 +124,54 @@ class  XH_Social_Helper_Http{
  * @since    1.0.0
  */
 class XH_Social_Helper_String{
+    /**
+     * xml转换成object
+     * @param string $xml
+     * @param string $return_array
+     * @since 1.0.8
+     */
+    public static function xml_to_obj($xml,$return_array = true){
+        $xml_parser = xml_parser_create();
+        if(!xml_parse($xml_parser,$xml,true)){
+            xml_parser_free($xml_parser);
+            return false;
+        }else{
+            libxml_disable_entity_loader(true);
+            return json_decode(json_encode(simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA)), $return_array);
+        }
+    }
+    
+    /**
+     * object|array 转换成xml
+     * @param array|object $parameter
+     * @return string|NULL
+     * @since 1.0.8
+     */
+    public static function obj_to_xml($parameter){
+        if(!$parameter){
+            return null;
+        }
+    
+        if(is_object($parameter)){
+            $parameter = get_object_vars($parameter);
+        }
+    
+        if(!is_array($parameter)){
+            return null;
+        }
+        $xml = "<xml>";
+        foreach ($parameter as $key=>$val){
+            if (is_numeric($val)){
+                $xml.="<".$key.">".$val."</".$key.">";
+            }else{
+                $xml.="<".$key."><![CDATA[".$val."]]></".$key.">";
+            }
+        }
+        $xml.="</xml>";
+    
+        return $xml;
+    }
+    
     public static function sanitize_key_ignorecase( $key ) {
         $raw_key = $key;
         $key = preg_replace( '/[^a-z0-9_\-A-Z]/', '', $key );
@@ -198,6 +246,14 @@ class XH_Social_Helper_Uri{
         return strripos($_SERVER['HTTP_USER_AGENT'],'micromessenger')!=false;
     }
     
+    public static function is_ios() {
+        $ua = $_SERVER ['HTTP_USER_AGENT'];
+        return strripos ( $ua, 'iphone' ) != false || strripos ( $ua, 'ipad' ) != false;
+    }
+    public static function is_android() {
+        return strripos ( $_SERVER ['HTTP_USER_AGENT'], 'android' ) != false;
+    }
+    
     /**
      * 判断是否是移动浏览器
      * @since 1.0.0
@@ -252,7 +308,7 @@ class XH_Social_Helper_Uri{
      * @param array $params
      * @return string
      */
-    public static function get_uri_without_params($uri,&$params=array()){
+    public static function get_uri_without_params($uri,&$params=array(),$urldecode=true){
         $urls = explode('?', $uri);
         $qty =count($urls);
         if($qty<=1){
@@ -266,7 +322,12 @@ class XH_Social_Helper_Uri{
                 continue;
             }
         
-            $params[urldecode($ps[0])]=urldecode($ps[1]);
+            if($urldecode){
+                $params[$ps[0]]=urldecode($ps[1]);
+            }else{
+                $params[$ps[0]]=$ps[1];
+            }
+            
         }
         
         return $urls[0];

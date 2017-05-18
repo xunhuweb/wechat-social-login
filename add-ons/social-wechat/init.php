@@ -19,6 +19,12 @@ class XH_Social_Add_On_Social_Wechat extends Abstract_XH_Social_Add_Ons{
      */
     private static $_instance = null;
     /**
+     * 插件目录
+     * @var string
+     * @since 1.0.0
+     */
+    private $dir;
+    /**
      * Main Social Instance.
      *
      * @since 1.0.0
@@ -36,11 +42,12 @@ class XH_Social_Add_On_Social_Wechat extends Abstract_XH_Social_Add_Ons{
         $this->id='add_ons_social_wechat';
         $this->title=__('Wechat',XH_SOCIAL);
         $this->description=__('微信登录：PC端开放平台登录，微信端公众号登录。(支持公众平台(PC+微信端)登录，请使用<a href="https://www.wpweixin.net/product/1135.html">微信扩展高级版</a>)',XH_SOCIAL);
-        $this->version='1.0.3';
+        $this->version='1.0.4';
         $this->setting_uri = admin_url('admin.php?page=social_page_default&section=menu_default_channel&sub=social_wechat');
         $this->min_core_version = '1.0.0';
         $this->author=__('xunhuweb',XH_SOCIAL);
         $this->author_uri='https://www.wpweixin.net';
+        $this->dir= rtrim ( plugin_dir_path ( __FILE__ ), '/' );
     }
 
     public function on_update($old_version){
@@ -127,46 +134,11 @@ class XH_Social_Add_On_Social_Wechat extends Abstract_XH_Social_Add_Ons{
         
         switch ($datas['tab']){
             case 'share_qrcode':
-                global $wp_scripts;
-                ?>
-                <!DOCTYPE html>
-                    <html lang="zh-cn">
-                    <head>
-                        <meta charset="utf-8">
-                        <title><?php echo __('Wechat Share',XH_SOCIAL)?></title>
-                        <?php 
-                        if(isset($wp_scripts->registered['jquery-core'])&&isset($wp_scripts->registered['jquery-core']->src)){
-                            ?>
-                		    <script src="<?php echo $wp_scripts->base_url.$wp_scripts->registered['jquery-core']->src; ?>"></script>
-                		    <?php 
-                		}else{
-                		    ?><script src="https://code.jquery.com/jquery-3.2.1.min.js"></script><?php 
-                		}
-                        ?>
-                        <script src="<?php echo XH_SOCIAL_URL.'/assets/js/qrcode.js'?>"></script>
-                    </head>
-                    <body>
-                    <div id="qrcode" style="padding: 10px;vertical-align: middle;line-height: 100%;margin:0 auto;" align="center"></div>
-                    <div style="display:table;width:100%;text-align:center;"><h5><?php echo __('打开微信“扫一扫”，扫描上面的二维码，打开网页后再点击微信右上角的菜单、即可分享到微信',XH_SOCIAL)?></h5></div>
-                    <script>
-                    <?php 
-                    $url = isset($_GET['url'])?esc_url_raw(urldecode($_GET['url'])):'';
-                    if(empty($url)){
-                        $url=home_url('/');
-                    }
-                    ?>
-                    (function($){
-                    	var qrcode = new QRCode(document.getElementById("qrcode"), {
-    	    	            width : 282,
-    	    	            height : 282
-    	    	        });
-    			        qrcode.makeCode("<?php print $url?>");
-                    })(jQuery);
-                    </script>
-                    </body>
-                    </html>
-                <?php 
+                ob_start();
+                require XH_Social::instance()->WP->get_template($this->dir, 'share/wechat/qrcode-content.php');
+                echo ob_get_clean();
                 exit;
+                
             case 'authorization':
                 $wp_user_id = isset($datas['uuid'])?$datas['uuid']:0;
                 if(

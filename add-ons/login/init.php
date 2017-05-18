@@ -1,4 +1,7 @@
 <?php 
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
 /**
  * 登录注册
  * 实现自定义登录注册，找回密码页面
@@ -205,9 +208,7 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
         do_action('xh_social_page_login_login_after',$wp_user,$userdata);
        
         XH_Social::instance()->WP->do_wp_login($wp_user);
-        //刷新当前用户信息
-        wp_set_current_user($wp_user->ID);
-       
+    
         echo XH_Social_Error::success()->to_json();
         exit;
     }
@@ -285,10 +286,7 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
         }
         
         XH_Social::instance()->WP->do_wp_login($wp_user);
-        //刷新当前用户信息
-        wp_set_current_user($wp_user_id);
-         
-        
+   
         echo XH_Social_Error::success()->to_json();
         exit;
     }
@@ -458,7 +456,11 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
         return $menus;
     }
 
-    private function page_login_login_fields(){
+    /**
+     * @since 1.0.0
+     * @return array
+     */
+    public function page_login_login_fields(){
         $fields=apply_filters('xh_social_page_login_login_fields',array(),0);
         
         $fields['login_name']=array(
@@ -510,7 +512,7 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
         return apply_filters('xh_social_page_login_login_fields',$fields,4);
     }
     
-    private function page_login_register_fields(){
+    public function page_login_register_fields(){
         $fields=apply_filters('xh_social_page_login_register_fields',array(),0);
         
         $fields['register_user_login']=array(
@@ -602,256 +604,27 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
         return apply_filters('xh_social_page_login_register_fields',$fields,5); 
     }
     
-    public function page_login($attrs=array(), $innerhtml=''){
-        $log_on_callback_uri=esc_url_raw(XH_Social_Shortcodes::get_attr($attrs, 'redirect_to'));
-        if(empty($log_on_callback_uri)){
-            if(isset($_GET['redirect_to'])){  
-                $log_on_callback_uri =esc_url_raw(urldecode($_GET['redirect_to']));
-            }
-        }
+    public function page_login($atts=array(), $content=null){
+        XH_Social_Temp_Helper::set('atts', array(
+            'atts'=>$atts,
+            'content'=>$content
+        ),'templete');
         
-        if(empty($log_on_callback_uri)){
-            $log_on_callback_uri =home_url('/');
-        }
-        
-        if(strcasecmp(XH_Social_Helper_Uri::get_location_uri(), $log_on_callback_uri)===0){
-            $log_on_callback_uri =home_url('/');
-        }
-        
-        XH_Social::instance()->session->set('social_login_location_uri',$log_on_callback_uri);
-       
-        do_action('xh_social_page_login_before');
-        
-        $action = apply_filters('xh_social_page_login_before', null);
-        if(!empty($action)){
-            return $action;
-        }
-        
-        if(is_user_logged_in()){
-           return XH_Social::instance()->WP->wp_loggout_html($log_on_callback_uri);
-        }
-                
         ob_start();
-        ?>
-            <div class="xh-regbox">
-    			<div class="xh-title" id="form-title"><?php echo __('Login',XH_SOCIAL)?></div>
-    			<form class="xh-form">
-        			<div id="fields-error"></div>
-                        <?php 
-                           $fields = $this->page_login_login_fields(); 
-                           echo XH_Social_Helper_Html_Form::generate_html('login',$fields);
-                           
-                           do_action('xh_social_page_login_login_form');
-                        ?>
-                        <div class="xh-form-group mt10">
-                            <button type="button" id="btn-login" onclick="window.xh_social_view.login();" class="xh-btn xh-btn-primary xh-btn-block xh-btn-lg"><?php echo __('Log On',XH_SOCIAL)?></button>
-                        </div>
-                    	<?php 
-                    	$channels = XH_Social::instance()->channel->get_social_channels(array('login'));
-                    	if(count($channels)>0){
-                    	    ?>
-                    	    <div class="xh-form-group xh-mT20">
-                                <label><?php echo __('Quick Login',XH_SOCIAL)?></label>
-                               <div class="xh-social">
-                                   <?php foreach ($channels as $channel){
-                                       ?><a href="<?php echo XH_Social::instance()->channel->get_authorization_redirect_uri($channel->id,$log_on_callback_uri);?>" class="xh-social-item" style="background:url(<?php echo $channel->icon?>) no-repeat transparent;"></a><?php 
-                                   }?>
-                               </div>
-                            </div>
-                    	    <?php 
-                    	}
-                    	?>
-    			</form>
-    		</div>
-    		
-    		<script type="text/javascript">
-    			(function($){
-    				window.xh_social_view={
-    					loading:false,
-    					reset:function(){
-    						$('.xh-alert').empty().css('display','none');
-    					},
-    					error:function(msg){
-    						$('#fields-error').html('<div class="xh-alert xh-alert-danger" role="alert">'+msg+' </div>').css('display','block');
-    					},
-    					success:function(msg){
-    						$('#fields-error').html('<div class="xh-alert xh-alert-success" role="alert">'+msg+' </div>').css('display','block');
-    					},
-    					login:function(){
-    						this.reset();
-    						<?php 
-    						$data = array(
-    						    'notice_str'=>str_shuffle(time()),
-    						    'action'=>"xh_social_{$this->id}",
-    						    'tab'=>'login'
-    						);
-    						
-    						$data['hash']= XH_Social_Helper::generate_hash($data,XH_Social::instance()->get_hash_key());
-    						?>
-    						var data=<?php echo json_encode($data);?>;
-    						<?php XH_Social_Helper_Html_Form::generate_submit_data('login', 'data');?>
-    						if(this.loading){
-    							return;
-    						}
-    						
-    						$('#btn-login').attr('disabled','disabled').text('<?php print __('loading...',XH_SOCIAL)?>')
-    						this.loading=true;
-    
-    						jQuery.ajax({
-    				            url: '<?php echo XH_Social::instance()->ajax_url()?>',
-    				            type: 'post',
-    				            timeout: 60 * 1000,
-    				            async: true,
-    				            cache: false,
-    				            data: data,
-    				            dataType: 'json',
-    				            complete: function() {
-    				            	$('#btn-login').removeAttr('disabled').text('<?php print __('Log On',XH_SOCIAL)?>')
-    				            	window.xh_social_view.loading=false;
-    				            },
-    				            success: function(m) {
-    				            	if(m.errcode==405||m.errcode==0){
-    				            		window.xh_social_view.success('<?php print __('Congratulations, log on successfully!',XH_SOCIAL);?>');   				           
-    				            		location.href='<?php echo $log_on_callback_uri?>';
-    									return;
-    								}
-    				            	
-    				            	window.xh_social_view.error(m.errmsg);
-    				            },
-    				            error:function(e){
-    				            	window.xh_social_view.error('<?php print __('Internal Server Error!',XH_SOCIAL);?>');
-    				            	console.error(e.responseText);
-    				            }
-    				         });
-    					}
-    				};
-    			})(jQuery);
-    		</script>
-            <?php 
-            return ob_get_clean();
-       }
+        require XH_Social::instance()->WP->get_template($this->dir, 'account/login-content.php');
+        return ob_get_clean();
+    }
        
-       public function page_register($attrs=array(), $innerhtml=''){
-            $log_on_callback_uri=esc_url_raw(XH_Social_Shortcodes::get_attr($attrs, 'redirect_to'));
-            if(empty($log_on_callback_uri)){
-                if(isset($_GET['redirect_to'])){  
-                    $log_on_callback_uri =esc_url_raw(urldecode($_GET['redirect_to']));
-                }
-            }
-            
-            if(empty($log_on_callback_uri)){
-                $log_on_callback_uri =home_url('/');
-            }
-            
-            if(strcasecmp(XH_Social_Helper_Uri::get_location_uri(), $log_on_callback_uri)===0){
-                $log_on_callback_uri =home_url('/');
-            }
-            
-            XH_Social::instance()->session->set('social_login_location_uri',$log_on_callback_uri);
-            do_action('xh_social_page_register_before');
-            
-            $action = apply_filters('xh_social_page_register_before', null);
-            if(!empty($action)){
-                return $action;
-            }
-            
-            if(is_user_logged_in()){
-                 return XH_Social::instance()->WP->wp_loggout_html($log_on_callback_uri);
-            }
-            
-           ob_start();
-           ?>
-           <div class="xh-regbox">
-   			<div class="xh-title" id="form-title"><?php echo __('Register',XH_SOCIAL)?></div>
-   			<form class="xh-form">
-       			<div id="fields-error"></div>
-               <?php 
-                   $fields = $this->page_login_register_fields();
-                   echo XH_Social_Helper_Html_Form::generate_html('register',$fields);
-                   do_action('xh_social_page_login_register_form');
-               ?>
-               <div class="xh-form-group mt10">
-                   <button type="button" id="btn-register" onclick="window.xh_social_view.register();" class="xh-btn xh-btn-primary xh-btn-block xh-btn-lg"><?php echo __('Log In',XH_SOCIAL)?></button>
-               </div>
-   			</form>
-   		</div>
-   		
-   		<script type="text/javascript">
-   			(function($){
-   				window.xh_social_view={
-   					loading:false,
-   					reset:function(){
-   						$('.xh-alert').empty().css('display','none');
-   					},
-   					error:function(msg){
-   						$('#fields-error').html('<div class="xh-alert xh-alert-danger" role="alert">'+msg+' </div>').css('display','block');
-   					},
-   					warning:function(msg){
-   						$('#fields-error').html('<div class="xh-alert xh-alert-warning" role="alert">'+msg+' </div>').css('display','block');
-   					},
-   					success:function(msg){
-   						$('#fields-error').html('<div class="xh-alert xh-alert-success" role="alert">'+msg+' </div>').css('display','block');
-   					},
-   					register:function(){
-   						this.reset();
-   						<?php 
-   						$data = array(
-   						    'notice_str'=>str_shuffle(time()),
-   						    'action'=>"xh_social_{$this->id}",
-   						    'tab'=>'register'
-   						);
-   						
-   						$data['hash']= XH_Social_Helper::generate_hash($data,XH_Social::instance()->get_hash_key());
-   						?>
-   						var data=<?php echo json_encode($data);?>;
-   						<?php XH_Social_Helper_Html_Form::generate_submit_data('register', 'data');?>
-   						
-   						if(this.loading){
-   							return;
-   						}
-   						
-   						$('#btn-register').attr('disabled','disabled').text('<?php print __('loading...',XH_SOCIAL)?>')
-   						this.loading=true;
-   
-   						jQuery.ajax({
-   				            url: '<?php echo XH_Social::instance()->ajax_url()?>',
-   				            type: 'post',
-   				            timeout: 60 * 1000,
-   				            async: true,
-   				            cache: false,
-   				            data: data,
-   				            dataType: 'json',
-   				            complete: function() {
-   				            	$('#btn-register').removeAttr('disabled').text('<?php print __('Log In',XH_SOCIAL)?>')
-   				            	window.xh_social_view.loading=false;
-   				            },
-   				            success: function(m) {
-   				            	if(m.errcode==0){
-   				            		window.xh_social_view.success('<?php print __('Congratulations, registered successfully!',XH_SOCIAL);?>');
-   									location.href='<?php echo $log_on_callback_uri?>';
-   									return;
-   								}
-
-   								if(m.errcode==1001){
-   									window.xh_social_view.warning(m.errmsg);
-   									location.href='<?php echo admin_url('/')?>';
-   									return;
-   	   							}
-   				            	
-   				            	window.xh_social_view.error(m.errmsg);
-   				            },
-   				            error:function(e){
-   				            	window.xh_social_view.error('<?php print __('Internal Server Error!',XH_SOCIAL);?>');
-   				            	console.error(e.responseText);
-   				            }
-   				         });
-   					}
-   				};
-   			})(jQuery);
-   		</script>
-           <?php 
-           return ob_get_clean();
-      }
+    public function page_register($atts=array(), $content=null){
+       XH_Social_Temp_Helper::set('atts', array(
+           'atts'=>$atts,
+           'content'=>$content
+       ),'templete');
+       
+       ob_start();
+       require XH_Social::instance()->WP->get_template($this->dir, 'account/register-content.php');
+       return ob_get_clean();
+    }
           
 }
 

@@ -66,17 +66,6 @@ class XH_Social_Admin {
     public function hooks(){
         add_action( 'admin_menu', array( $this, 'admin_menu'),10);
         add_action( 'admin_head', array( $this, 'admin_head'),10 ); 
-        add_action( 'admin_print_scripts', array( $this, 'admin_scripts'),10 );
-        add_action( 'admin_print_styles', array( $this, 'admin_styles'),10 );
-    }
-    
-    public function admin_scripts() { //加载需要使用的js文件。
-        wp_enqueue_script('media-upload');
-        wp_enqueue_script('thickbox');
-    }
-    
-    public function admin_styles() { //加载样式文件。
-        wp_enqueue_style('thickbox');
     }
     
     /**

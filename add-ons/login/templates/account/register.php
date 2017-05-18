@@ -2,7 +2,9 @@
 /*
  Template Name: Social - Register
  */
-global $wp_scripts;
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -11,7 +13,8 @@ global $wp_scripts;
 		<meta charset="<?php bloginfo( 'charset' ); ?>">
 		<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
 		<link media="all" type="text/css" rel="stylesheet" href="<?php print XH_SOCIAL_URL?>/assets/css/social.css">	
-		<?php 
+		<?php
+		global $wp_scripts;
 		if(isset($wp_scripts->registered['jquery-core'])&&isset($wp_scripts->registered['jquery-core']->src)){
 		    ?>
 		    <script src="<?php echo $wp_scripts->base_url.$wp_scripts->registered['jquery-core']->src; ?>"></script>

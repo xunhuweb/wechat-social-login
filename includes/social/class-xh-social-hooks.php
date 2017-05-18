@@ -8,9 +8,9 @@ require_once 'class-xh-social-wp-api.php';
  * 
  * @author rain
  * @since 1.0.0
- */
+ */ 
 class XH_Social_Hooks{
-    private static $page_templetes=array();
+    private static $page_templates=array();
     
     public static function init(){
         add_filter( 'theme_page_templates',__CLASS__.'::theme_page_templates',10,4);
@@ -22,12 +22,12 @@ class XH_Social_Hooks{
         add_filter( 'get_avatar', __CLASS__.'::get_avatar', 100, 6);
         add_action( 'admin_init', __CLASS__.'::check_add_ons_update',10);
         add_action( 'admin_footer', __CLASS__.'::admin_footer',10);
-        add_action('the_content', __CLASS__.'::share',10,1);
+        add_action( 'the_content', __CLASS__.'::share',10,1);
         
         //templete must be start with social.
-        $templetes = apply_filters('xh_social_page_templetes', array());    
-        foreach ($templetes as $dir=>$templete_list){
-            self::$page_templetes[$dir]=$templete_list;
+        $templates = apply_filters('xh_social_page_templetes', array());    
+        foreach ($templates as $dir=>$template_list){
+            self::$page_templates[$dir]=$template_list;
         }
     }
     
@@ -109,6 +109,7 @@ class XH_Social_Hooks{
      * @return string <img> tag for the user's avatar
      */
     public static function get_avatar ( $avatar, $id_or_email, $size='', $default='', $alt='', $args =null ) {
+       
         $_user_ID = 0;
         
         if ( is_numeric( $id_or_email ) && 0 < $id_or_email )
@@ -201,54 +202,15 @@ class XH_Social_Hooks{
     }
     
     public static function accountbind(){
-        $channels = XH_Social::instance()->channel->get_social_channels(array('login'));
-        global $current_user;
-        if(!is_user_logged_in()){
-            return '';
-        }
-        if(count($channels)==0){
-            return '';
-        }
         ob_start();
-            ?>
-            <div class="xh-regbox" style="width: 100%;">
-              <h4 class="xh-title" style="margin-bottom:40px"><?php echo __('Account Binding/Unbundling',XH_SOCIAL)?></h4> 
-              <div class="xh-form ">
-              <?php if($channels){
-        			    foreach ($channels as $channel){
-        			        ?>
-                            <div class="xh-form-group xh-mT20  xh-social clearfix">
-                                 <div class="xh-left"><span class="xh-text"><img src="<?php echo $channel->icon?>" style="width:25px;vertical-align:middle;"/> <?php echo $channel->title?></span></div>
-                                 <div class="xh-right"><?php echo $channel->bindinfo($current_user->ID)?></div>
-                            </div>
-                            <hr/>
-                  <?php }
-              }?>  
-                 
-              </div>
-        
-            </div>
-           <?php 
-           
-           return ob_get_clean();
+        require XH_Social::instance()->WP->get_template(XH_SOCIAL_DIR, 'account/bind-bar.php');
+        return ob_get_clean();
     }
     
     public static function show_loginbar($redirect=''){
-        $channels =XH_Social::instance()->channel->get_social_channels(array('login'));    
         ob_start();
-        ?>
-	    <div class="xh_social_box" style="clear:both;">
-    	   <?php 
-	        foreach ($channels as $channel){
-    	        ?>
-    	        <a href="<?php echo XH_Social::instance()->channel->get_authorization_redirect_uri($channel->id,$redirect);?>" rel="noflow" style="background:url(<?php echo $channel->icon?>) no-repeat transparent;" class="xh_social_login_bar" title="<?php echo $channel->title;?>"></a>
-    	        <?php 
-    	    }?>
-	    </div><?php 
-	    
-	    unset($channels);
-	    
-	    return ob_get_clean();
+        require XH_Social::instance()->WP->get_template(XH_SOCIAL_DIR, 'account/login-bar.php');
+        return ob_get_clean();
     }
     
     /**
@@ -272,15 +234,23 @@ class XH_Social_Hooks{
         }
      
         //加载插件默认模板
-        foreach ( self::$page_templetes as $dir=>$templetes){
+        foreach ( self::$page_templates as $dir=>$templates){
            
-            foreach ($templetes as $ltemplete=>$name){
+            foreach ($templates as $ltemplete=>$name){
                 if($page_templete==$ltemplete){
-                    if(file_exists(STYLESHEETPATH.'/'.$page_templete)){
-                        return STYLESHEETPATH.'/'.$page_templete;
+                    if(strpos($ltemplete, 'social/')===0){
+                        $ltemplete=substr($ltemplete, 7);
                     }
                     
-                    $file = $dir.'/templates/'.(strpos($ltemplete, 'social/')===0?substr($ltemplete, 7):$ltemplete);
+                    if(file_exists(STYLESHEETPATH.'/social/'.$page_templete)){
+                        return STYLESHEETPATH.'/social/'.$page_templete;
+                    }
+                    
+                    if(file_exists(STYLESHEETPATH.'/wechat-social-login/'.$page_templete)){
+                        return STYLESHEETPATH.'/wechat-social-login/'.$page_templete;
+                    }
+                    
+                    $file = $dir.'/templates/'.$ltemplete;
                     if(file_exists($file)){
                         return $file;
                     }
@@ -305,10 +275,10 @@ class XH_Social_Hooks{
      * @param string       $post_type      Post type to get the templates for.
      */
     public static function theme_page_templates($post_templates, $WP_Theme, $post, $post_type=null){  
-        foreach ( self::$page_templetes as $dir=>$templetes){
-            foreach ($templetes as $templete=>$templete_name){
-                if(!isset($post_templates[$templete])){
-                    $post_templates[$templete] =$templete_name;
+        foreach ( self::$page_templates as $dir=>$templates){
+            foreach ($templates as $template=>$template_name){
+                if(!isset($post_templates[$template])){
+                    $post_templates[$template] =$template_name;
                 }
             }
         }

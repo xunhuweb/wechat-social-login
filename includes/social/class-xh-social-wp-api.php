@@ -114,66 +114,32 @@ class XH_Social_WP_Api{
     }
     
     public function wp_loggout_html($log_on_callback_uri=null){
-        if(empty($log_on_callback_uri)){
-            $log_on_callback_uri = home_url('/');
-        }
+        XH_Social_Temp_Helper::set('atts', array(
+            'log_on_callback_uri'=>$log_on_callback_uri
+        ),'templete');
+        
         ob_start();
-        ?>
-        <div class="xh-regbox">
-			<div class="xh-title"><?php echo __('You have logged in, log out?',XH_SOCIAL)?></div>
-			<div class="xh-form">
-                <div class="xh-form-group" style="margin-top:25px;">
-                    <a href="<?php echo wp_logout_url(XH_Social_Helper_Uri::get_location_uri())?>" class="xh-btn xh-btn-primary xh-btn-block xh-btn-lg"><?php echo __('Log out',XH_SOCIAL)?></a>
-                </div>
- 				<div class="xh-form-group xh-mT20">
-                <p style="text-align: center;"><a href="<?php echo $log_on_callback_uri;?>"><?php echo __('back',XH_SOCIAL)?></a></p>
-            </div>
-			</div>
-
-		</div>
-        <?php 
+        require XH_Social::instance()->WP->get_template(XH_SOCIAL_DIR, 'account/logout-panel.php');
         return ob_get_clean();
     }
     
-    public function wp_die($err=null){
-        if($err){
-            if($err instanceof Exception){
-                $err = "errcode:{$err->getCode()},errmsg:{$err->getMessage()}";
-            }
-            if($err instanceof XH_Social_Error){
-                $err = "errcode:{$err->errcode},errmsg:{$err->errmsg}";
-            }
-            if($err instanceof WP_Error){
-                $err = "errcode:{$err->get_error_code()},errmsg:{$err->get_error_message()}";
-            }
-            if(is_object($err)){
-                $err = print_r($err,true);
-            }
-        }
+    /**
+     * wp die
+     * @param Exception|XH_Social_Error|WP_Error|string|object $err
+     * @since 1.0.0
+     */
+    public function wp_die($err=null,$include_header_footer=true,$exit=true){
+        XH_Social_Temp_Helper::set('atts', array(
+            'err'=>$err,
+            'include_header_footer'=>$include_header_footer
+        ),'templete');
         
-        if(empty($err)){
-            $err = XH_Social_Error::err_code(500)->errmsg;
-        }
-        ?>
-        <!DOCTYPE html>
-        <html>
-            <head>
-            	<title>抱歉，出错了!</title>
-                <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
-                <link rel="stylesheet" type="text/css" href="<?php echo XH_SOCIAL_URL.'/assets/css/weui.css'?>">
-            </head>
-            <body>
-               <div class="weui_msg">
-               <div class="weui_icon_area"><i class="weui_icon_warn weui_icon_msg"></i></div>
-               <div class="weui_text_area">
-               <h4 class="weui_msg_title">抱歉，出错了!</h4>
-               <p class="weui_msg_desc"><?php echo $err;?></p>
-               </div>
-               </div>
-            </body>
-        </html>
-        <?php 
+        ob_start();
+        require XH_Social::instance()->WP->get_template(XH_SOCIAL_DIR, 'wp-die.php');
+        echo ob_get_clean();
+        if($exit){
         exit;
+        }
     }
     
     /**
@@ -377,5 +343,28 @@ class XH_Social_WP_Api{
         }
         
         return $results;
+    }
+    
+    /**
+     *
+     * @param string $page_templete_dir
+     * @param string $page_templete
+     * @return string
+     * @since 1.0.8
+     */
+    public function get_template($page_templete_dir,$page_templete){
+        if(strpos($page_templete, 'social/')===0){
+            $ltemplete=substr($page_templete, 7);
+        }
+        
+        if(file_exists(STYLESHEETPATH.'/social/'.$page_templete)){
+            return STYLESHEETPATH.'/social/'.$page_templete;
+        }
+        
+        if(file_exists(STYLESHEETPATH.'/wechat-social-login/'.$page_templete)){
+            return STYLESHEETPATH.'/wechat-social-login/'.$page_templete;
+        }
+    
+        return $page_templete_dir.'/templates/'.$page_templete;
     }
 }

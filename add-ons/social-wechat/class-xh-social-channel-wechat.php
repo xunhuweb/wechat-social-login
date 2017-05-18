@@ -171,6 +171,33 @@ class XH_Social_Channel_Wechat extends Abstract_XH_Social_Settings_Channel{
     }
     
     /**
+     * 获取openid
+     * @return string|exit
+     * @since 1.0.8
+     */
+    public function get_openid(){
+        $openid=null;
+        if(is_user_logged_in()){
+            $ext_user_info = $this->get_ext_user_info_by_wp(get_current_user_id());
+            if($ext_user_info){
+                $openid=isset($ext_user_info->mp_openid)?$ext_user_info->mp_openid:null;
+            }
+        }
+        
+        //重新获取openid
+        if(empty($openid)){
+            if(is_user_logged_in()){
+                wp_redirect(XH_Social::instance()->channel->get_do_unbind_uri($this->id,XH_Social_Helper_Uri::get_location_uri()));
+            }else{
+                wp_redirect(XH_Social::instance()->channel->get_authorization_redirect_uri($this->id,XH_Social_Helper_Uri::get_location_uri()));
+            }
+            exit;
+        }
+        
+        return $openid;
+    }
+    
+    /**
      * {@inheritDoc}
      * @see Abstract_XH_Social_Settings_Channel::get_share_link()
      */

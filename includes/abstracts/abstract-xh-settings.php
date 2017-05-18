@@ -87,7 +87,27 @@ abstract class Abstract_XH_Social_Settings {
 	    }
 	    ?><form method="post" id="mainform" action="" enctype="multipart/form-data"><?php
 	}
-	
+	/**
+	 *
+	 * @param array $pairs
+	 * @param array $atts
+	 * @param string $shortcode
+	 * @return array[]|unknown[]
+	 * @since 1.0.7
+	 */
+	function include_atts( $pairs, $atts, $shortcode = '' ) {
+	    $atts = (array)$atts;
+	    $out = array();
+	    foreach ($pairs as $name => $default) {
+	        if ( array_key_exists($name, $atts) ){
+	            $out[$name] = $atts[$name];
+	        }else{
+	            $out[$name] = $default;
+	        }
+	    }
+	     
+	    return $out;
+	}
 	/**
 	 * Admin Options.
 	 *

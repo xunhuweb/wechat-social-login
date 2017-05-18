@@ -22,6 +22,12 @@ final class XH_Social {
     public $version = '1.0.7';
     
     /**
+     * 最小wp版本
+     * @var string
+     */
+    public $min_wp_version='3.7';
+    
+    /**
      * License ID
      * 
      * @var string
@@ -65,7 +71,7 @@ final class XH_Social {
      * @var XH_Social_WP_Api
      */
     public $WP;
-    private $_scritps_tag=false;
+ 
     /**
      * Main Social Instance.
      *
@@ -120,13 +126,15 @@ final class XH_Social {
      * @since 1.0.0
      */
     private function init_hooks() {
+        $this->include_plugins();
+        
         add_action( 'init', array( $this,                       'init' ), 1 );
+        add_action( 'init', array( 'XH_Social_Hooks',           'init' ), 9 );
         add_action( 'init', array( 'XH_Social_Shortcodes',      'init' ), 10 );
         add_action( 'init', array( 'XH_Social_Ajax',            'init' ), 10 );
-        add_action( 'init', array( 'XH_Social_Hooks',           'init' ), 10 );
         
         //wp_enqueue_scripts,wp_loaded all required.
-        add_action( 'wp_enqueue_scripts', array($this,'wp_enqueue_scripts'),10);
+        //add_action( 'wp_enqueue_scripts', array($this,'wp_enqueue_scripts'),10);
         add_action( 'wp_loaded', array($this,'wp_enqueue_scripts'),10);  
         
         load_plugin_textdomain( XH_SOCIAL, false,dirname( plugin_basename( __FILE__ ) ) . '/lang/'  );
@@ -135,8 +143,6 @@ final class XH_Social {
         register_activation_hook ( XH_SOCIAL_FILE, array($this,'_register_activation_hook'),10 );
         register_deactivation_hook(XH_SOCIAL_FILE,  array($this,'_register_deactivation_hook'),10);        
         add_action ( 'plugin_action_links_'. plugin_basename( XH_SOCIAL_FILE ),array($this,'_plugin_action_links'),10,1);
-       
-        $this->include_plugins();
     }
 
     /**
@@ -192,23 +198,32 @@ final class XH_Social {
     }
     
     /**
-     * Get Ajax URL.
+     * ajax url
+     * @param string|array $action
+     * @param bool $hash
      * @return string
      * @since 1.0.0
      */
-    public function ajax_url($action='') {
-        //2017年4月12日 11:13:37
-        //修改地址取值，在二级目录下出现错误路径的问题
-//         $url = admin_url( 'admin-ajax.php', 'relative' );
-       
-//         if(strpos($url, 'http')!==0){
-//             $url= rtrim(home_url(),'/').'/'.ltrim($url,'/');
-//         }
-        $url = admin_url( 'admin-ajax.php' );
-        if(!empty($action)){
-            $params=array();
-            $url = XH_Social_Helper_Uri::get_uri_without_params($url,$params);
-            $params['action']=$action;
+    public function ajax_url($action=null,$hash = false) {
+        $params = array();
+        $url = XH_Social_Helper_Uri::get_uri_without_params(admin_url( 'admin-ajax.php' ),$params);
+        if($action){
+            $ps = array();
+            if(is_string($action)){
+                $ps['action']=$action;
+            }else if(is_array($action)){
+                $ps=array_merge($ps,$action);
+            }
+            
+            if($hash){
+                $ps['notice_str'] = str_shuffle(time());
+                $ps['hash'] = XH_Social_Helper::generate_hash($ps, $this->get_hash_key());
+            }
+            
+            $params = array_merge($params,$ps);
+        }
+        
+        if(count($params)>0){
             $url.="?".http_build_query($params);
         }
         return $url;
@@ -227,7 +242,10 @@ final class XH_Social {
         
         return $hash_key;
     }
-    
+    public function supported_wp_version(){
+        global $wp_version;
+        return version_compare( $wp_version, $this->min_wp_version, '>=' );
+    }
     /**
      * 插件初始化
      * 
@@ -235,6 +253,18 @@ final class XH_Social {
      * @since 1.0.0
      */
     public function _register_activation_hook(){
+        if(!$this->supported_wp_version()){
+            throw new Exception('min wp version is 3.7');
+        }
+        
+        if(!function_exists('curl_init')){
+            throw new Exception('php curl libs is required');
+        }
+        
+        if(!function_exists('mb_strimwidth')){
+            throw new Exception('php mb_string libs is required');
+        }
+        
         //第一次安装，所有插件自动安装
         $plugins_installed =get_option('xh_social_plugins_installed',null);
         if(!is_array($plugins_installed)||count($plugins_installed)==0){
@@ -394,18 +424,19 @@ final class XH_Social {
     
    
     public function wp_enqueue_scripts(){
-        if($this->_scritps_tag){
-            return;
-        }
+        wp_enqueue_style('wsocial',XH_SOCIAL_URL.'/assets/css/social.css',array(),$this->version);
         
-        $this->_scritps_tag=true;
-        
+        wp_enqueue_script('jquery');
         if(is_admin()){
             //current plugins require jquery.js
-            wp_enqueue_script('xh-social-js',XH_SOCIAL_URL.'/assets/js/jquery-loading.js',array('jquery'),$this->version);
+            wp_enqueue_script('jquery-loading',XH_SOCIAL_URL.'/assets/js/jquery-loading.js',array('jquery'),$this->version);
+            wp_enqueue_script('qrcode',XH_SOCIAL_URL.'/assets/js/qrcode.js',array('jquery'),$this->version);
+            wp_enqueue_script('media-upload');
+            wp_enqueue_script('thickbox');
+            wp_enqueue_style('thickbox');
         }
         
-        wp_enqueue_style('xh-social-css',XH_SOCIAL_URL.'/assets/css/social.css',array(),$this->version);
+        do_action('xh_social_enqueue_scripts');
     }
 }
 
