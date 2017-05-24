@@ -429,13 +429,14 @@ final class XH_Social {
     
    
     public function wp_enqueue_scripts(){
-        wp_enqueue_style('wsocial',XH_SOCIAL_URL.'/assets/css/social.css',array(),$this->version);
+        $min = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+        wp_enqueue_style('wsocial',XH_SOCIAL_URL."/assets/css/social$min.css",array(),$this->version);
         
         wp_enqueue_script('jquery');
         if(is_admin()){
             //current plugins require jquery.js
-            wp_enqueue_script('jquery-loading',XH_SOCIAL_URL.'/assets/js/jquery-loading.js',array('jquery'),$this->version);
-            wp_enqueue_script('qrcode',XH_SOCIAL_URL.'/assets/js/qrcode.js',array('jquery'),$this->version);
+            wp_enqueue_script('jquery-loading',XH_SOCIAL_URL.'/assets/js/jquery-loading$min.js',array('jquery'),$this->version);
+            wp_enqueue_script('qrcode',XH_SOCIAL_URL.'/assets/js/qrcode$min.js',array('jquery'),$this->version);
             wp_enqueue_script('media-upload');
             wp_enqueue_script('thickbox');
             wp_enqueue_style('thickbox');
