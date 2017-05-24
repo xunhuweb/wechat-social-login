@@ -36,6 +36,18 @@ class XH_Social_Ajax {
 	 * @since 1.0.0
 	 */
     public static function gc(){
+        $action ='xh_social_gc';
+        $params = array(
+            'action'=>$action,
+            $action=>isset($_REQUEST[$action])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST[$action]):'',
+            'notice_str'=>isset($_REQUEST['notice_str'])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST['notice_str']):'',
+        );
+         
+        if(!XH_Social::instance()->WP->ajax_validate($params,isset($_REQUEST['hash'])?$_REQUEST['hash']:null,true)){
+            echo XH_Social_Error::err_code(701)->to_json();
+            exit;
+        }
+        
         XH_Social::instance()->session->cleanup_sessions();
         do_action('xh_social_gc');
     }
@@ -49,7 +61,18 @@ class XH_Social_Ajax {
 	    require_once XH_SOCIAL_DIR.'/includes/captcha/CaptchaBuilder.php';
 	    require_once XH_SOCIAL_DIR.'/includes/captcha/PhraseBuilder.php';
 	 
-	    // header('Content-type: image/jpeg');
+	    $action ='xh_social_captcha';
+	    $params = array(
+	        'action'=>$action,
+	        $action=>isset($_REQUEST[$action])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST[$action]):'',
+	        'notice_str'=>isset($_REQUEST['notice_str'])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST['notice_str']):'',
+	    );
+	    
+	    if(!XH_Social::instance()->WP->ajax_validate($params,isset($_REQUEST['hash'])?$_REQUEST['hash']:null,true)){
+            XH_Social::instance()->WP->wp_die(XH_Social_Error::err_code(701)->errmsg);
+            exit;
+	    }
+	    
 	    $builder = Gregwar\Captcha\CaptchaBuilder::create() ->build();
 	    XH_Social::instance()->session->set('social_captcha', $builder->getPhrase());
 	    
@@ -57,16 +80,17 @@ class XH_Social_Ajax {
 	    exit;
 	}
 	
-	public static function channel(){    
+	public static function channel(){  
+	    $action ='xh_social_channel';
 	    $params = array(
-	        'action'=>isset($_REQUEST['action'])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST['action']):'',
+	        'action'=>$action,
+	        $action=>isset($_REQUEST[$action])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST[$action]):'',
 	        'channel_id'=>isset($_REQUEST['channel_id'])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST['channel_id']):'',
 	        'tab'=>isset($_REQUEST['tab'])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST['tab']):'',
 	        'notice_str'=>isset($_REQUEST['notice_str'])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST['notice_str']):'',
 	    );
 	    
-	    $hash=XH_Social_Helper::generate_hash($params, XH_Social::instance()->get_hash_key());
-	    if(!isset($_REQUEST['hash'])||$hash!=XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST['hash'])){
+	    if(!XH_Social::instance()->WP->ajax_validate($params,isset($_REQUEST['hash'])?$_REQUEST['hash']:null,true)){
 	        XH_Social::instance()->WP->wp_die(XH_Social_Error::err_code(701)->errmsg);
 	        exit;
 	    }
@@ -176,14 +200,15 @@ class XH_Social_Ajax {
 	        exit;
 	    }
 	    
+	    $action ='xh_social_service';
 	    $params = array(
-	        'action'=>isset($_POST['action'])?XH_Social_Helper_String::sanitize_key_ignorecase($_POST['action']):'',
+	        'action'=>$action,
+	        $action=>isset($_POST[$action])?XH_Social_Helper_String::sanitize_key_ignorecase($_POST[$action]):'',
 	        'tab'=>isset($_POST['tab'])?XH_Social_Helper_String::sanitize_key_ignorecase($_POST['tab']):'',
 	        'notice_str'=>isset($_POST['notice_str'])?XH_Social_Helper_String::sanitize_key_ignorecase($_POST['notice_str']):'',
 	    );
 	    
-	    $hash=XH_Social_Helper::generate_hash($params, XH_Social::instance()->get_hash_key());
-	    if($hash!=XH_Social_Helper_String::sanitize_key_ignorecase($_POST['hash'])){
+	    if(!XH_Social::instance()->WP->ajax_validate($params,isset($_REQUEST['hash'])?$_REQUEST['hash']:null,true)){
 	        echo (XH_Social_Error::err_code(701)->to_json());
 	        exit;
 	    }
@@ -312,16 +337,16 @@ class XH_Social_Ajax {
 	        echo (XH_Social_Error::err_code(501)->to_json());
 	        exit;
 	    }
-	    
+	    $action ='xh_social_plugin';
 	    $params = array(
-	        'action'=>isset($_POST['action'])?XH_Social_Helper_String::sanitize_key_ignorecase($_POST['action']):'',
+	        'action'=>$action,
+	        $action=>isset($_POST[$action])?XH_Social_Helper_String::sanitize_key_ignorecase($_POST[$action]):'',
 	        'tab'=>isset($_POST['tab'])?XH_Social_Helper_String::sanitize_key_ignorecase($_POST['tab']):'',
 	        'plugin_id'=>isset($_POST['plugin_id'])?XH_Social_Helper_String::sanitize_key_ignorecase($_POST['plugin_id']):'',
 	        'notice_str'=>isset($_POST['notice_str'])?XH_Social_Helper_String::sanitize_key_ignorecase($_POST['notice_str']):'',
 	    );
 	   
-	    $hash=XH_Social_Helper::generate_hash($params, XH_Social::instance()->get_hash_key());
-	    if($hash!=XH_Social_Helper_String::sanitize_key_ignorecase($_POST['hash'])){
+	    if(!XH_Social::instance()->WP->ajax_validate($params,isset($_REQUEST['hash'])?$_REQUEST['hash']:null,true)){
 	        echo (XH_Social_Error::err_code(701)->to_json());
 	        exit;
 	    }

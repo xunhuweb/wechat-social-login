@@ -213,14 +213,6 @@ abstract class Abstract_XH_Social_Add_Ons_Update extends Abstract_XH_Social_Add_
     }
     
     private function _uuu($action,$plugin_id,$on_success){
-        $pr = array(
-            'action'=>'xh_social_plugin',
-            'tab'=>$action,
-            'plugin_id'=>$plugin_id,
-            'notice_str'=>str_shuffle(time())
-        );
-       
-        $pr['hash']=XH_Social_Helper::generate_hash($pr, XH_Social::instance()->get_hash_key()); 
         ?>
         <script type="text/javascript">
 			(function($){
@@ -230,7 +222,11 @@ abstract class Abstract_XH_Social_Add_Ons_Update extends Abstract_XH_Social_Add_
 							if(this.loading){return;}
 							this.loading=true;
 							jQuery.ajax({
-					            url: '<?php echo XH_Social::instance()->ajax_url()?>',
+					            url: '<?php echo XH_Social::instance()->ajax_url(array(
+					                'action'=>'xh_social_plugin',
+					                'tab'=>$action,
+					                'plugin_id'=>$plugin_id
+					            ),true,true)?>',
 					            type: 'post',
 					            timeout: 60 * 1000,
 					            async: true,
@@ -250,7 +246,7 @@ abstract class Abstract_XH_Social_Add_Ons_Update extends Abstract_XH_Social_Add_
 						}
 				};
 
-				window.view.plugin(<?php echo json_encode($pr);?>);
+				window.view.plugin({});
 			})(jQuery);
 		</script>
         <?php 

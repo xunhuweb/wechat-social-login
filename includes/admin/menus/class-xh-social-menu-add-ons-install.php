@@ -113,8 +113,9 @@ class XH_Social_Settings_Add_Ons_Install_Installed extends Abstract_XH_Social_Se
                                   		   			$params = array(
                                   		   			      'action'=>'xh_social_plugin',
                                   		   			      'tab'=>'uninstall',
+                                  		   			      'xh_social_plugin'=>wp_create_nonce('xh_social_plugin'),
                                   		   			      'plugin_id'=>$plugin->id,
-                                      		   			   'notice_str'=>str_shuffle(time())
+                                      		   			  'notice_str'=>str_shuffle(time())
                                   		   			);
                                   		   			$params['hash']=XH_Social_Helper::generate_hash($params, XH_Social::instance()->get_hash_key());
                                   		   			?>
@@ -152,6 +153,7 @@ class XH_Social_Settings_Add_Ons_Install_Installed extends Abstract_XH_Social_Se
                     		              	<?php 
                     		              	$params = array(
                     		              	    'action'=>'xh_social_plugin',
+                    		              	    'xh_social_plugin'=>wp_create_nonce('xh_social_plugin'),
                     		              	    'tab'=>'install',
                     		              	    'plugin_id'=>$plugin->id,
                     		              	    'notice_str'=>str_shuffle(time())
@@ -348,6 +350,7 @@ class XH_Social_Settings_Add_Ons_Install_Find extends Abstract_XH_Social_Setting
     <?php 
       	$params = array(
       	    'action'=>'xh_social_service',
+      	    'xh_social_service'=>wp_create_nonce('xh_social_service'),
       	    'tab'=>'extensions',
       	    'notice_str'=>str_shuffle(time())
       	);

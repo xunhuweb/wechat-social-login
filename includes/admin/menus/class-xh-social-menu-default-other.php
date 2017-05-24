@@ -32,7 +32,7 @@ class XH_Social_Menu_Default_Other extends Abstract_XH_Social_Settings_Menu{
      */
     private function __construct(){
         $this->id='menu_default_other';
-        $this->title=__('Other',XH_SOCIAL);
+        $this->title=__('Basic Settings',XH_SOCIAL);
     }
     
     /* (non-PHPdoc)

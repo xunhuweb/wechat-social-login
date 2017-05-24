@@ -76,6 +76,27 @@ class XH_Social_WP_Api{
     
         return $nickname;
     }
+
+    /**
+     * @since 1.0.9
+     * @param array $request
+     * @param bool $validate_notice
+     * @return bool
+     */
+    public function ajax_validate(array $request,$hash,$validate_notice = true){
+        if(XH_Social_Helper::generate_hash($request, XH_Social::instance()->get_hash_key())!=$hash){
+            return false;
+        }
+        
+        if($validate_notice
+            &&isset($request['action'])
+            &&'yes'===XH_Social_Settings_Default_Other_Default::instance()->get_option('defense_CSRF','no')){
+
+            return check_ajax_referer($request['action'],$request['action'],false);
+        }
+        
+        return true;
+    }
     
     /**
      * 设置错误
@@ -122,7 +143,7 @@ class XH_Social_WP_Api{
         require XH_Social::instance()->WP->get_template(XH_SOCIAL_DIR, 'account/logout-panel.php');
         return ob_get_clean();
     }
-    
+
     /**
      * wp die
      * @param Exception|XH_Social_Error|WP_Error|string|object $err
@@ -196,7 +217,7 @@ class XH_Social_WP_Api{
                             window.captcha_<?php echo esc_attr($name);?>_load=function(){
                             	$('#img-captcha-<?php echo esc_attr($name);?>').attr('src','');
                             	$.ajax({
-        				            url: '<?php echo XH_Social::instance()->ajax_url('xh_social_captcha')?>',
+        				            url: '<?php echo XH_Social::instance()->ajax_url('xh_social_captcha',true,true)?>',
         				            type: 'post',
         				            timeout: 60 * 1000,
         				            async: true,

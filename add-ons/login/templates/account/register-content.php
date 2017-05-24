@@ -69,16 +69,8 @@ if(is_user_logged_in()){
 			},
 			register:function(){
 				this.reset();
-				<?php 
-				$data = array(
-				    'notice_str'=>str_shuffle(time()),
-				    'action'=>"xh_social_{$api->id}",
-				    'tab'=>'register'
-				);
 				
-				$data['hash']= XH_Social_Helper::generate_hash($data,XH_Social::instance()->get_hash_key());
-				?>
-				var data=<?php echo json_encode($data);?>;
+				var data={};
 				<?php XH_Social_Helper_Html_Form::generate_submit_data('register', 'data');?>
 				
 				if(this.loading){
@@ -89,7 +81,10 @@ if(is_user_logged_in()){
 				this.loading=true;
 
 				jQuery.ajax({
-		            url: '<?php echo XH_Social::instance()->ajax_url()?>',
+		            url: '<?php echo XH_Social::instance()->ajax_url(array(
+		                'action'=>"xh_social_{$api->id}",
+		                'tab'=>'register'
+		            ),true,true)?>',
 		            type: 'post',
 		            timeout: 60 * 1000,
 		            async: true,

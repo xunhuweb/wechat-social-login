@@ -160,8 +160,11 @@ class XH_Social_Channel_Weibo extends Abstract_XH_Social_Settings_Channel{
         
         $ext_user_info['wp_user_id']=$wp_user_id;
         
+        do_action('xh_social_channel_update_wp_user_info',$ext_user_info);
         do_action('xh_social_channel_weibo_update_wp_user_info',$ext_user_info);
+        
         update_user_meta($wp_user_id, '_social_img', $ext_user_info['user_img']);
+        
         return $this->get_wp_user_info($ext_user_id);
     }
     public function get_wp_user($field,$field_val){
@@ -203,10 +206,6 @@ class XH_Social_Channel_Weibo extends Abstract_XH_Social_Settings_Channel{
      * @see Abstract_XH_Social_Settings_Channel::get_wp_user_info($ext_user_id)
      */
     public function get_wp_user_info($ext_user_id){
-        $userinfo =XH_Social_Temp_Helper::get('wp_user_info', 'login:weibo');
-        if($userinfo){
-            return $userinfo;
-        }
         $ext_user_id = intval($ext_user_id);
         global $wpdb;
         $user = $wpdb->get_row(
@@ -214,26 +213,17 @@ class XH_Social_Channel_Weibo extends Abstract_XH_Social_Settings_Channel{
             from {$wpdb->prefix}xh_social_channel_weibo w
             where w.id=$ext_user_id
             limit 1;");
-        if(!$user) {
+        if(!$user||!$user->user_id) {
             return null;
         }
         
-        $userinfo= get_userdata($user->user_id);
-        if($userinfo){
-            XH_Social_Temp_Helper::set('wp_user_info', $userinfo,'login:weibo');
-        }
-        return $userinfo;
+        return get_userdata($user->user_id);
     }
     /**
      * {@inheritDoc}
      * @see Abstract_XH_Social_Settings_Channel::get_ext_user_info_by_wp($wp_user_id)
      */
     public function get_ext_user_info_by_wp($wp_user_id){
-        $userinfo =XH_Social_Temp_Helper::get('ext_user_info_by_wp', 'login:weibo');
-        if($userinfo){
-            return $userinfo;
-        }
-    
         $wp_user_id = intval($wp_user_id);
         
         global $wpdb;
@@ -247,7 +237,7 @@ class XH_Social_Channel_Weibo extends Abstract_XH_Social_Settings_Channel{
             return null;
         }
         $guid = XH_Social_Helper_String::guid();
-        $userinfo=array(
+        return array(
                 'wp_user_id'=>$user->user_id,
                 'ext_user_id'=>$user->id,
                 'nickname'=>$user->nickname,
@@ -257,9 +247,6 @@ class XH_Social_Channel_Weibo extends Abstract_XH_Social_Settings_Channel{
                 'user_email'=>null,
                 'uid'=>$user->uid
         );
-        
-        XH_Social_Temp_Helper::set('ext_user_info_by_wp',$userinfo, 'login:weibo');
-        return $userinfo;
     }
     
     /**
@@ -281,11 +268,6 @@ class XH_Social_Channel_Weibo extends Abstract_XH_Social_Settings_Channel{
      * @see Abstract_XH_Social_Settings_Channel::get_ext_user_info($ext_user_id)
      */
     public function get_ext_user_info($ext_user_id){
-        $userinfo =XH_Social_Temp_Helper::get('ext_user_info', 'login:weibo');
-        if($userinfo){
-            return $userinfo;
-        }
-        
         $ext_user_id = intval($ext_user_id);
         global $wpdb;
         $user = $wpdb->get_row(
@@ -297,7 +279,7 @@ class XH_Social_Channel_Weibo extends Abstract_XH_Social_Settings_Channel{
             return null;
         }               
         $guid=XH_Social_Helper_String::guid();
-        $userinfo= array(
+        return array(
                 'nickname'=>$user->nickname,
                 'nicename'=>$guid,
                 'user_login'=>null,
@@ -307,9 +289,6 @@ class XH_Social_Channel_Weibo extends Abstract_XH_Social_Settings_Channel{
                 'ext_user_id'=>$user->id,
                 'uid'=>$user->uid
         );
-        
-        XH_Social_Temp_Helper::set('ext_user_info',$userinfo, 'login:weibo');
-        return $userinfo;
     }
     
     public function process_authorization_callback($wp_user_id){
@@ -433,19 +412,17 @@ class XH_Social_Channel_Weibo extends Abstract_XH_Social_Settings_Channel{
                     }
             }
             
-            if($wp_user_id>0
-                &&(!$ext_user_info||$ext_user_info->user_id!=$wp_user_id)){
-            
-                    $wpdb->query("delete from {$wpdb->prefix}xh_social_channel_weibo where user_id=$wp_user_id ;");
-                    if(!empty($wpdb->last_error)){
-                        XH_Social_Log::error($wpdb->last_error);
-                         throw new Exception(__($wpdb->last_error,XH_SOCIAL));
-                    }
+            if($wp_user_id>0 &&(!$ext_user_info||$ext_user_info->user_id!=$wp_user_id)){
+                $wpdb->query("delete from {$wpdb->prefix}xh_social_channel_weibo where user_id=$wp_user_id ;");
+                if(!empty($wpdb->last_error)){
+                    XH_Social_Log::error($wpdb->last_error);
+                     throw new Exception(__($wpdb->last_error,XH_SOCIAL));
+                }
             }
             
             if(!$ext_user_info){
                 if($wp_user_id>0){
-                    $update['user_id']=$wp_user_id;
+                    $userdata['user_id']=$wp_user_id;
                 }
                 
                 $wpdb->insert("{$wpdb->prefix}xh_social_channel_weibo", $userdata);
@@ -459,6 +436,7 @@ class XH_Social_Channel_Weibo extends Abstract_XH_Social_Settings_Channel{
                 }
         
                 $ext_user_id=$wpdb->insert_id;
+                
             } else{
                 if($wp_user_id>0){
                     $userdata['user_id']=$wp_user_id;
@@ -472,12 +450,10 @@ class XH_Social_Channel_Weibo extends Abstract_XH_Social_Settings_Channel{
                     XH_Social_Log::error($wpdb->last_error);
                     throw new Exception($wpdb->last_error);
                 }
-                if($ext_user_info->user_id){
-                    update_user_meta($ext_user_info->user_id, '_social_img', $userdata['img']);
-                }
+               
                 $ext_user_id=$ext_user_info->id;
             }
-        
+            
            return $this->process_login($ext_user_id);
         } catch (Exception $e) {
             XH_Social_Log::error($e);
@@ -503,22 +479,23 @@ class XH_Social_Channel_Weibo extends Abstract_XH_Social_Settings_Channel{
      * @since 1.0.0
      */
     private function _login_get_authorization_uri($wp_user_id,$error_times=null){
+        $api = XH_Social_Add_On_Social_Weibo::instance();
+        $params=array();
+        $url=XH_Social_Helper_Uri::get_uri_without_params(XH_Social::instance()->ajax_url(
+            array(
+                'tab'=>'authorization',
+                'action'=>"xh_social_{$api->id}",
+                'uid'=>$wp_user_id
+            ),true,true
+            ),$params);
+         
+        if(!is_null($error_times)){
+            $params['err_times']=$error_times;
+        }
+        
+        $redirect_uri= $url."?".http_build_query($params);
+        
         if('cross_domain_enabled'==$this->get_option('enabled_cross_domain')){
-            $params=array();
-            $url=XH_Social_Helper_Uri::get_uri_without_params(XH_Social::instance()->ajax_url(),$params);
-            $api = XH_Social_Add_On_Social_Weibo::instance();
-            
-            $params['tab']='authorization';
-            $params['action']="xh_social_{$api->id}";
-            $params['uid']=$wp_user_id;
-            $params['notice_str']=str_shuffle(time());
-            $params['hash']=XH_Social_Helper::generate_hash($params, XH_Social::instance()->get_hash_key());
-            if(!is_null($error_times)){
-                $params['err_times']=$error_times;
-            }
-            
-            $redirect_uri= $url."?".http_build_query($params);
-            
             $params = array(
                 'callback'=>$redirect_uri
             );
@@ -529,20 +506,6 @@ class XH_Social_Channel_Weibo extends Abstract_XH_Social_Settings_Channel{
             
             return $cross_domain_uri."?".http_build_query(array_merge($params_uri,$params));
         }else{
-            $params=array();
-            $url=XH_Social_Helper_Uri::get_uri_without_params(XH_Social::instance()->ajax_url(),$params);
-            $api = XH_Social_Add_On_Social_Weibo::instance();
-            
-            $params['tab']='authorization';
-            $params['action']="xh_social_{$api->id}";
-            $params['uid']=$wp_user_id;
-            $params['notice_str']=str_shuffle(time());
-            $params['hash']=XH_Social_Helper::generate_hash($params, XH_Social::instance()->get_hash_key());
-            if(!is_null($error_times)){
-                $params['err_times']=$error_times;
-            }
-            $redirect_uri= $url."?".http_build_query($params);
-            
             if(!class_exists('SaeTOAuthV2')){
                 require_once 'saetv2.ex.class.php';
             }

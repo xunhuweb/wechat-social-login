@@ -4,7 +4,7 @@
  * Plugin URI: http://www.weixinsocial.com
  * Description: 支持国内最热门的社交媒体登录。如：微信、QQ、微博、手机登录、账号绑定和解绑，全新的注册页面取代原生注册页面，支持Ultimate Member、WooCommerce、Buddypress，兼容Open Social。部分扩展收费，查看详情：<a href="http://www.weixinsocial.com">www.weixinsocial.com</a>
  * Author: 迅虎网络
- * Version: 1.0.7
+ * Version: 1.0.9
  * Author URI:  http://www.wpweixin.net
  */
 
@@ -19,7 +19,7 @@ final class XH_Social {
      * @since 1.0.0
      * @var string
      */
-    public $version = '1.0.7';
+    public $version = '1.0.9';
     
     /**
      * 最小wp版本
@@ -204,23 +204,28 @@ final class XH_Social {
      * @return string
      * @since 1.0.0
      */
-    public function ajax_url($action=null,$hash = false) {
+    public function ajax_url($action=null,$hash = false,$notice=false) {  
+        $ps =array();
+        $url = XH_Social_Helper_Uri::get_uri_without_params(admin_url( 'admin-ajax.php' ),$ps);
         $params = array();
-        $url = XH_Social_Helper_Uri::get_uri_without_params(admin_url( 'admin-ajax.php' ),$params);
+        
         if($action){
-            $ps = array();
             if(is_string($action)){
-                $ps['action']=$action;
+                $params['action']=$action;
             }else if(is_array($action)){
-                $ps=array_merge($ps,$action);
+                $params=$action;
             }
-            
-            if($hash){
-                $ps['notice_str'] = str_shuffle(time());
-                $ps['hash'] = XH_Social_Helper::generate_hash($ps, $this->get_hash_key());
+        }
+        
+        if(isset($params['action'])&&!empty($params['action'])){
+            if($notice){
+                $params[$params['action']]=wp_create_nonce($params['action']);
             }
-            
-            $params = array_merge($params,$ps);
+        }
+        
+        if($hash){
+            $params['notice_str'] = str_shuffle(time());
+            $params['hash'] = XH_Social_Helper::generate_hash($params, $this->get_hash_key());
         }
         
         if(count($params)>0){

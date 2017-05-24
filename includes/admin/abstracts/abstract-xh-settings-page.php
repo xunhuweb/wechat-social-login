@@ -8,7 +8,9 @@ if (! defined ( 'ABSPATH' ))
  * @since 1.0.0
  * @author ranj
  */
-abstract class Abstract_XH_Social_Settings_Page extends Abstract_XH_Social_Settings{  
+abstract class Abstract_XH_Social_Settings_Page extends Abstract_XH_Social_Settings{ 
+    protected $current_menu;
+    
     public function get_page_id(){
         return 'social_'.$this->id;
     }
@@ -26,12 +28,15 @@ abstract class Abstract_XH_Social_Settings_Page extends Abstract_XH_Social_Setti
         return apply_filters("xh_social_admin_page_{$this->id}", array());
     }
     
-    /**
-     * 输出页面
-     * 
-     * @since 1.0.0
-     */
-    public function render(){
+    public function get_current_menu(){
+        global $pagenow;
+        if($pagenow!='admin.php'){
+            return null;
+        }
+        
+        if($this->current_menu){
+            return $this->current_menu;
+        }
         $menus =  $this->menus();
         $current= isset($_GET['section'])?XH_Social_Helper_String::sanitize_key_ignorecase($_GET['section']):'';
         
@@ -41,12 +46,12 @@ abstract class Abstract_XH_Social_Settings_Page extends Abstract_XH_Social_Setti
             if(!$menu||!$menu instanceof Abstract_XH_Social_Settings_Menu){
                 continue;
             }
-           
+             
             //default first item
             if($index++===0){
                 $current_menu=$menu;
             }
-            
+        
             //specified item
             $select =strcasecmp($current,$menu->id)===0;
             if($select){
@@ -54,11 +59,25 @@ abstract class Abstract_XH_Social_Settings_Page extends Abstract_XH_Social_Setti
                 break;
             }
         }
-       
+         
+        if(!$current_menu){
+            return null;
+        }
+        $_GET['section'] = $current_menu->id;
+        $this->current_menu=$current_menu;
+        return $this->current_menu;
+    }
+    
+    /**
+     * 输出页面
+     * 
+     * @since 1.0.0
+     */
+    public function render(){
+        $current_menu = $this->get_current_menu();
         if(!$current_menu){
             return;
         }
-        
         $current_menu->render($this);
     }
 }

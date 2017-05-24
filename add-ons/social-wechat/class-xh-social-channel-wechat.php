@@ -202,20 +202,15 @@ class XH_Social_Channel_Wechat extends Abstract_XH_Social_Settings_Channel{
      * @see Abstract_XH_Social_Settings_Channel::get_share_link()
      */
     public function get_share_link(){
-        $params = array();
-        $ajax_url =XH_Social_Helper_Uri::get_uri_without_params( XH_Social::instance()->ajax_url(),$params);
-        
         $api =XH_Social_Add_On_Social_Wechat::instance();
-        $params1 = array(
-                'action'=>"xh_social_{$api->id}",
-                'tab'=>'share_qrcode',
-                'notice_str'=>str_shuffle(time())
-        );
-        
-        $params1['hash'] = XH_Social_Helper::generate_hash($params1, XH_Social::instance()->get_hash_key());
+        $params = array();
+        $ajax_url =XH_Social::instance()->ajax_url(array(
+            'action'=>"xh_social_{$api->id}",
+            'tab'=>'share_qrcode'
+        ),true,true);
         
         return array(
-            'link'=>$ajax_url."?".http_build_query(array_merge($params,$params1))."&url=".urlencode(XH_Social_Helper_Uri::get_location_uri()),
+            'link'=>$ajax_url."&url=".urlencode(XH_Social_Helper_Uri::get_location_uri()),
             'width'=>450,
             'height'=>400
         );
@@ -272,6 +267,7 @@ class XH_Social_Channel_Wechat extends Abstract_XH_Social_Settings_Channel{
         
         $ext_user_info['wp_user_id']=$wp_user_id;
         
+        do_action('xh_social_channel_update_wp_user_info',$ext_user_info);
         do_action('xh_social_channel_wechat_update_wp_user_info',$ext_user_info);
         update_user_meta($wp_user_id, '_social_img', $ext_user_info['user_img']);
         //兼容其他插件
@@ -294,11 +290,6 @@ class XH_Social_Channel_Wechat extends Abstract_XH_Social_Settings_Channel{
      * @see Abstract_XH_Social_Settings_Channel::get_wp_user_info($ext_user_id)
      */
     public function get_wp_user_info($ext_user_id){
-        $userinfo =XH_Social_Temp_Helper::get('wp_user_info', 'login:wechat');
-        if($userinfo){
-            return $userinfo;
-        }
-        
         $ext_user_id = intval($ext_user_id);
         global $wpdb;
         $user = $wpdb->get_row(
@@ -307,30 +298,17 @@ class XH_Social_Channel_Wechat extends Abstract_XH_Social_Settings_Channel{
             from {$wpdb->prefix}xh_social_channel_wechat w
             where w.id=$ext_user_id
             limit 1;");
-        if(!$user) {
+        if(!$user||!$user->user_id) {
             return null;
         }
         
-        if($user->user_id){
-            $userinfo= get_userdata($user->user_id);
-            if($userinfo){
-                XH_Social_Temp_Helper::set('wp_user_info', $userinfo,'login:wechat');
-                return $userinfo;
-            }
-        }
-     
-        return null;
+        return get_userdata($user->user_id);
     }
     /**
      * {@inheritDoc}
      * @see Abstract_XH_Social_Settings_Channel::get_ext_user_info_by_wp($wp_user_id)
      */
     public function get_ext_user_info_by_wp($wp_user_id){
-        $userinfo =XH_Social_Temp_Helper::get('ext_user_info_by_wp', 'login:wechat');
-        if($userinfo){
-            return $userinfo;
-        }
-    
         $wp_user_id = intval($wp_user_id);
         
         global $wpdb;
@@ -344,7 +322,7 @@ class XH_Social_Channel_Wechat extends Abstract_XH_Social_Settings_Channel{
             return null;
         }
         $guid = XH_Social_Helper_String::guid();
-        $userinfo=array(
+        return array(
                 'wp_user_id'=>$user->user_id,
                 'ext_user_id'=>$user->id,
                 'nickname'=>$user->nickname,
@@ -356,9 +334,6 @@ class XH_Social_Channel_Wechat extends Abstract_XH_Social_Settings_Channel{
                 'mp_openid'=>$user->mp_openid,
                 'op_openid'=>$user->op_openid,
         );
-        
-        XH_Social_Temp_Helper::set('ext_user_info_by_wp',$userinfo, 'login:wechat');
-        return $userinfo;
     }
     
     /**
@@ -380,11 +355,6 @@ class XH_Social_Channel_Wechat extends Abstract_XH_Social_Settings_Channel{
      * @see Abstract_XH_Social_Settings_Channel::get_ext_user_info($ext_user_id)
      */
     public function get_ext_user_info($ext_user_id){
-        $userinfo =XH_Social_Temp_Helper::get('ext_user_info', 'login:wechat');
-        if($userinfo){
-            return $userinfo;
-        }
-        
         $ext_user_id = intval($ext_user_id);
         global $wpdb;
         $user = $wpdb->get_row(
@@ -396,7 +366,7 @@ class XH_Social_Channel_Wechat extends Abstract_XH_Social_Settings_Channel{
             return null;
         }               
         $guid = XH_Social_Helper_String::guid();
-        $userinfo= array(
+        return array(
                 'nickname'=>$user->nickname,
                 'user_login'=>null,
                 'user_email'=>null,
@@ -408,9 +378,6 @@ class XH_Social_Channel_Wechat extends Abstract_XH_Social_Settings_Channel{
                 'mp_openid'=>$user->mp_openid,
                 'op_openid'=>$user->op_openid,
         );
-        
-        XH_Social_Temp_Helper::set('ext_user_info',$userinfo, 'login:wechat');
-        return $userinfo;
     }
     
     public function get_wp_user($field,$field_val){
@@ -719,6 +686,7 @@ class XH_Social_Channel_Wechat extends Abstract_XH_Social_Settings_Channel{
         $url=XH_Social_Helper_Uri::get_uri_without_params(XH_Social::instance()->ajax_url(),$params);
         $params['tab']='authorization';
         $params['action']="xh_social_{$api->id}";
+        $params["xh_social_{$api->id}"]=wp_create_nonce("xh_social_{$api->id}");
         $params['s'] =$state;
         $params['uuid']=is_null($user_ID)?0:$user_ID;
         $params['notice_str']=str_shuffle(time());
@@ -758,6 +726,7 @@ class XH_Social_Channel_Wechat extends Abstract_XH_Social_Settings_Channel{
         $url=XH_Social_Helper_Uri::get_uri_without_params(XH_Social::instance()->ajax_url(),$params);
         $params['tab']='authorization';
         $params['action']="xh_social_{$api->id}";
+        $params["xh_social_{$api->id}"]=wp_create_nonce("xh_social_{$api->id}");
         $params['uuid']=is_null($user_ID)?0:$user_ID;
         $params['s'] =$state;
         $params['notice_str']=str_shuffle(time());

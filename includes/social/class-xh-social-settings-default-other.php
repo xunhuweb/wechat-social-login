@@ -27,7 +27,7 @@ class XH_Social_Settings_Default_Other_Default extends Abstract_XH_Social_Settin
 
     private function __construct(){
         $this->id='settings_default_other_default';
-        $this->title=__('Other',XH_SOCIAL);
+        $this->title=__('Basic Settings',XH_SOCIAL);
 
         $this->init_form_fields();
     }
@@ -54,6 +54,12 @@ class XH_Social_Settings_Default_Other_Default extends Abstract_XH_Social_Settin
                     
                     return $options;
                 }
+            ),
+            'defense_CSRF'=>array(
+                'title'=>__('CSRF Defense ',XH_SOCIAL),
+                'label'=>__('Enabled/Disabled',XH_SOCIAL),
+                'type'=>'checkbox',
+                'description'=>__('If your site\' page is cached(using cache plugins(wp super cache, etc.)), Do not enable.',XH_SOCIAL)
             )
         );
     }

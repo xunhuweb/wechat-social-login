@@ -101,6 +101,7 @@ class XH_Social_Settings_Add_Ons_Recommend_Plugins extends Abstract_XH_Social_Se
     <?php 
       	$params = array(
       	    'action'=>'xh_social_service',
+      	    'xh_social_service'=>wp_create_nonce('xh_social_service'),
       	    'tab'=>'plugins',
       	    'notice_str'=>str_shuffle(time())
       	);

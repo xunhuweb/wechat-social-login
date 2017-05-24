@@ -50,13 +50,14 @@ class XH_Social_Channel_Api{
         }
     
         $params=array();
-        $ajax_url =XH_Social_Helper_Uri::get_uri_without_params(XH_Social::instance()->ajax_url(),$params);
-    
-        $params['channel_id'] =$channel_id;
-        $params['action']='xh_social_channel';
-        $params['tab']='do_unbind';
-        $params['notice_str']=str_shuffle(time());
-        $params['hash']=XH_Social_Helper::generate_hash($params,  XH_Social::instance()->get_hash_key());
+        $ajax_url =XH_Social_Helper_Uri::get_uri_without_params(XH_Social::instance()->ajax_url(
+            array(
+                'channel_id'=>$channel_id,
+                'action'=>'xh_social_channel',
+                'tab'=>'do_unbind'
+            ),true,true
+            ),$params);
+        
         $params['redirect_to']=$redirect_to;
         return $ajax_url."?".http_build_query($params);
     }
@@ -83,18 +84,19 @@ class XH_Social_Channel_Api{
         
         $redirect_to= apply_filters('xh_social_log_on_callback_uri', $redirect_to,$channel_id);
     
-        $params1=array();
-        $ajax_url =XH_Social_Helper_Uri::get_uri_without_params(XH_Social::instance()->ajax_url(),$params1);
-    
         $params=array();
-        $params['channel_id'] = $channel_id;
-        $params['action']='xh_social_channel';
-        $params['tab']='login_redirect_to_authorization_uri';
-        $params['notice_str']=str_shuffle(time());
-        $params['hash']=XH_Social_Helper::generate_hash($params,  XH_Social::instance()->get_hash_key());
+        $ajax_url =XH_Social_Helper_Uri::get_uri_without_params(XH_Social::instance()->ajax_url(
+            array(
+                'channel_id'=>$channel_id,
+                'action'=>'xh_social_channel',
+                'tab'=>'login_redirect_to_authorization_uri'
+            ),true,true
+            
+            ),$params);
+    
         $params['redirect_to']=$redirect_to;
     
-        return $ajax_url."?".http_build_query(array_merge($params,$params1));
+        return $ajax_url."?".http_build_query($params);
     } 
     
     /**
@@ -120,18 +122,18 @@ class XH_Social_Channel_Api{
     
         $redirect_to= apply_filters('xh_social_log_on_callback_uri', $redirect_to,$channel_id);
     
-        $params1=array();
-        $ajax_url =XH_Social_Helper_Uri::get_uri_without_params(XH_Social::instance()->ajax_url(),$params1);
-    
         $params=array();
-        $params['channel_id'] = $channel_id;
-        $params['action']='xh_social_channel';
-        $params['tab']='bind_redirect_to_authorization_uri';
-        $params['notice_str']=str_shuffle(time());
-        $params['hash']=XH_Social_Helper::generate_hash($params,  XH_Social::instance()->get_hash_key());
+        $ajax_url =XH_Social_Helper_Uri::get_uri_without_params(XH_Social::instance()->ajax_url(
+            array(
+                'channel_id'=>$channel_id,
+                'action'=>'xh_social_channel',
+                'tab'=>'bind_redirect_to_authorization_uri'
+            ),true,true
+            ),$params);
+    
         $params['redirect_to']=$redirect_to;
     
-        return $ajax_url."?".http_build_query(array_merge($params,$params1));
+        return $ajax_url."?".http_build_query($params);
     }
         
     /**

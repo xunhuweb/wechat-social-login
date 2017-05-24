@@ -183,50 +183,38 @@ abstract class Abstract_XH_Social_Settings_Channel extends Abstract_XH_Social_Se
         
         //清除上次错误数据
         XH_Social::instance()->WP->unset_wp_error($login_location_uri);
+        
         if(!$ext_user_id||$ext_user_id<=0){
             //未知错误！
             XH_Social::instance()->WP->set_wp_error($login_location_uri, sprintf(__("对不起，%s用户绑定失败！错误：%s",XH_SOCIAL),$this->title,XH_Social_Error::err_code(500)->errmsg));
             return $login_location_uri;
         }
-//         //TODO:这里需要处理
-//         global $current_user;
-//         //若当前用户已登录，就绑定
-//         if(is_user_logged_in()){
-//             $wp_user =$this->get_wp_user_info($ext_user_id);
-//             if($wp_user&&$wp_user->ID!=$current_user->ID){
-//                 //当前扩展用户已绑定了其它用户
-//                 XH_Social::instance()->WP->set_wp_error($login_location_uri, sprintf(__("对不起，您的%s已与账户(%s)绑定，请解绑后重试！",XH_SOCIAL),$this->title,$wp_user->nickname));
-//                 return $login_location_uri;
-//             }
-            
-//             //未开启用户信息绑定，则直接创建用户并登录跳转
-//             $wp_user = $this->update_wp_user_info($ext_user_id,$current_user->ID);
-//             if($wp_user instanceof  XH_Social_Error){
-//                 XH_Social::instance()->WP->set_wp_error($login_location_uri,  sprintf(__("对不起，%s用户绑定失败！错误：%s",XH_SOCIAL),$this->title,$wp_user->errmsg));
-//                 return $login_location_uri;
-//             }
-             
-//             XH_Social::instance()->WP->do_wp_login($wp_user);
-//             return $login_location_uri;
-//         }
-         
+       
         $wp_user =$this->get_wp_user_info($ext_user_id);
         if($wp_user){
             if(is_user_logged_in()&&get_current_user_id()!=$wp_user->ID){
                 XH_Social::instance()->WP->set_wp_error($login_location_uri,__("对不起，不允许在已登录的情况下登录其它账户!",XH_SOCIAL));
                 return $login_location_uri;
             }
+            
+            $wp_user = $this->update_wp_user_info($ext_user_id,$wp_user->ID);
+            if($wp_user instanceof  XH_Social_Error){
+                XH_Social::instance()->WP->set_wp_error($login_location_uri,  sprintf(__("对不起，%s用户绑定失败！错误：%s",XH_SOCIAL),$this->title,$wp_user->errmsg));
+                return $login_location_uri;
+            }
+            
             XH_Social::instance()->WP->do_wp_login($wp_user);
             return $login_location_uri;
         }
         
+        //在此处，不可能已存在已登录的用户了
         if(is_user_logged_in()){
-            XH_Social::instance()->WP->set_wp_error($login_location_uri,__("对不起，不允许在已登录的情况下登录其它账户!",XH_SOCIAL));
+            XH_Social::instance()->WP->set_wp_error($login_location_uri,__("对不起，请刷新后重试!",XH_SOCIAL));
             return $login_location_uri;
         }
         
         //兼容其他插件老用用户
-        $wp_user = apply_filters('xh_social_process_login_new_user',null, $this,$ext_user_id);
+        $wp_user = apply_filters('xh_social_process_login_new_user',null, $this,$ext_user_id);   
         if($wp_user){
             $wp_user = $this->update_wp_user_info($ext_user_id,$wp_user->ID);
             if($wp_user instanceof  XH_Social_Error){

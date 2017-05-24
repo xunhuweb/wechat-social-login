@@ -40,10 +40,10 @@ class XH_Social_Page_Default extends Abstract_XH_Social_Settings_Page{
      */
     public function menus(){
         $submenus =array(
+            XH_Social_Menu_Default_Other::instance(),
             XH_Social_Menu_Default_Channel::instance(),
             XH_Social_Menu_Default_Account::instance(),
-            XH_Social_Menu_Default_Ext::instance(),
-            XH_Social_Menu_Default_Other::instance()
+            XH_Social_Menu_Default_Ext::instance()
         );
         
         return apply_filters("xh_social_admin_page_{$this->id}", XH_Social_Helper_Array::where($submenus, function($m){

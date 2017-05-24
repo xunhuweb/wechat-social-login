@@ -95,7 +95,7 @@ class XH_Social_Session_Handler extends Abstract_XH_Social_Session {
 	            $last_value=$new_value;
 	        }
 	    }
-	    
+	   
 	    return $last_value;
 	}
 	

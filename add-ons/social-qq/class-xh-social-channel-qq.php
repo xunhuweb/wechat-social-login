@@ -146,6 +146,8 @@ class XH_Social_Channel_QQ extends Abstract_XH_Social_Settings_Channel{
         }
         
         $ext_user_info['wp_user_id']=$wp_user_id;
+        
+        do_action('xh_social_channel_update_wp_user_info',$ext_user_info);
         do_action('xh_social_channel_qq_update_wp_user_info',$ext_user_info);
         update_user_meta($wp_user_id, '_social_img', $ext_user_info['user_img']);
         return $this->get_wp_user_info($ext_user_id);
@@ -156,10 +158,6 @@ class XH_Social_Channel_QQ extends Abstract_XH_Social_Settings_Channel{
      * @see Abstract_XH_Social_Settings_Channel::get_wp_user_info($ext_user_id)
      */
     public function get_wp_user_info($ext_user_id){
-        $userinfo =XH_Social_Temp_Helper::get('wp_user_info', 'login:qq');
-        if($userinfo){
-            return $userinfo;
-        }
         $ext_user_id = intval($ext_user_id);
         global $wpdb;
         $user = $wpdb->get_row(
@@ -167,26 +165,17 @@ class XH_Social_Channel_QQ extends Abstract_XH_Social_Settings_Channel{
             from {$wpdb->prefix}xh_social_channel_qq w
             where w.id=$ext_user_id
             limit 1;");
-        if(!$user) {
+        if(!$user||!$user->user_id) {
             return null;
         }
         
-        $userinfo= get_userdata($user->user_id);
-        if($userinfo){
-            XH_Social_Temp_Helper::set('wp_user_info', $userinfo,'login:qq');
-        }
-        return $userinfo;
+        return get_userdata($user->user_id);
     }
     /**
      * {@inheritDoc}
      * @see Abstract_XH_Social_Settings_Channel::get_ext_user_info_by_wp($wp_user_id)
      */
     public function get_ext_user_info_by_wp($wp_user_id){
-        $userinfo =XH_Social_Temp_Helper::get('ext_user_info_by_wp', 'login:qq');
-        if($userinfo){
-            return $userinfo;
-        }
-    
         $wp_user_id = intval($wp_user_id);
         
         global $wpdb;
@@ -200,7 +189,7 @@ class XH_Social_Channel_QQ extends Abstract_XH_Social_Settings_Channel{
             return null;
         }
         $guid = XH_Social_Helper_String::guid();
-        $userinfo=array(
+        return array(
                 'wp_user_id'=>$user->user_id,
                 'ext_user_id'=>$user->id,
                 'nickname'=>$user->nickname,
@@ -210,9 +199,6 @@ class XH_Social_Channel_QQ extends Abstract_XH_Social_Settings_Channel{
                 'nicename'=>$guid,
                 'uid'=>$user->openid
         );
-        
-        XH_Social_Temp_Helper::set('ext_user_info_by_wp',$userinfo, 'login:qq');
-        return $userinfo;
     }
     
     /**
@@ -246,11 +232,6 @@ class XH_Social_Channel_QQ extends Abstract_XH_Social_Settings_Channel{
      * @see Abstract_XH_Social_Settings_Channel::get_ext_user_info($ext_user_id)
      */
     public function get_ext_user_info($ext_user_id){
-        $userinfo =XH_Social_Temp_Helper::get('ext_user_info', 'login:qq');
-        if($userinfo){
-            return $userinfo;
-        }
-        
         $ext_user_id = intval($ext_user_id);
         global $wpdb;
         $user = $wpdb->get_row(
@@ -262,7 +243,7 @@ class XH_Social_Channel_QQ extends Abstract_XH_Social_Settings_Channel{
             return null;
         }               
         $guid = XH_Social_Helper_String::guid();
-        $userinfo= array(
+        return  array(
                 'nickname'=>$user->nickname,
                 'user_login'=>null,
                 'user_email'=>null,
@@ -272,9 +253,6 @@ class XH_Social_Channel_QQ extends Abstract_XH_Social_Settings_Channel{
                 'nicename'=>$guid,
                 'uid'=>$user->openid
         );
-        
-        XH_Social_Temp_Helper::set('ext_user_info',$userinfo, 'login:qq');
-        return $userinfo;
     }
     
     public function process_authorization_callback($wp_user_id){
@@ -444,7 +422,7 @@ class XH_Social_Channel_QQ extends Abstract_XH_Social_Settings_Channel{
             
             if(!$ext_user_info){
                 if($wp_user_id>0){
-                    $update['user_id']=$wp_user_id;
+                    $userdata['user_id']=$wp_user_id;
                 }
                 $wpdb->insert("{$wpdb->prefix}xh_social_channel_qq", $userdata);
                 if(!empty($wpdb->last_error)){
@@ -535,20 +513,23 @@ class XH_Social_Channel_QQ extends Abstract_XH_Social_Settings_Channel{
      * @since 1.0.0
      */
     private function _login_get_authorization_uri($user_ID=0,$error_times=null){
-        if('cross_domain_enabled'==$this->get_option('enabled_cross_domain')){
-            $params=array();
-            $url=XH_Social_Helper_Uri::get_uri_without_params(XH_Social::instance()->ajax_url(),$params);
-            $api = XH_Social_Add_On_Social_QQ::instance();
-            $params['tab']='authorization';
-            $params['action']="xh_social_{$api->id}";
-            $params['uid']=is_null($user_ID)?0:$user_ID;
-            $params['notice_str']=str_shuffle(time());
-            $params['hash']=XH_Social_Helper::generate_hash($params, XH_Social::instance()->get_hash_key());
-            if(!is_null($error_times)){
-                $params['err_times']=$error_times;
-            }
-           
-            $redirect_uri= $url."?".http_build_query($params);           
+        $params=array();
+        $api = XH_Social_Add_On_Social_QQ::instance();
+        $url=XH_Social_Helper_Uri::get_uri_without_params(XH_Social::instance()->ajax_url(
+            array(
+                'tab'=>'authorization',
+                'action'=>"xh_social_{$api->id}",
+                'uid'=>is_null($user_ID)?0:$user_ID
+            ),true,true
+            ),$params);
+         
+        if(!is_null($error_times)){
+            $params['err_times']=$error_times;
+        }
+         
+        $redirect_uri= $url."?".http_build_query($params);
+        
+        if('cross_domain_enabled'==$this->get_option('enabled_cross_domain')){       
             $params = array(
                 'callback'=>$redirect_uri
             );
@@ -558,20 +539,7 @@ class XH_Social_Channel_QQ extends Abstract_XH_Social_Settings_Channel{
             $cross_domain_uri = XH_Social_Helper_Uri::get_uri_without_params($this->get_option('cross_domain_url'),$params_uri);
 
             return $cross_domain_uri."?".http_build_query(array_merge($params_uri,$params));
-           
         }else{
-            $params=array();
-            $url=XH_Social_Helper_Uri::get_uri_without_params(XH_Social::instance()->ajax_url(),$params);
-            $api = XH_Social_Add_On_Social_QQ::instance();
-            $params['tab']='authorization';
-            $params['action']="xh_social_{$api->id}";
-            $params['uid']=is_null($user_ID)?0:$user_ID;
-            $params['notice_str']=str_shuffle(time());
-            $params['hash']=XH_Social_Helper::generate_hash($params, XH_Social::instance()->get_hash_key());
-            if(!is_null($error_times)){
-                $params['err_times']=$error_times;
-            }
-            $redirect_uri= $url."?".http_build_query($params);
             $params=array(
                 'response_type'=>'code',
                 'client_id'=>$this->get_option('appid'),

@@ -87,7 +87,7 @@ class XH_Social_Admin {
     
     /**
      * 获取注册的菜单
-     * @return array
+     * @return []Abstract_XH_Social_Settings_Page
      * @since 1.0.0
      */
     public function get_admin_pages(){
@@ -96,6 +96,35 @@ class XH_Social_Admin {
             XH_Social_Page_Add_Ons::instance()
         ));
     }
+
+    /**
+     * @return NULL|Abstract_XH_Social_Settings_Page
+     */
+    public function get_current_page(){
+        global $pagenow;
+        if($pagenow!='admin.php'){
+            return null;
+        }
+        
+        $page_id = isset($_GET['page'])?$_GET['page']:null;
+        return XH_Social_Helper_Array::first_or_default($this->get_admin_pages(),function($m,$pid){
+            return $m->get_page_id()==$pid;
+        },$page_id);
+    }
+    
+    /**
+     *
+     * @return NULL|Abstract_XH_Social_Settings_Menu
+     */
+    public function get_current_menu(){
+        $current_page = $this->get_current_page();
+        if(!$current_page){
+            return null;
+        }
+    
+        return  $current_page->get_current_menu();
+    }
+    
     /**
      * Wp menus
      * @since  1.0.0

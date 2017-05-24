@@ -66,20 +66,21 @@ class XH_Social_Add_On_Social_QQ extends Abstract_XH_Social_Add_Ons{
     }
     
     public function do_ajax(){ 
+        $action ="xh_social_{$this->id}";
         $datas = array(
             'notice_str'=>isset($_REQUEST['notice_str'])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST['notice_str']):'',
-            'action'=>isset($_REQUEST['action'])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST['action']):'',
+            'action'=>$action,
+            $action => isset($_REQUEST[$action])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST[$action]):'',
             'tab'=>isset($_REQUEST['tab'])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST['tab']):'',
         );
         
         if(isset($_REQUEST['uid'])){
             $datas['uid']=XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST['uid']);
         }
-        
-        $hash=XH_Social_Helper::generate_hash($datas, XH_Social::instance()->get_hash_key());     
-        if(!isset($_REQUEST['hash'])||$hash!=$_REQUEST['hash']){
-            echo (XH_Social_Error::err_code(701)->to_json());
-            exit;
+           
+        if(!XH_Social::instance()->WP->ajax_validate($datas,isset($_REQUEST['hash'])?$_REQUEST['hash']:null,true)){
+           XH_Social::instance()->WP->wp_die(XH_Social_Error::err_code(701));
+           exit;
         }
      
         switch ($datas['tab']){
