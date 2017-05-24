@@ -498,8 +498,8 @@ class XH_Social_Settings_Add_Ons_Install_Find extends Abstract_XH_Social_Setting
          		                output+='<a class="first-page" href="javascript:window.view.search(1);"><span class="screen-reader-text"><?php echo __('first page',XH_SOCIAL)?></span><span aria-hidden="true">«</span></a>';
          		                output+=' <a class="prev-page" href="javascript:window.view.search('+(paging.page_index-1)+');"><span class="screen-reader-text"><?php echo __('prev page',XH_SOCIAL)?></span><span aria-hidden="true">‹</span></a>';
          		            }else{
-         		                output+='<span class="tablenav-pages-navspan" style="height:30px;" aria-hidden="true">«</span>';
-         		                output+=' <span class="tablenav-pages-navspan" style="height:30px;" aria-hidden="true">‹</span>';
+         		                output+='<span class="tablenav-pages-navspan"  aria-hidden="true">«</span>';
+         		                output+=' <span class="tablenav-pages-navspan"  aria-hidden="true">‹</span>';
          		            }
          		        
          		            output+='<span class="paging-input"> <input class="current-page xh-social-current-page" style="width:30px;" type="text" value="'+paging.page_index+'"  aria-describedby="table-paging"> of <span class="total-pages">'+paging.page_count+'</span></span>';
@@ -508,8 +508,8 @@ class XH_Social_Settings_Add_Ons_Install_Find extends Abstract_XH_Social_Setting
          		                output +='<a class="next-page" href="javascript:window.view.search('+(paging.page_index+1)+');"><span class="screen-reader-text"><?php echo __('next page',XH_SOCIAL)?></span><span aria-hidden="true">›</span></a>';
          		                output +=' <a class="last-page" href="javascript:window.view.search('+paging.page_count+');"><span class="screen-reader-text"><?php echo __('last page',XH_SOCIAL)?></span><span aria-hidden="true">»</span></a></span>';
          		            }else{
-         		                output+='<span class="tablenav-pages-navspan" style="height:30px;" aria-hidden="true">›</span>';
-         		                output+=' <span class="tablenav-pages-navspan" style="height:30px;" aria-hidden="true">»</span>';
+         		                output+='<span class="tablenav-pages-navspan" aria-hidden="true">›</span>';
+         		                output+=' <span class="tablenav-pages-navspan"  aria-hidden="true">»</span>';
          		            }
          		        
          		            output+='</div>';
