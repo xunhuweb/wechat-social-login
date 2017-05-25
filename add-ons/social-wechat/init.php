@@ -137,7 +137,7 @@ class XH_Social_Add_On_Social_Wechat extends Abstract_XH_Social_Add_Ons{
                 exit;
             }
         }
-        
+       
         switch ($datas['tab']){
             case 'share_qrcode':
                 ob_start();
@@ -196,14 +196,15 @@ class XH_Social_Add_On_Social_Wechat extends Abstract_XH_Social_Add_Ons{
                         XH_Social::instance()->WP->wp_die(__('Please check cross-domain app secret config(equal to current website app secret)!',XH_SOCIAL));
                     }
                      
-                  try {
+                    try {
                       $ext_user_id =$api->create_ext_user_info($datas['s'],$userdata,$wp_user_id, $datas['uid']);
                       $login_location_uri =$api->process_login($ext_user_id);
-                  } catch (Exception $e) {
+                    } catch (Exception $e) {
                       XH_Social_Log::error($e);
                       XH_Social::instance()->WP->wp_die($e);
                       exit;
-                  }
+                    }
+                    
                     $error = XH_Social::instance()->WP->get_wp_error($redirect_uri);
                     if(!empty($error)){
                         XH_Social::instance()->WP->wp_die($error);

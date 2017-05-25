@@ -564,7 +564,7 @@ class XH_Social_Channel_Wechat extends Abstract_XH_Social_Settings_Channel{
             'uid'=>$uid,
             'last_update'=>date_i18n('Y-m-d H:i:s')
         );
-        
+       
         if(isset($user_data['nickname'])&&!empty($user_data['nickname'])){
             $update['nickname']= XH_Social_Helper_String::remove_emoji($user_data['nickname']);
         }
@@ -629,7 +629,7 @@ class XH_Social_Channel_Wechat extends Abstract_XH_Social_Settings_Channel{
             if(!empty($wpdb->last_error)){
                 throw new Exception($wpdb->last_error,500);
             }
-    
+          
             return $user->id;
         }else{
             if($wp_user_id>0){
@@ -718,7 +718,6 @@ class XH_Social_Channel_Wechat extends Abstract_XH_Social_Settings_Channel{
         if(empty($uid)){
             $uid = XH_Social_Helper_String::guid();
         }
-        
         $state="mp";
         $api = XH_Social_Add_On_Social_Wechat::instance();
      
@@ -735,7 +734,8 @@ class XH_Social_Channel_Wechat extends Abstract_XH_Social_Settings_Channel{
         if(!is_null($error_times)){
             $params['err_times']=$error_times;
         }
-        
+
+      
         $redirect_uri= $url."?".http_build_query($params);
         
         $uri=null;

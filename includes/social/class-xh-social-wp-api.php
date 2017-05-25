@@ -90,6 +90,7 @@ class XH_Social_WP_Api{
         
         if($validate_notice
             &&isset($request['action'])
+            &&isset($request[$request['action']])
             &&'yes'===XH_Social_Settings_Default_Other_Default::instance()->get_option('defense_CSRF','no')){
 
             return check_ajax_referer($request['action'],$request['action'],false);
@@ -134,16 +135,25 @@ class XH_Social_WP_Api{
         return $error;
     }
     
-    public function wp_loggout_html($log_on_callback_uri=null){
+    /**
+     * @since 1.0.7
+     * @param string $log_on_callback_uri
+     * @return string
+     */
+    public function wp_loggout_html($log_on_callback_uri=null,$include_css=false,$include_header_footer=false,$include_html=false){
         XH_Social_Temp_Helper::set('atts', array(
-            'log_on_callback_uri'=>$log_on_callback_uri
+            'log_on_callback_uri'=>$log_on_callback_uri,
+            'include_css'=>$include_css,
+            'include_header_footer'=>$include_header_footer,
+            'include_html'=>$include_html
         ),'templete');
         
         ob_start();
-        require XH_Social::instance()->WP->get_template(XH_SOCIAL_DIR, 'account/logout-panel.php');
+        require XH_Social::instance()->WP->get_template(XH_SOCIAL_DIR, 'account/logout-content.php');
+     
         return ob_get_clean();
     }
-
+    
     /**
      * wp die
      * @param Exception|XH_Social_Error|WP_Error|string|object $err

@@ -32,8 +32,12 @@ if(!empty($action)){
 }
 
 if(is_user_logged_in()){
-     echo XH_Social::instance()->WP->wp_loggout_html($log_on_callback_uri);
-     return;
+    if(method_exists(XH_Social::instance()->WP, 'wp_loggout_html')){
+        echo XH_Social::instance()->WP->wp_loggout_html($log_on_callback_uri);
+        return;
+    }else{
+        wp_logout();
+    }
 }
 ?>
 <div class="xh-regbox">

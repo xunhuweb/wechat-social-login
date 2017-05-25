@@ -203,9 +203,9 @@ class XH_Social_Ajax {
 	    $action ='xh_social_service';
 	    $params = array(
 	        'action'=>$action,
-	        $action=>isset($_POST[$action])?XH_Social_Helper_String::sanitize_key_ignorecase($_POST[$action]):'',
-	        'tab'=>isset($_POST['tab'])?XH_Social_Helper_String::sanitize_key_ignorecase($_POST['tab']):'',
-	        'notice_str'=>isset($_POST['notice_str'])?XH_Social_Helper_String::sanitize_key_ignorecase($_POST['notice_str']):'',
+	        $action=>isset($_REQUEST[$action])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST[$action]):'',
+	        'tab'=>isset($_REQUEST['tab'])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST['tab']):'',
+	        'notice_str'=>isset($_REQUEST['notice_str'])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST['notice_str']):'',
 	    );
 	    
 	    if(!XH_Social::instance()->WP->ajax_validate($params,isset($_REQUEST['hash'])?$_REQUEST['hash']:null,true)){
@@ -217,12 +217,12 @@ class XH_Social_Ajax {
 
 	        //第三方扩展
 	        case 'extensions':
-	            $page_index = isset($_POST['pageIndex'])?intval($_POST['pageIndex']):1;
+	            $page_index = isset($_REQUEST['pageIndex'])?intval($_REQUEST['pageIndex']):1;
 	            if($page_index<1){
 	                $page_index=1;
 	            }
 	             
-	            $keywords = isset($_POST['keywords'])?sanitize_title_for_query($_POST['keywords']):'';
+	            $keywords = isset($_REQUEST['keywords'])?sanitize_title_for_query($_REQUEST['keywords']):'';
 	             
 	            if(empty($keywords)){
 	                $info = get_option('xh-social-ajax:service:extensions:'.$page_index);
@@ -268,12 +268,12 @@ class XH_Social_Ajax {
 
 	            exit;
 	        case 'plugins':
-	            $page_index = isset($_POST['pageIndex'])?intval($_POST['pageIndex']):1;
+	            $page_index = isset($_REQUEST['pageIndex'])?intval($_REQUEST['pageIndex']):1;
 	            if($page_index<1){
 	                $page_index=1;
 	            }
-	            $category_id=isset($_POST['category_id'])?intval($_POST['category_id']):0;
-	            $keywords = isset($_POST['keywords'])?sanitize_title_for_query($_POST['keywords']):'';
+	            $category_id=isset($_REQUEST['category_id'])?intval($_REQUEST['category_id']):0;
+	            $keywords = isset($_REQUEST['keywords'])?sanitize_title_for_query($_REQUEST['keywords']):'';
 	            if(empty($keywords)){
 	                $info = get_option("xh-social-ajax:service:plugins:{$category_id}:{$page_index}");
 	                if(!$info||!is_array($info)){
@@ -337,13 +337,14 @@ class XH_Social_Ajax {
 	        echo (XH_Social_Error::err_code(501)->to_json());
 	        exit;
 	    }
+	    
 	    $action ='xh_social_plugin';
 	    $params = array(
 	        'action'=>$action,
-	        $action=>isset($_POST[$action])?XH_Social_Helper_String::sanitize_key_ignorecase($_POST[$action]):'',
-	        'tab'=>isset($_POST['tab'])?XH_Social_Helper_String::sanitize_key_ignorecase($_POST['tab']):'',
-	        'plugin_id'=>isset($_POST['plugin_id'])?XH_Social_Helper_String::sanitize_key_ignorecase($_POST['plugin_id']):'',
-	        'notice_str'=>isset($_POST['notice_str'])?XH_Social_Helper_String::sanitize_key_ignorecase($_POST['notice_str']):'',
+	        $action=>isset($_REQUEST[$action])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST[$action]):'',
+	        'tab'=>isset($_REQUEST['tab'])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST['tab']):'',
+	        'plugin_id'=>isset($_REQUEST['plugin_id'])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST['plugin_id']):'',
+	        'notice_str'=>isset($_REQUEST['notice_str'])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST['notice_str']):'',
 	    );
 	   
 	    if(!XH_Social::instance()->WP->ajax_validate($params,isset($_REQUEST['hash'])?$_REQUEST['hash']:null,true)){
