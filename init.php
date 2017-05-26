@@ -126,6 +126,8 @@ final class XH_Social {
      * @since 1.0.0
      */
     private function init_hooks() {
+        load_plugin_textdomain( XH_SOCIAL, false,dirname( plugin_basename( __FILE__ ) ) . '/lang/'  );
+        
         $this->include_plugins();
         
         add_action( 'init', array( $this,                       'init' ), 1 );
@@ -136,9 +138,6 @@ final class XH_Social {
         //wp_enqueue_scripts,wp_loaded all required.
         //add_action( 'wp_enqueue_scripts', array($this,'wp_enqueue_scripts'),10);
         add_action( 'wp_loaded', array($this,'wp_enqueue_scripts'),10);  
-        
-        load_plugin_textdomain( XH_SOCIAL, false,dirname( plugin_basename( __FILE__ ) ) . '/lang/'  );
-   
         XH_Social_Log::instance( new XH_Social_Log_File_Handler ( XH_SOCIAL_DIR . "/logs/" . date ( 'Y/m/d' ) . '.log' ));
         register_activation_hook ( XH_SOCIAL_FILE, array($this,'_register_activation_hook'),10 );
         register_deactivation_hook(XH_SOCIAL_FILE,  array($this,'_register_deactivation_hook'),10);        
