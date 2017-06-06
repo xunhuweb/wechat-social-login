@@ -1233,11 +1233,7 @@ abstract class Abstract_XH_Social_Settings {
 		    if(isset($field['ignore'])){
 		        continue;
 		    }
-		    
-		    if(!isset ( $_POST [$this->get_field_key ( $key )] )){
-		        continue;
-		    }
-		    
+		
 			// Default to "text" field type.
 			$type = empty ( $field ['type'] ) ? 'text' : $field ['type'];
 			
