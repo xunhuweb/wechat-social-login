@@ -210,9 +210,9 @@ class XH_Social_WP_Api{
      */
     public function get_captcha_fields(){
         $fields['captcha']=array(
-            'type'=>function($form_id,$name,$settings){
-                    $form_name = $name;
-                    $name = $form_id."_".$name;
+            'type'=>function($form_id,$data_name,$settings){
+                    $form_name = $data_name;
+                    $name = $form_id."_".$data_name;
                     ob_start();
                     ?>
                    <div class="xh-input-group" style="width:100%;">
@@ -247,13 +247,10 @@ class XH_Social_WP_Api{
             				});
             				
             				window.captcha_<?php echo esc_attr($name);?>_load();
-            				window._submit_<?php echo esc_attr($form_id);?>(function(data){
-            					if(!data){data={};}
-            					data.<?php echo esc_attr($form_name)?>=$('#<?php echo esc_attr($name)?>').val();
-            				});
             			})(jQuery);
                     </script>
                 <?php 
+                XH_Social_Helper_Html_Form::generate_field_scripts($form_id, $data_name);
                 return ob_get_clean();
             },
             'validate'=>function($name,$datas,$settings){
@@ -268,7 +265,7 @@ class XH_Social_WP_Api{
                     return XH_Social_Error::error_custom(__('Please refresh the image captcha!',XH_SOCIAL));
                 }
                 
-                if($captcha!=$code_post){
+                if(strcasecmp($captcha, $code_post)!==0){
                     return XH_Social_Error::error_custom(__('image captcha is invalid!',XH_SOCIAL));
                 }
                 
@@ -375,7 +372,22 @@ class XH_Social_WP_Api{
         
         return $results;
     }
-    
+
+    /**
+     *
+     * @param string $dir
+     * @param string $templete_name
+     * @param mixed $params
+     * @return string
+     */
+    public function requires($dir,$templete_name,$params=null){
+        if(!is_null($params)){
+            XH_Social_Temp_Helper::set('atts', $params,'templetes');
+        }
+        ob_start();
+        require $this->get_template($dir, $templete_name);
+        return ob_get_clean();
+    }
     /**
      *
      * @param string $page_templete_dir

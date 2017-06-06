@@ -456,15 +456,42 @@ class XH_Social_Helper_Html_Form{
    public static function generate_submit_data($form_id,$data_name){
        ob_start();
        ?>
+        /*old version codes,willbe removed next version START*/
         if(window._submit_<?php echo esc_attr($form_id);?>_temps){
         	for(var i=0;i < window._submit_<?php echo esc_attr($form_id);?>_temps.length;i++){
         		window._submit_<?php echo esc_attr($form_id);?>_temps[i](<?php echo $data_name?>);
         	}
         }
-        <?php 
-        echo ob_get_clean();
+       /*old version codes,willbe removed next version END*/
+       
+       
+       $(document).trigger('on_form_<?php echo esc_attr($form_id);?>_submit',<?php echo $data_name;?>);
+       <?php 
+       echo ob_get_clean();
    }
     
+   /**
+    * 
+    * @param string $form_id
+    * @param string $data_name
+    * @since 1.1.1
+    */
+   public static function generate_field_scripts($form_id,$data_name){
+       $form_name = $data_name;
+       $name = $form_id."_".$data_name;
+       ob_start();
+       ?>
+      <script type="text/javascript">
+      	(function($){
+			$(document).bind('on_form_<?php echo esc_attr($form_id);?>_submit',function(e,m){
+				m.<?php echo esc_attr($form_name)?>=$('#<?php echo esc_attr($name)?>').val();
+			});
+		})(jQuery);
+		</script>
+      <?php 
+      echo ob_get_clean();
+   }
+   
     /**
      * 
      * @param array $fields
@@ -488,10 +515,10 @@ class XH_Social_Helper_Html_Form{
             'generate_html'=>null
         );
         
-      
-        ob_start();
+       ob_start();
         ?>
         <script type="text/javascript">
+        /*old version codes,willbe removed next version */
         window._submit_<?php echo esc_attr($form_id);?>=function(callback){
 			if(!window._submit_<?php echo esc_attr($form_id);?>_temps){window._submit_<?php echo esc_attr($form_id);?>_temps=[];}
         	window._submit_<?php echo esc_attr($form_id);?>_temps.push(callback);	
@@ -511,27 +538,19 @@ class XH_Social_Helper_Html_Form{
         
         return $html;
     } 
-    public static function generate_hidden_html($form_id,$name,$settings){
-        $form_name = $name;
-        $name = $form_id."_".$name;
+    public static function generate_hidden_html($form_id,$data_name,$settings){
+        $form_name = $data_name;
+        $name = $form_id."_".$data_name;
         ob_start();
         ?>
-            <input type="hidden" id="<?php echo esc_attr($name)?>" name="<?php echo esc_attr($name)?>" value="<?php echo esc_attr($settings['default'])?>"  />
-            <script type="text/javascript">
-    			(function($){
-    				window._submit_<?php echo esc_attr($form_id);?>(function(data){
-    					if(!data){data={};}
-    					data.<?php echo esc_attr($form_name)?>=$('#<?php echo esc_attr($name)?>').val();
-    				});
-    					
-    			})(jQuery);
-    		</script>
-            <?php 
-            return ob_get_clean();
-        }
-    public static function generate_text_html($form_id,$name,$settings){
-        $form_name = $name;
-        $name = $form_id."_".$name;
+        <input type="hidden" id="<?php echo esc_attr($name)?>" name="<?php echo esc_attr($name)?>" value="<?php echo esc_attr($settings['default'])?>"  />
+        <?php
+        self::generate_field_scripts($form_id, $data_name);
+        return ob_get_clean();
+    }
+    public static function generate_text_html($form_id,$data_name,$settings){
+        $form_name = $data_name;
+        $name = $form_id."_".$data_name;
         ob_start();
         ?>
         <div class="xh-form-group">
@@ -541,22 +560,14 @@ class XH_Social_Helper_Html_Form{
                 ?><span class="help-block"><?php echo $settings['descroption'];?></span><?php 
             }?>
         </div>
-        <script type="text/javascript">
-			(function($){
-				window._submit_<?php echo esc_attr($form_id);?>(function(data){
-					if(!data){data={};}
-					data.<?php echo esc_attr($form_name)?>=$('#<?php echo esc_attr($name)?>').val();
-				});
-					
-			})(jQuery);
-		</script>
         <?php 
+        self::generate_field_scripts($form_id, $data_name);
         return ob_get_clean();
     }
 
-    public static function generate_email_html($form_id,$name,$settings){
-        $form_name = $name;
-        $name = $form_id."_".$name;
+    public static function generate_email_html($form_id,$data_name,$settings){
+        $form_name = $data_name;
+        $name = $form_id."_".$data_name;
         ob_start();
         ?>
             <div class="xh-form-group">
@@ -566,21 +577,13 @@ class XH_Social_Helper_Html_Form{
                     ?><span class="help-block"><?php echo $settings['descroption'];?></span><?php 
                 }?>
             </div>
-            <script type="text/javascript">
-    			(function($){
-    				window._submit_<?php echo esc_attr($form_id);?>(function(data){
-    					if(!data){data={};}
-    					data.<?php echo esc_attr($form_name)?>=$('#<?php echo esc_attr($name)?>').val();
-    				});
-    					
-    			})(jQuery);
-    		</script>
-            <?php 
-            return ob_get_clean();
-        }
-    public static function generate_password_html($form_id,$name,$settings){
-        $form_name = $name;
-        $name = $form_id."_".$name;
+        <?php 
+        self::generate_field_scripts($form_id, $data_name);
+        return ob_get_clean();
+    }
+    public static function generate_password_html($form_id,$data_name,$settings){
+        $form_name = $data_name;
+        $name = $form_id."_".$data_name;
         ob_start();
         ?>
         <div class="xh-form-group">
@@ -590,24 +593,16 @@ class XH_Social_Helper_Html_Form{
                 ?><span class="help-block"><?php echo $settings['descroption'];?></span><?php 
             }?>
         </div>
-        <script type="text/javascript">
-			(function($){
-				window._submit_<?php echo esc_attr($form_id);?>(function(data){
-					if(!data){data={};}
-					data.<?php echo esc_attr($form_name)?>=$('#<?php echo esc_attr($name)?>').val();
-				});
-					
-			})(jQuery);
-		</script>
         <?php 
+        self::generate_field_scripts($form_id, $data_name);
         return ob_get_clean();
     }
     
-    public static function generate_select_html($form_id,$name,$settings){
-        $form_name = $name;
-        $name = $form_id."_".$name;
+    public static function generate_select_html($form_id,$data_name,$settings){
+        $form_name = $data_name;
+        $name = $form_id."_".$data_name;
+        
         ob_start();
-        $is_multi_fieldsets =false;
         ?>
         <div class="xh-form-group">
             <label class="<?php echo $settings['required']?'required':'';?>"><?php echo esc_html($settings['title'])?></label>
@@ -615,20 +610,7 @@ class XH_Social_Helper_Html_Form{
             	<?php 
             	   if(isset($settings['options'])){
             	       foreach ($settings['options'] as $key=>$val){
-            	           if(is_array($val)){
-            	               $is_multi_fieldsets=true;
-            	               $defaults = array (
-            	                   'title' => '',
-            	                   'class' => '',
-            	                   'css' => '',
-            	                   'fields' => array()
-            	               );
-            	               $val = wp_parse_args($val,$defaults);
-            	               ?><option <?php selected( $key, esc_attr( $settings['default']) ); ?> value="<?php echo esc_html($key);?>"><?php echo esc_html($val['title']);?></option><?php
-            	           }else{
-            	               ?><option <?php selected( $key, esc_attr( $settings['default']) ); ?> value="<?php echo esc_html($key);?>"><?php echo esc_html($val);?></option><?php
-            	           }
-            	            
+            	          ?><option <?php selected( $key, esc_attr( $settings['default']) ); ?> value="<?php echo esc_html($key);?>"><?php echo esc_html($val);?></option><?php
             	       }
             	   }
             	?>
@@ -637,70 +619,14 @@ class XH_Social_Helper_Html_Form{
                 ?><span class="help-block"><?php echo $settings['descroption'];?></span><?php 
             }?>
         </div>
-        <?php 
-        if(!$is_multi_fieldsets){
-            ?>
-                <script type="text/javascript">
-        			(function($){
-        				window._submit_<?php echo esc_attr($form_id);?>(function(data){
-        					if(!data){data={};}
-        					data.<?php echo esc_attr($form_name)?>=$('#<?php echo esc_attr($name)?>').val();
-        				});
-        					
-        			})(jQuery);
-        		</script>
-            <?php 
-        }else{
-              foreach ($settings['options'] as $file_key=>$fieldset){
-                  $defaults = array (
-                      'title' => '',
-                      'class' => '',
-                      'css' => 'border:0;',
-                      'fields' => array()
-                  );
-                  $fieldset=wp_parse_args($fieldset,$defaults);
-                  ?>
-                  <div id="<?php echo esc_attr($name)?>_fieldset_<?php echo esc_attr($file_key)?>" style="<?php echo esc_attr($fieldset['css'])?>" class="<?php echo esc_attr($name)?>_fieldset <?php echo esc_attr($fieldset['class'])?>">
-                  	<?php echo self::generate_html("{$form_id}_{$name}_{$file_key}", $fieldset['fields']);?>
-                  </div>
-                  <?php 
-              }  
-              ?>
-                <script type="text/javascript">
-        			(function($){
-        				window._submit_<?php echo esc_attr($form_id);?>(function(data){
-        					if(!data){data={};}
-        					
-        					data.<?php echo esc_attr($form_name)?>=$('#<?php echo esc_attr($name)?>').val();
-        					
-        					var func = new Function('return window._submit_<?php echo "{$form_id}_{$name}_";?>'+$('#<?php echo esc_attr($name)?>').val()+'_temps;');
-							var children = func();
-        					if(children){
-								for(var i=0;i<children.length;i++){
-									children[i](data);
-								}
-            				}
-        				});
-
-        				window._on_<?php echo esc_attr($form_id);?>_change=function(){
-							$('.<?php echo esc_attr($name)?>_fieldset').css('display','none');
-        					$('#<?php echo esc_attr($name)?>_fieldset_'+$('#<?php echo esc_attr($name)?>').val()).css('display','block');
-            			};	
-            			window._on_<?php echo esc_attr($form_id);?>_change();
-            			$('#<?php echo esc_attr($name)?>').change(function(){
-            				window._on_<?php echo esc_attr($form_id);?>_change();
-                		});
-        			})(jQuery);
-        		</script>
-            <?php 
-        }
-        
+    <?php 
+    self::generate_field_scripts($form_id, $data_name);
         return ob_get_clean();
     }
      
-    public static function generate_textarea_html($form_id,$name,$settings){
-        $form_name = $name;
-        $name = $form_id."_".$name;
+    public static function generate_textarea_html($form_id,$data_name,$settings){
+        $form_name = $data_name;
+        $name = $form_id."_".$data_name;
         ob_start();
         ?>
         <div class="xh-form-group">
@@ -710,22 +636,14 @@ class XH_Social_Helper_Html_Form{
                 ?><span class="help-block"><?php echo $settings['descroption'];?></span><?php 
             }?>
         </div>
-        <script type="text/javascript">
-			(function($){
-				window._submit_<?php echo esc_attr($form_id);?>(function(data){
-					if(!data){data={};}
-					data.<?php echo esc_attr($form_name)?>=$('#<?php echo esc_attr($name)?>').val();
-				});
-					
-			})(jQuery);
-		</script>
         <?php 
+        self::generate_field_scripts($form_id, $data_name);
         return ob_get_clean();
     }
     
-    public static function generate_checkbox_html($form_id,$name,$settings){
-        $form_name = $name;
-        $name = $form_id."_".$name;
+    public static function generate_checkbox_html($form_id,$data_name,$settings){
+        $form_name = $data_name;
+        $name = $form_id."_".$data_name;
         ob_start();
         ?>
         <div class="xh-form-group">
@@ -735,18 +653,11 @@ class XH_Social_Helper_Html_Form{
                 ?><span class="help-block"><?php echo $settings['descroption'];?></span><?php 
             }?>
         </div>
-        <script type="text/javascript">
-			(function($){
-				window._submit_<?php echo esc_attr($form_id);?>(function(data){
-					if(!data){data={};}
-					data.<?php echo esc_attr($form_name)?>=$('#<?php echo esc_attr($name)?>').val();
-				});
-					
-			})(jQuery);
-		</script>
         <?php 
+        self::generate_field_scripts($form_id, $data_name);
         return ob_get_clean();
     }
+    
     private static function get_custom_attribute_html($data) {
         $custom_attributes = array ();
     

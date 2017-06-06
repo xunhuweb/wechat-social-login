@@ -4,7 +4,7 @@
  * Plugin URI: http://www.weixinsocial.com
  * Description: 支持国内最热门的社交媒体登录。如：微信、QQ、微博、手机登录、账号绑定和解绑，全新的注册页面取代原生注册页面，支持Ultimate Member、WooCommerce、Buddypress，兼容Open Social。部分扩展收费，查看详情：<a href="http://www.weixinsocial.com">www.weixinsocial.com</a>
  * Author: 迅虎网络
- * Version: 1.1.0
+ * Version: 1.1.1
  * Author URI:  http://www.wpweixin.net
  */
 
@@ -19,7 +19,7 @@ final class XH_Social {
      * @since 1.0.0
      * @var string
      */
-    public $version = '1.1.0';
+    public $version = '1.1.1';
     
     /**
      * 最小wp版本
@@ -142,6 +142,32 @@ final class XH_Social {
         register_activation_hook ( XH_SOCIAL_FILE, array($this,'_register_activation_hook'),10 );
         register_deactivation_hook(XH_SOCIAL_FILE,  array($this,'_register_deactivation_hook'),10);        
         add_action ( 'plugin_action_links_'. plugin_basename( XH_SOCIAL_FILE ),array($this,'_plugin_action_links'),10,1);
+        
+        if(is_admin()){
+            if(!$this->supported_wp_version()){
+                add_action ( 'admin_notices',function(){
+                    ?>
+                    <div class="notice notice-error is-dismissible"><b>Wechat Social:</b><p>allowed min wordpress version is 3.7</p></div>
+                    <?php 
+                });
+            }
+            
+            if(!function_exists('curl_init')){
+                add_action ( 'admin_notices',function(){
+                    ?>
+                    <div class="notice notice-error is-dismissible"><b>Wechat Social:</b><p>php curl libs is missing!</p></div>
+                    <?php 
+                });
+            }
+            
+            if(!function_exists('mb_strimwidth')){
+                add_action ( 'admin_notices',function(){
+                    ?>
+                    <div class="notice notice-error is-dismissible"><b>Wechat Social:</b><p>php mb_string libs is missing!</p></div>
+                    <?php 
+                });
+            }
+        }
     }
 
     /**
@@ -257,18 +283,6 @@ final class XH_Social {
      * @since 1.0.0
      */
     public function _register_activation_hook(){
-        if(!$this->supported_wp_version()){
-            throw new Exception('min wp version is 3.7');
-        }
-        
-        if(!function_exists('curl_init')){
-            throw new Exception('php curl libs is required');
-        }
-        
-        if(!function_exists('mb_strimwidth')){
-            throw new Exception('php mb_string libs is required');
-        }
-        
         //第一次安装，所有插件自动安装
         $plugins_installed =get_option('xh_social_plugins_installed',null);
         if(!is_array($plugins_installed)||count($plugins_installed)==0){
@@ -438,6 +452,7 @@ final class XH_Social {
             wp_enqueue_script('qrcode',XH_SOCIAL_URL."/assets/js/qrcode$min.js",array('jquery'),$this->version);
             wp_enqueue_script('media-upload');
             wp_enqueue_script('thickbox');
+            
             wp_enqueue_style('thickbox');
         }
         
