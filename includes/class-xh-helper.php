@@ -486,6 +486,13 @@ class XH_Social_Helper_Html_Form{
 			$(document).bind('on_form_<?php echo esc_attr($form_id);?>_submit',function(e,m){
 				m.<?php echo esc_attr($form_name)?>=$('#<?php echo esc_attr($name)?>').val();
 			});
+
+			if(window._submit_<?php echo esc_attr($form_id);?>){
+				window._submit_<?php echo esc_attr($form_id);?>(function(data){
+					if(!data){data={};}
+					data.<?php echo esc_attr($form_name)?>=$('#<?php echo esc_attr($name)?>').val();
+				});
+			}
 		})(jQuery);
 		</script>
       <?php 

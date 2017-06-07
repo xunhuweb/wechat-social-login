@@ -4,7 +4,7 @@
  * Plugin URI: http://www.weixinsocial.com
  * Description: 支持国内最热门的社交媒体登录。如：微信、QQ、微博、手机登录、账号绑定和解绑，全新的注册页面取代原生注册页面，支持Ultimate Member、WooCommerce、Buddypress，兼容Open Social。部分扩展收费，查看详情：<a href="http://www.weixinsocial.com">www.weixinsocial.com</a>
  * Author: 迅虎网络
- * Version: 1.1.1
+ * Version: 1.1.2
  * Author URI:  http://www.wpweixin.net
  */
 
@@ -19,7 +19,7 @@ final class XH_Social {
      * @since 1.0.0
      * @var string
      */
-    public $version = '1.1.1';
+    public $version = '1.1.2';
     
     /**
      * 最小wp版本
