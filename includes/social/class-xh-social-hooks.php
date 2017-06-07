@@ -106,8 +106,12 @@ class XH_Social_Hooks{
         if(!$user_ID){
             return $args;
         }
-       
-        $args['url'] =get_user_meta($user_ID,'_social_img',true);
+        
+        $url =get_user_meta($user_ID,'_social_img',true);
+        if(!empty($url)){
+            $args['url'] =$url;
+        }
+        
         return $args;
     }
     
