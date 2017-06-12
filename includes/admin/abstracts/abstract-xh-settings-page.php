@@ -28,47 +28,7 @@ abstract class Abstract_XH_Social_Settings_Page extends Abstract_XH_Social_Setti
         return apply_filters("xh_social_admin_page_{$this->id}", array());
     }
     
-    public function get_current_menu(){
-        global $pagenow;
-        if($pagenow!='admin.php'){
-            return null;
-        }
-        
-        if($this->current_menu){
-            return $this->current_menu;
-        }
-        $menus =  $this->menus();
-        $current= isset($_GET['section'])?XH_Social_Helper_String::sanitize_key_ignorecase($_GET['section']):'';
-        
-        $current_menu =null;
-        $index=0;
-        foreach ($menus as $menu){
-            if(!$menu||!$menu instanceof Abstract_XH_Social_Settings_Menu){
-                continue;
-            }
-             
-            //default first item
-            if($index++===0){
-                $current_menu=$menu;
-            }
-        
-            //specified item
-            $select =strcasecmp($current,$menu->id)===0;
-            if($select){
-                $current_menu=$menu;
-                break;
-            }
-        }
-         
-        if(!$current_menu){
-            return null;
-        }
-        $_GET['section'] = $current_menu->id;
-        $this->current_menu=$current_menu;
-        return $this->current_menu;
-    }
-    
-    /**
+/**
      * 输出页面
      * 
      * @since 1.0.0
@@ -76,8 +36,33 @@ abstract class Abstract_XH_Social_Settings_Page extends Abstract_XH_Social_Setti
     public function render(){
         $current_menu = $this->get_current_menu();
         if(!$current_menu){
-            return;
+           return;
         }
+        
         $current_menu->render($this);
+    }
+    
+    /**
+     * 
+     * @return NULL|Abstract_XH_Social_Settings_Menu
+     */
+    public function get_current_menu(){
+        $menu_id = isset($_GET['section'])?$_GET['section']:null;
+        
+        $menus =$this->menus();
+        $index =0;
+        $current =null;
+        foreach ($menus as $menu){
+            if($index++==0){
+                $current=$menu;
+            }
+            
+            if($menu->id ==$menu_id){
+                $current=$menu;
+                break;
+            }
+        }
+        
+        return $current;
     }
 }

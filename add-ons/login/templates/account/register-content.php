@@ -81,7 +81,7 @@ if(is_user_logged_in()){
 					return;
 				}
 				
-				$('#btn-register').attr('disabled','disabled').text('<?php print __('loading...',XH_SOCIAL)?>')
+				$('#btn-register').attr('disabled','disabled').text('<?php print __('loading...',XH_SOCIAL)?>');
 				this.loading=true;
 
 				jQuery.ajax({
@@ -96,7 +96,7 @@ if(is_user_logged_in()){
 		            data: data,
 		            dataType: 'json',
 		            complete: function() {
-		            	$('#btn-register').removeAttr('disabled').text('<?php print __('Log In',XH_SOCIAL)?>')
+		            	$('#btn-register').removeAttr('disabled').text('<?php print __('Log In',XH_SOCIAL)?>');
 		            	window.xh_social_view.loading=false;
 		            },
 		            success: function(m) {

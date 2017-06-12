@@ -113,16 +113,30 @@ class XH_Social_Admin {
     }
     
     /**
-     *
      * @return NULL|Abstract_XH_Social_Settings_Menu
+     * @since 1.0.0
      */
     public function get_current_menu(){
         $current_page = $this->get_current_page();
         if(!$current_page){
             return null;
         }
+       
+        return $current_page->get_current_menu();
+    }
     
-        return  $current_page->get_current_menu();
+    /**
+     * 
+     * @return NULL|Abstract_XH_Social_Settings
+     * @since 1.0.0
+     */
+    public function get_current_submenu(){
+        $current_menu = $this->get_current_menu();
+        if(!$current_menu){
+            return null;
+        }
+       
+        return $current_menu->get_submenu();
     }
     
     /**
