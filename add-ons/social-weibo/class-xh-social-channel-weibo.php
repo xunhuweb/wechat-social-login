@@ -545,9 +545,7 @@ class XH_Social_Channel_Weibo_Model extends Abstract_XH_Social_Schema{
                     `img` TEXT NULL,
                     PRIMARY KEY (`id`),
                     UNIQUE INDEX `uid_unique` (`uid`),
-                    UNIQUE INDEX `user_id_unique` (`user_id`),
-                    INDEX `uid_key` (`uid`),
-                    INDEX `user_id_key` (`user_id`)
+                    UNIQUE INDEX `user_id_unique` (`user_id`)
                 )
                 $collate;");
     

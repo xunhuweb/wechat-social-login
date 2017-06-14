@@ -222,6 +222,9 @@ class XH_Social_Hooks{
     
     public static function show_loginbar($redirect=''){
         ob_start();
+        XH_Social_Temp_Helper::set('atts', array(
+            'redirect'=>$redirect
+        ),'templates');
         require XH_Social::instance()->WP->get_template(XH_SOCIAL_DIR, 'account/login-bar.php');
         return ob_get_clean();
     }

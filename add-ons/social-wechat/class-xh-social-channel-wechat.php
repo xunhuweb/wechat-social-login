@@ -787,12 +787,7 @@ class XH_Social_Channel_Wechat_Model extends Abstract_XH_Social_Schema{
                     UNIQUE INDEX `user_id_unique` (`user_id`),
                     UNIQUE INDEX `mp_openid_unique` (`mp_openid`),
                     UNIQUE INDEX `unionid_unique` (`unionid`),
-                    UNIQUE INDEX `uid_unique` (`uid`),
-                    INDEX `op_openid_key` (`op_openid`),
-                    INDEX `uid_key` (`uid`),
-                    INDEX `user_id_key` (`user_id`),
-                    INDEX `mp_openid_key` (`mp_openid`),
-                    INDEX `unionid_key` (`unionid`)
+                    UNIQUE INDEX `uid_unique` (`uid`)
                     )
                     $collate;");
     

@@ -96,7 +96,34 @@ class XH_Social_Admin {
             XH_Social_Page_Add_Ons::instance()
         ));
     }
-
+    /**
+     * 获取当前设置地址
+     * @since 2.1.1
+     * @return string
+     */
+    public function get_current_admin_url($params = array()){
+        $page = $this->get_current_page();
+        $menu = $this->get_current_menu();
+        $submenu = $this->get_current_submenu();
+    
+        $query="admin.php";
+    
+        if($page){
+            $query.="?page={$page->get_page_id()}";
+            if($menu){
+                $query .="&section={$menu->id}";
+            }
+    
+            if($submenu){
+                $query .="&tab={$submenu->id}";
+            }
+        }
+    
+        if(count($params)>0){
+            $query.="&".http_build_query($params);
+        }
+        return admin_url($query);
+    }
     /**
      * @return NULL|Abstract_XH_Social_Settings_Page
      */

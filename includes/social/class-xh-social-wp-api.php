@@ -375,21 +375,6 @@ class XH_Social_WP_Api{
 
     /**
      *
-     * @param string $dir
-     * @param string $templete_name
-     * @param mixed $params
-     * @return string
-     */
-    public function requires($dir,$templete_name,$params=null){
-        if(!is_null($params)){
-            XH_Social_Temp_Helper::set('atts', $params,'templetes');
-        }
-        ob_start();
-        require $this->get_template($dir, $templete_name);
-        return ob_get_clean();
-    }
-    /**
-     *
      * @param string $page_templete_dir
      * @param string $page_templete
      * @return string

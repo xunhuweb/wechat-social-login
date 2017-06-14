@@ -581,9 +581,7 @@ class XH_Social_Channel_QQ_Model extends Abstract_XH_Social_Schema{
             `img` TEXT NULL,
             PRIMARY KEY (`id`),
             UNIQUE INDEX `openid_unique` (`openid`),
-            UNIQUE INDEX `user_id_unique` (`user_id`),
-            INDEX `openid_key` (`openid`),
-            INDEX `user_id_key` (`user_id`)
+            UNIQUE INDEX `user_id_unique` (`user_id`)
         )
         $collate;");
     
