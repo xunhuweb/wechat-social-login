@@ -94,7 +94,7 @@ class XH_Social_Hooks{
         // Process the user identifier.
         if ( is_numeric( $id_or_email ) ) {
             $user_ID=absint( $id_or_email );
-        } elseif ( is_email( $id_or_email ) ) {
+        } elseif (is_string($id_or_email)&& is_email( $id_or_email ) ) {
             $wp_user = get_user_by('email', $id_or_email);
             if($wp_user){
                 $user_ID=$wp_user->ID;
