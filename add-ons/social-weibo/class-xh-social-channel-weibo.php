@@ -515,7 +515,7 @@ class XH_Social_Channel_Weibo extends Abstract_XH_Social_Settings_Channel{
         }
     }
 }
-
+require_once XH_SOCIAL_DIR.'/includes/abstracts/abstract-xh-schema.php';
 /**
 * 微信接口
 *

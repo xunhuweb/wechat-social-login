@@ -1,7 +1,7 @@
 <?php
 if (! defined ( 'ABSPATH' ))
 	exit (); // Exit if accessed directly
-	
+require_once 'abstract-xh-settings.php';	
 /**
  * 社会化登录工具接口
  *

@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: wechat social\n"
-"POT-Creation-Date: 2017-06-05 14:30+0800\n"
-"PO-Revision-Date: 2017-06-05 14:31+0800\n"
+"POT-Creation-Date: 2017-06-26 10:47+0800\n"
+"PO-Revision-Date: 2017-06-26 10:49+0800\n"
 "Last-Translator: ranj <ranj@evget.com>\n"
 "Language-Team: 重庆迅虎网络有限公司 <jeff@xunhuweb.com>\n"
 "Language: zh_CN\n"
@@ -28,17 +28,17 @@ msgstr "当用户第三方登录时，实现与现有账户绑定或注册绑定
 #: add-ons/account-bind/init.php:51 add-ons/buddypress/init.php:44 add-ons/login/init.php:48
 #: add-ons/open-social/init.php:44 add-ons/social-mobile/init.php:50
 #: add-ons/social-qq/init.php:42 add-ons/social-wechat-ext/init.php:47
-#: add-ons/social-wechat/init.php:48 add-ons/social-weibo/init.php:42
-#: add-ons/ultimate-member/init.php:42 add-ons/woocommerce/init.php:48
+#: add-ons/social-wechat/init.php:49 add-ons/social-weibo/init.php:42
+#: add-ons/ultimate-member/init.php:48 add-ons/woocommerce/init.php:48
 #: add-ons/wp-open/init.php:37
 msgid "xunhuweb"
 msgstr "迅虎网络"
 
 #: add-ons/account-bind/init.php:64 add-ons/login/init.php:61 add-ons/social-mobile/init.php:159
-#: add-ons/social-qq/class-xh-social-channel-qq.php:57 add-ons/social-wechat-ext/init.php:269
+#: add-ons/social-qq/class-xh-social-channel-qq.php:57 add-ons/social-wechat-ext/init.php:322
 #: add-ons/social-wechat/class-xh-social-channel-wechat.php:63
-#: add-ons/social-weibo/class-xh-social-channel-weibo.php:58 add-ons/ultimate-member/init.php:94
-#: add-ons/woocommerce/init.php:83
+#: add-ons/social-weibo/class-xh-social-channel-weibo.php:58
+#: add-ons/ultimate-member/init.php:110 add-ons/woocommerce/init.php:83
 msgid "Enable/Disable"
 msgstr "启用/禁用"
 
@@ -91,7 +91,7 @@ msgstr "注册条款"
 msgid "http://www.xxx.com/...(Leave blank,terms of service will be hidden)."
 msgstr "http://www.xxx.com/...(留空，则不显示注册条款)."
 
-#: add-ons/account-bind/init.php:99 add-ons/login/init.php:94
+#: add-ons/account-bind/init.php:99
 msgid "Terms Of Service under the register form(before submit button)."
 msgstr "注册条款讲显示在注册页面（提交按钮之上）"
 
@@ -99,72 +99,80 @@ msgstr "注册条款讲显示在注册页面（提交按钮之上）"
 msgid "Login With Iamge Captcha"
 msgstr "图片验证(登录时)"
 
-#: add-ons/account-bind/init.php:105 add-ons/login/init.php:99
+#: add-ons/account-bind/init.php:105
 msgid "Iamge captcha in the login form(before submit button)."
 msgstr "图片验证码显示在登录表单(登录按钮之上)"
 
-#: add-ons/account-bind/init.php:154 add-ons/account-bind/init.php:704
+#: add-ons/account-bind/init.php:108 add-ons/login/init.php:102
+msgid "Email Required"
+msgstr "邮箱必填"
+
+#: add-ons/account-bind/init.php:110 add-ons/login/init.php:104
+msgid "Email is required when register."
+msgstr "在注册时，邮箱必填。"
+
+#: add-ons/account-bind/init.php:159 add-ons/account-bind/init.php:709
 msgid "Social - Complete Account"
 msgstr "Social - 完善资料"
 
-#: add-ons/account-bind/init.php:271 add-ons/account-bind/init.php:333
-#: add-ons/social-mobile/init.php:299 add-ons/social-wechat-ext/init.php:424
+#: add-ons/account-bind/init.php:276 add-ons/account-bind/init.php:338
+#: add-ons/social-mobile/init.php:299 add-ons/social-wechat-ext/init.php:480
 msgid "Sorry! You have logged in,Refresh the page and try again."
 msgstr "对不起，您已登录，请刷新页面后重试。"
 
-#: add-ons/account-bind/init.php:309 add-ons/login/init.php:211
+#: add-ons/account-bind/init.php:314 add-ons/login/init.php:216
 msgid "login name or password is invalid!"
 msgstr "登录名或登录密码错误！"
 
-#: add-ons/account-bind/init.php:392 add-ons/login/init.php:259
+#: add-ons/account-bind/init.php:397 add-ons/login/init.php:264
 msgid "User email is required!"
 msgstr "请输入用户邮箱！"
 
-#: add-ons/account-bind/init.php:416 add-ons/login/init.php:287
+#: add-ons/account-bind/init.php:421 add-ons/login/init.php:292
 msgid "注册成功,但手机绑定失败(你可以在用户中心重新绑定)！"
 msgstr ""
 
-#: add-ons/account-bind/init.php:449 add-ons/login/init.php:604
+#: add-ons/account-bind/init.php:454 add-ons/login/init.php:610
 msgid "Agree and accept"
 msgstr "同意并接受"
 
-#: add-ons/account-bind/init.php:449 add-ons/login/init.php:604
+#: add-ons/account-bind/init.php:454 add-ons/login/init.php:610
 msgid "《Terms Of Service》"
 msgstr "《服务条款》"
 
-#: add-ons/account-bind/init.php:483 add-ons/account-bind/init.php:565
-#: add-ons/login/init.php:474 add-ons/login/init.php:526
+#: add-ons/account-bind/init.php:488 add-ons/account-bind/init.php:570
+#: add-ons/login/init.php:479 add-ons/login/init.php:531
 msgid "user login"
 msgstr "登录名"
 
-#: add-ons/account-bind/init.php:491 add-ons/account-bind/init.php:574
-#: add-ons/login/init.php:482 add-ons/login/init.php:533
+#: add-ons/account-bind/init.php:496 add-ons/account-bind/init.php:579
+#: add-ons/login/init.php:487 add-ons/login/init.php:538
 msgid "user login is required!"
 msgstr "请输入登录名！"
 
-#: add-ons/account-bind/init.php:503 add-ons/login/init.php:546
+#: add-ons/account-bind/init.php:508 add-ons/login/init.php:551
 msgid "user email"
 msgstr "邮箱"
 
-#: add-ons/account-bind/init.php:511 add-ons/login/init.php:553
+#: add-ons/account-bind/init.php:516 add-ons/login/init.php:559
 msgid "user email is required!"
 msgstr "请输入邮箱！"
 
-#: add-ons/account-bind/init.php:515 add-ons/login/init.php:557
+#: add-ons/account-bind/init.php:520 add-ons/login/init.php:563
 msgid "user email is invalid!"
 msgstr "请输入正确的用户邮箱！"
 
-#: add-ons/account-bind/init.php:536 add-ons/account-bind/init.php:585
-#: add-ons/login/init.php:495 add-ons/login/init.php:576
+#: add-ons/account-bind/init.php:541 add-ons/account-bind/init.php:590
+#: add-ons/login/init.php:500 add-ons/login/init.php:582
 msgid "password"
 msgstr "密码"
 
-#: add-ons/account-bind/init.php:545 add-ons/account-bind/init.php:593
-#: add-ons/login/init.php:502 add-ons/login/init.php:583
+#: add-ons/account-bind/init.php:550 add-ons/account-bind/init.php:598
+#: add-ons/login/init.php:507 add-ons/login/init.php:589
 msgid "password is required!"
 msgstr "密码不能为空！"
 
-#: add-ons/account-bind/init.php:568 add-ons/login/init.php:477
+#: add-ons/account-bind/init.php:573 add-ons/login/init.php:482
 msgid "Please enter userlogin/email/mobile"
 msgstr "请输入登录名/邮箱/手机号"
 
@@ -298,11 +306,19 @@ msgstr ""
 "启用之前,请安装\"<a href=\"https://www.wpweixin.net/product/1090.html\" target=\"_blank\">手机"
 "扩展</a>\""
 
-#: add-ons/login/init.php:364 add-ons/login/init.php:384
+#: add-ons/login/init.php:94
+msgid "Terms Of Service under the register form."
+msgstr "注册条款讲显示在注册页面。"
+
+#: add-ons/login/init.php:99
+msgid "Iamge captcha in the login form."
+msgstr "图片验证码显示在登录表单。"
+
+#: add-ons/login/init.php:369 add-ons/login/init.php:389
 msgid "Social - Login"
 msgstr "Social - 登录"
 
-#: add-ons/login/init.php:365 add-ons/login/init.php:412
+#: add-ons/login/init.php:370 add-ons/login/init.php:417
 msgid "Social - Register"
 msgstr "Social - 注册"
 
@@ -340,24 +356,49 @@ msgid "App Secret"
 msgstr "App Secret"
 
 #: add-ons/social-mobile/class-xh-sms-alidayu.php:50
+#: add-ons/social-mobile/class-xh-sms-aliyun.php:51
 msgid "Sign Name"
 msgstr "短信签名"
 
 #: add-ons/social-mobile/class-xh-sms-alidayu.php:67
+#: add-ons/social-mobile/class-xh-sms-aliyun.php:72
 #: add-ons/social-mobile/class-xh-sms-netease.php:58
-#, fuzzy
 msgid "Invalid Mobile!"
 msgstr "无效的手机号码！"
 
 #: add-ons/social-mobile/class-xh-sms-alidayu.php:85
-#: add-ons/social-mobile/class-xh-sms-netease.php:113
+#: add-ons/social-mobile/class-xh-sms-aliyun.php:122
+#: add-ons/social-mobile/class-xh-sms-netease.php:116
 msgid "sms send failed"
 msgstr ""
 
 #: add-ons/social-mobile/class-xh-sms-alidayu.php:92
-#: add-ons/social-mobile/class-xh-sms-netease.php:120
+#: add-ons/social-mobile/class-xh-sms-aliyun.php:128
+#: add-ons/social-mobile/class-xh-sms-netease.php:123
 msgid "Message is sending failed, please try again later!"
 msgstr "短信发送异常，请重试！"
+
+#: add-ons/social-mobile/class-xh-sms-aliyun.php:35
+msgid "Aliyun"
+msgstr ""
+
+#: add-ons/social-mobile/class-xh-sms-aliyun.php:42
+msgid "AccessKeyId"
+msgstr ""
+
+#: add-ons/social-mobile/class-xh-sms-aliyun.php:44
+#, php-format
+msgid "View <a href=\"%s\" target=\"_blank\">Get \"AccessKeyId/AccessKeySecret\"</a>"
+msgstr "查看 <a href=\"%s\" target=\"_blank\">获取\"AccessKeyId/AccessKeySecret\"</a>"
+
+#: add-ons/social-mobile/class-xh-sms-aliyun.php:47
+msgid "AccessKeySecret"
+msgstr ""
+
+#: add-ons/social-mobile/class-xh-sms-aliyun.php:53
+#, php-format
+msgid "View <a href=\"%s\" target=\"_blank\">Get \"sign name/templete id\" help</a>"
+msgstr "查看<a href=\"%s\" target=\"_blank\">获取 \"签名/模版ID\"帮助</a>"
 
 #: add-ons/social-mobile/class-xh-sms-netease.php:34
 msgid "Netease Cloud"
@@ -401,7 +442,7 @@ msgstr "手机登录页面未找到！"
 msgid "让wordpress支持手机注册，登录，绑定网站用户"
 msgstr "让wordpress支持手机注册，登录，绑定网站用户"
 
-#: add-ons/social-mobile/init.php:91 add-ons/social-mobile/init.php:568
+#: add-ons/social-mobile/init.php:91 add-ons/social-mobile/init.php:571
 msgid "mobile"
 msgstr "手机"
 
@@ -477,7 +518,7 @@ msgid ""
 "设置短信内容参数，多个参数以英文逗号隔开。\n"
 "                    <br/> 可选参数：\n"
 "                    <br/>code:验证码\n"
-"                    <br/>sitename:网站名称\n"
+"                    <br/>sitename(或product):网站名称\n"
 "                    <br/>currenttime:当前时间\n"
 "                    "
 msgstr ""
@@ -497,48 +538,48 @@ msgstr "请等待%s秒后操作！"
 msgid "[system error]sms api is invalid!"
 msgstr "[系统异常]短信接口错误！"
 
-#: add-ons/social-mobile/init.php:452 add-ons/social-mobile/init.php:469
+#: add-ons/social-mobile/init.php:455 add-ons/social-mobile/init.php:472
 msgid "Social - Mobile Login"
 msgstr "Social - 手机登录"
 
-#: add-ons/social-mobile/init.php:511 add-ons/social-mobile/init.php:534
+#: add-ons/social-mobile/init.php:514 add-ons/social-mobile/init.php:537
 msgid "mobile is required!"
 msgstr "手机号码不能为空！"
 
-#: add-ons/social-mobile/init.php:515 add-ons/social-mobile/init.php:538
+#: add-ons/social-mobile/init.php:518 add-ons/social-mobile/init.php:541
 msgid "mobile is invalid!"
 msgstr "请输入正确的手机号码！"
 
-#: add-ons/social-mobile/init.php:546
+#: add-ons/social-mobile/init.php:549
 msgid "mobile is registered!"
 msgstr "手机号码已注册！"
 
-#: add-ons/social-mobile/init.php:605
+#: add-ons/social-mobile/init.php:608
 msgid "sms captcha"
 msgstr "短信验证码"
 
-#: add-ons/social-mobile/init.php:606 add-ons/social-mobile/init.php:635
-#: add-ons/social-mobile/init.php:649 add-ons/social-mobile/init.php:659
+#: add-ons/social-mobile/init.php:609 add-ons/social-mobile/init.php:638
+#: add-ons/social-mobile/init.php:652 add-ons/social-mobile/init.php:662
 msgid "Send Code"
 msgstr "发送短信"
 
-#: add-ons/social-mobile/init.php:622
+#: add-ons/social-mobile/init.php:625
 msgid "Processing..."
 msgstr "执行中..."
 
-#: add-ons/social-mobile/init.php:656
+#: add-ons/social-mobile/init.php:659
 msgid "Resend"
 msgstr "重新发送"
 
-#: add-ons/social-mobile/init.php:674
+#: add-ons/social-mobile/init.php:690
 msgid "sms captcha is required!"
 msgstr "请输入短信验证码！"
 
-#: add-ons/social-mobile/init.php:679
+#: add-ons/social-mobile/init.php:695
 msgid "please get the sms captcha again!"
 msgstr "请重新获取短信验证码！"
 
-#: add-ons/social-mobile/init.php:683
+#: add-ons/social-mobile/init.php:699
 msgid "sms captcha is invalid!"
 msgstr "短信验证码错误！"
 
@@ -595,7 +636,7 @@ msgstr ""
 msgid "Cross-domain"
 msgstr "跨域授权"
 
-#: add-ons/social-qq/class-xh-social-channel-qq.php:83 add-ons/social-wechat-ext/init.php:286
+#: add-ons/social-qq/class-xh-social-channel-qq.php:83 add-ons/social-wechat-ext/init.php:339
 #: add-ons/social-wechat/class-xh-social-channel-wechat.php:109
 #: add-ons/social-wechat/class-xh-social-channel-wechat.php:157
 #: add-ons/social-weibo/class-xh-social-channel-weibo.php:84
@@ -625,7 +666,7 @@ msgid ""
 "product/1211.html\" target=\"_blank\">跨域扩展</a>"
 msgstr ""
 
-#: add-ons/social-qq/class-xh-social-channel-qq.php:276 add-ons/social-wechat/init.php:196
+#: add-ons/social-qq/class-xh-social-channel-qq.php:276 add-ons/social-wechat/init.php:197
 #: add-ons/social-weibo/class-xh-social-channel-weibo.php:312
 msgid "Please check cross-domain app secret config(equal to current website app secret)!"
 msgstr ""
@@ -657,59 +698,59 @@ msgid "无需开发者认证，微信登录自动关注微信公众号。"
 msgstr ""
 
 #: add-ons/social-wechat-ext/init.php:51
-#: add-ons/social-wechat/class-xh-social-channel-wechat.php:40 add-ons/social-wechat/init.php:43
+#: add-ons/social-wechat/class-xh-social-channel-wechat.php:40 add-ons/social-wechat/init.php:44
 msgid "Wechat"
 msgstr "微信"
 
-#: add-ons/social-wechat-ext/init.php:271
+#: add-ons/social-wechat-ext/init.php:324
 msgid "Enable wechat extension"
 msgstr "启用微信扩展"
 
-#: add-ons/social-wechat-ext/init.php:276
+#: add-ons/social-wechat-ext/init.php:329
 msgid "Qrcode Page"
 msgstr "二维码页面"
 
-#: add-ons/social-wechat-ext/init.php:283
+#: add-ons/social-wechat-ext/init.php:336
 msgid "Auto Login"
 msgstr "自动登录"
 
-#: add-ons/social-wechat-ext/init.php:287
+#: add-ons/social-wechat-ext/init.php:340
 msgid "Enable wechat auto login in wechat client"
 msgstr "在微信客户端启用微信登录"
 
-#: add-ons/social-wechat-ext/init.php:290
+#: add-ons/social-wechat-ext/init.php:343
 msgid "仅对(home、category(tag)、author、single post)页面进行登录检查(避免不可预测的错误)。"
 msgstr ""
 
-#: add-ons/social-wechat-ext/init.php:294
+#: add-ons/social-wechat-ext/init.php:347
 msgid "Enabled IP Check"
 msgstr "启用IP检查"
 
-#: add-ons/social-wechat-ext/init.php:296
+#: add-ons/social-wechat-ext/init.php:349
 msgid "在扫描二维码登录时，匹配用户ip增强安全性(网站启用了CDN，请不要开启此项)"
 msgstr ""
 
-#: add-ons/social-wechat-ext/init.php:300
+#: add-ons/social-wechat-ext/init.php:353
 msgid "Login Settings"
 msgstr "登录设置"
 
-#: add-ons/social-wechat-ext/init.php:305
+#: add-ons/social-wechat-ext/init.php:358
 msgid "Login Model"
 msgstr "登录模式"
 
-#: add-ons/social-wechat-ext/init.php:308
+#: add-ons/social-wechat-ext/init.php:361
 msgid "Model one"
 msgstr "模式一"
 
-#: add-ons/social-wechat-ext/init.php:309
+#: add-ons/social-wechat-ext/init.php:362
 msgid "Model two"
 msgstr "模式二"
 
-#: add-ons/social-wechat-ext/init.php:310
+#: add-ons/social-wechat-ext/init.php:363
 msgid "Model three"
 msgstr "模式三"
 
-#: add-ons/social-wechat-ext/init.php:312
+#: add-ons/social-wechat-ext/init.php:365
 msgid ""
 "模式一：桌面端<b>(开放平台API)</b>扫码登录，移动端<b>(公众平台API)</b>网页授权登录。<br/>\n"
 "                                                                                             模"
@@ -720,36 +761,38 @@ msgid ""
 "入公众号聊天界面)，(已)关注后，桌面端自动登录。"
 msgstr ""
 
-#: add-ons/social-wechat-ext/init.php:319
+#: add-ons/social-wechat-ext/init.php:375
 msgid "URL"
 msgstr "URL(服务器地址)"
 
-#: add-ons/social-wechat-ext/init.php:323
+#: add-ons/social-wechat-ext/init.php:379
+#, php-format
 msgid ""
-"<a href=\"https://mp.weixin.qq.com\" target=\"_blank\">微信公众平台</a>>基本设置>服务器配置"
+"(拷贝文件<code>%s</code>到网站根目录)<br/><a href=\"https://mp.weixin.qq.com\" target=\"_blank"
+"\">微信公众平台</a>>基本设置>服务器配置"
 msgstr ""
 
-#: add-ons/social-wechat-ext/init.php:328
+#: add-ons/social-wechat-ext/init.php:384
 msgid "Token"
 msgstr "Token(令牌)"
 
-#: add-ons/social-wechat-ext/init.php:334
+#: add-ons/social-wechat-ext/init.php:390
 msgid "EncodingAESKey"
 msgstr "EncodingAESKey(消息加解密密钥)"
 
-#: add-ons/social-wechat-ext/init.php:340
+#: add-ons/social-wechat-ext/init.php:396
 msgid "Welcome Message"
 msgstr "欢迎消息"
 
-#: add-ons/social-wechat-ext/init.php:341
+#: add-ons/social-wechat-ext/init.php:397
 msgid "optional"
 msgstr "可选"
 
-#: add-ons/social-wechat-ext/init.php:565
+#: add-ons/social-wechat-ext/init.php:621
 msgid "wechat qrcode page not found!"
 msgstr "微信二维码页面未找到！"
 
-#: add-ons/social-wechat-ext/init.php:591 add-ons/social-wechat-ext/init.php:626
+#: add-ons/social-wechat-ext/init.php:647 add-ons/social-wechat-ext/init.php:682
 msgid "Social - Wechat Qrcode"
 msgstr "Social - 微信二维码"
 
@@ -849,7 +892,7 @@ msgstr ""
 msgid "unknow error when insert wechat user info."
 msgstr "插入数据时发生未知错误！"
 
-#: add-ons/social-wechat/init.php:44
+#: add-ons/social-wechat/init.php:45
 msgid ""
 "微信登录：PC端开放平台登录，微信端公众号登录。(支持公众平台(PC+微信端)登录，请使用<a href="
 "\"https://www.wpweixin.net/product/1135.html\">微信扩展高级版</a>)"
@@ -893,15 +936,15 @@ msgstr ""
 msgid "使用微博帐号快速登录，请在open.weibo.com申请网站应用"
 msgstr ""
 
-#: add-ons/ultimate-member/init.php:38
+#: add-ons/ultimate-member/init.php:44
 msgid "Ultimate Member"
 msgstr "Ultimate Member"
 
-#: add-ons/ultimate-member/init.php:39
+#: add-ons/ultimate-member/init.php:45
 msgid "Ultimate Member 扩展，整合登录，账户解绑，手机登录/注册(需要手机登录子插件)"
 msgstr "Ultimate Member 扩展，整合登录，账户解绑，手机登录/注册(需要手机登录子插件)"
 
-#: add-ons/ultimate-member/init.php:96
+#: add-ons/ultimate-member/init.php:112
 msgid "Enable ultimate member extension."
 msgstr "启用 ultimate member 扩展"
 
@@ -983,7 +1026,7 @@ msgstr ""
 
 #: includes/abstracts/abstract-xh-settings.php:124
 #: includes/admin/menus/class-xh-social-menu-add-ons-install.php:111
-#: includes/admin/menus/class-xh-social-page-default.php:35 init.php:325
+#: includes/admin/menus/class-xh-social-page-default.php:35 init.php:339
 msgid "Settings"
 msgstr "设置"
 
@@ -1263,22 +1306,22 @@ msgstr "对不起，网络错误！"
 msgid "Ops!Something is wrong."
 msgstr "对不起！系统发生了错误！"
 
-#: includes/social/class-xh-social-ajax.php:410
+#: includes/social/class-xh-social-ajax.php:388
 #, php-format
 msgid "Current add-on is relies on %s!"
 msgstr "当前扩展依赖%s!"
 
-#: includes/social/class-xh-social-ajax.php:418
+#: includes/social/class-xh-social-ajax.php:396
 #, php-format
 msgid "Core version must greater than or equal to %s!"
 msgstr "核心插件版本不能低于%s!"
 
-#: includes/social/class-xh-social-ajax.php:482
+#: includes/social/class-xh-social-ajax.php:460
 #, php-format
 msgid "\"%s\" is relies on current add-on!"
 msgstr "%s依赖于当前插件！"
 
-#: includes/social/class-xh-social-ajax.php:567
+#: includes/social/class-xh-social-ajax.php:545
 #, php-format
 msgid ""
 "There is a new version of %s - %s. <a href=\"%s\" target=\"_blank\">View version %s details</"
@@ -1287,7 +1330,7 @@ msgstr ""
 "有一个新版本 %s - %s. <a href=\"%s\" target=\"_blank\">查看版本 %s 详情</a> or <a href=\"%s\" "
 "target=\"_blank\">立即下载</a>."
 
-#: includes/social/class-xh-social-ajax.php:577
+#: includes/social/class-xh-social-ajax.php:555
 #, php-format
 msgid ""
 "<tr class=\"plugin-update-tr active\">\n"
@@ -1306,7 +1349,7 @@ msgstr ""
 "\t                       <div class=\"\">%s</div>\n"
 "\t                       </div></td></tr>"
 
-#: includes/social/class-xh-social-hooks.php:115
+#: includes/social/class-xh-social-hooks.php:119
 msgid "Social Avatar (Wechat Social)"
 msgstr "社会化头像 （Wechat Social）"
 
@@ -1330,19 +1373,19 @@ msgstr "启用/禁用"
 msgid "If your site' page is cached(using cache plugins(wp super cache, etc.)), Do not enable."
 msgstr "如果你的网站启用了页面缓存(使用缓存插件wp super cache等)，不要启用此项。"
 
-#: includes/social/class-xh-social-wp-api.php:219
+#: includes/social/class-xh-social-wp-api.php:241
 msgid "image captcha"
 msgstr "图形验证码"
 
-#: includes/social/class-xh-social-wp-api.php:260
+#: includes/social/class-xh-social-wp-api.php:282
 msgid "image captcha is required!"
 msgstr "请输入图片验证码！"
 
-#: includes/social/class-xh-social-wp-api.php:265
+#: includes/social/class-xh-social-wp-api.php:287
 msgid "Please refresh the image captcha!"
 msgstr "请刷新图片验证码！"
 
-#: includes/social/class-xh-social-wp-api.php:269
+#: includes/social/class-xh-social-wp-api.php:291
 msgid "image captcha is invalid!"
 msgstr "图片验证码错误！"
 

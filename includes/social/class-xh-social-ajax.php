@@ -184,22 +184,11 @@ class XH_Social_Ajax {
 	 * 远程服务
 	 */
 	public static function service(){
-	    global $current_user;
-	    if(!is_user_logged_in()){
+	    if(!XH_Social::instance()->WP->capability()){
 	        echo (XH_Social_Error::err_code(501)->to_json());
 	        exit;
 	    }
-	    
-	    $capability = apply_filters('xh_social_admin_menu_capability', 'administrator');
-	    if(!$current_user->roles||!is_array($current_user->roles)){
-	        $current_user->roles=array();
-	    }
-	     
-	    if(!in_array($capability, $current_user->roles)){
-	        echo (XH_Social_Error::err_code(501)->to_json());
-	        exit;
-	    }
-	    
+	   
 	    $action ='xh_social_service';
 	    $params = array(
 	        'action'=>$action,
@@ -222,7 +211,7 @@ class XH_Social_Ajax {
 	                $page_index=1;
 	            }
 	             
-	            $keywords = isset($_REQUEST['keywords'])?sanitize_title_for_query($_REQUEST['keywords']):'';
+	            $keywords = isset($_REQUEST['keywords'])?($_REQUEST['keywords']):'';
 	             
 	            if(empty($keywords)){
 	                $info = get_option('xh-social-ajax:service:extensions:'.$page_index);
@@ -273,7 +262,7 @@ class XH_Social_Ajax {
 	                $page_index=1;
 	            }
 	            $category_id=isset($_REQUEST['category_id'])?intval($_REQUEST['category_id']):0;
-	            $keywords = isset($_REQUEST['keywords'])?sanitize_title_for_query($_REQUEST['keywords']):'';
+	            $keywords = isset($_REQUEST['keywords'])?($_REQUEST['keywords']):'';
 	            if(empty($keywords)){
 	                $info = get_option("xh-social-ajax:service:plugins:{$category_id}:{$page_index}");
 	                if(!$info||!is_array($info)){
@@ -322,18 +311,7 @@ class XH_Social_Ajax {
 	 * 管理员对插件的操作
 	 */
 	public static function plugin(){
-	    global $current_user;
-	    if(!is_user_logged_in()){
-	        echo (XH_Social_Error::err_code(501)->to_json());
-	        exit;
-	    }
-	   
-	    $capability = apply_filters('xh_social_admin_menu_capability', 'administrator');
-	    if(!$current_user->roles||!is_array($current_user->roles)){
-	        $current_user->roles=array();
-	    }
-	    
-	    if(!in_array($capability, $current_user->roles)){
+	   if(!XH_Social::instance()->WP->capability()){
 	        echo (XH_Social_Error::err_code(501)->to_json());
 	        exit;
 	    }

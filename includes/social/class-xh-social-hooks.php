@@ -26,10 +26,16 @@ class XH_Social_Hooks{
         add_action( 'admin_footer', __CLASS__.'::admin_footer',10);
         add_action( 'the_content', __CLASS__.'::share',10,1);
         
-        //change default avatar
-        add_filter('avatar_defaults', __CLASS__.'::avatar_defaults',10,1);
+        //------change by hoter@xunhuweb.com --------
+        // @version 1.1.5 
+        // @date 2017-07-04 10:55:48
+        
+        //add_filter('avatar_defaults', __CLASS__.'::avatar_defaults',10,1);
         add_filter('pre_get_avatar_data', __CLASS__.'::pre_get_avatar_data',999,2);
-        add_filter('default_avatar_select',  __CLASS__.'::default_avatar_select',10,1);
+        
+        //change by hoter@xunhuweb.com 2017-07-04 10:55:48
+        //add_filter('default_avatar_select',  __CLASS__.'::default_avatar_select',10,1);
+        //----------------------change end-------------------
         
         //templete must be start with social.
         $templates = apply_filters('xh_social_page_templetes', array());    
@@ -38,21 +44,46 @@ class XH_Social_Hooks{
         }
     }
     
-    /**
-     * 低版本wp，图片不现实问题修复
-     */
+    //------change by hoter@xunhuweb.com --------
+    // @version 1.1.5
+    // @date 2017-07-04 10:55:48
+    
+    /*
     public static function default_avatar_select($avatar_list){
         return str_replace('&amp;forcedefault=1', '', $avatar_list);
-    }
+    }*/
     
+    //----------------------change end-------------------
+    
+    /**
+     * 重置用户头像
+     * 
+     * @param array $args
+     * @param string $id_or_email
+     */
     public static function pre_get_avatar_data( $args, $id_or_email ){     
         if ( isset( $args['url'] ) && ! is_null( $args['url'] ) ) {
     		return $args;
     	}
     	
-        if(isset($args['default'])&&$args['default']!=self::AVATAR_KEY){
+    	//------change by hoter@xunhuweb.com --------
+        // @version 1.1.5
+        // @date 2017-07-04 10:55:48
+
+    	/*if(isset($args['default'])&&$args['default']!=self::AVATAR_KEY){
+    	   return $args;
+    	 }*/
+    	
+    	//低版本 ：判断force_default
+        if(isset($args['force_default'])&&$args['force_default']){
             return $args;
         }
+        
+        //高版本：判断pre_option_show_avatars
+        if(apply_filters('pre_option_show_avatars', false)){
+            return $args;
+        }
+        //----------------------change end-------------------
         
         $user_ID =0;
         
@@ -115,10 +146,10 @@ class XH_Social_Hooks{
         return $args;
     }
     
-    public static function avatar_defaults($avatar_defaults){
-        $avatar_defaults[self::AVATAR_KEY]=__('Social Avatar (Wechat Social)',XH_SOCIAL);
-        return $avatar_defaults;
-    }
+//     public static function avatar_defaults($avatar_defaults){
+//         $avatar_defaults[self::AVATAR_KEY]=__('Social Avatar (Wechat Social)',XH_SOCIAL);
+//         return $avatar_defaults;
+//     }
     
     public static function share($content){
         if(!is_single()){

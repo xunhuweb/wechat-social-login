@@ -3,6 +3,7 @@ if (! defined ( 'ABSPATH' ))
     exit (); // Exit if accessed directly
 
 require_once 'class-xh-social-channel-wechat.php';
+require_once XH_SOCIAL_DIR.'/includes/abstracts/abstract-xh-add-ons.php';
 
 /**
  * 微信登录

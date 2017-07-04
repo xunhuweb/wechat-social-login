@@ -65,13 +65,14 @@ class XH_Social_Settings_Add_Ons_Install_Installed extends Abstract_XH_Social_Se
    
     public function admin_options(){
         $plugins =XH_Social::instance()->WP->get_plugin_list_from_system();
+        $content_dir =WP_CONTENT_DIR;
         ?>
         <h2><?php echo $this->title?></h2>
            <div id="field-messages"></div>
             <?php do_action('xh_social_menu_add_ons_install_installed_header');?>
             
 			<p><?php echo sprintf(__('Upload your plugins into <code>%s</code> and redirect to <a href="%s">installed page</a>,activate the plugin.',XH_SOCIAL)
-			    ,WP_CONTENT_DIR.'/wechat-social-login/add-ons/',
+			    ,XH_Social::instance()->plugins_dir[0],
 			     admin_url("admin.php?page=social_page_add_ons&section=menu_add_ons_install&sub=settings_add_ons_install_installed"))?></p>
 		<br class="clear">	
             <table class="wp-list-table widefat plugins">
@@ -334,8 +335,10 @@ class XH_Social_Settings_Add_Ons_Install_Find extends Abstract_XH_Social_Setting
         	</div>
 		
 			<br class="clear">	
-			<p><?php echo sprintf(__('Upload your plugins into <code>%s</code> and redirect to <a href="%s">installed page</a>,activate the plugin.',XH_SOCIAL)
-			    ,WP_CONTENT_DIR.'/wechat-social-login/add-ons/',
+			<p><?php
+			$content_dir =WP_CONTENT_DIR;
+			echo sprintf(__('Upload your plugins into <code>%s</code> and redirect to <a href="%s">installed page</a>,activate the plugin.',XH_SOCIAL)
+			    ,XH_Social::instance()->plugins_dir[0],
 			     admin_url("admin.php?page=social_page_add_ons&section=menu_add_ons_install&sub=settings_add_ons_install_installed"))?></p>
 		
 		
@@ -517,7 +520,9 @@ class XH_Social_Settings_Add_Ons_Install_Find extends Abstract_XH_Social_Setting
                 		}
     			};
 
-    			window.view.search(1);
+    			$(function(){
+    				window.view.search(1);
+        		});
     		})(jQuery);
 		</script>
 		<?php

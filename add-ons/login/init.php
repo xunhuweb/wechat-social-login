@@ -1,7 +1,7 @@
 <?php 
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
-}
+} 
 /**
  * 登录注册
  * 实现自定义登录注册，找回密码页面
@@ -91,12 +91,17 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
                 'title'=>__('Register Terms Of Service(link)',XH_SOCIAL),
                 'type'=>'text',
                 'placeholder'=>__('http://www.xxx.com/...(Leave blank,terms of service will be hidden).',XH_SOCIAL),
-                'description'=>__('Terms Of Service under the register form(before submit button).',XH_SOCIAL),
+                'description'=>__('Terms Of Service under the register form.',XH_SOCIAL),
             ),
             'login_with_captcha'=>array(
                 'title'=>__('Login With Iamge Captcha',XH_SOCIAL),
                 'type'=>'checkbox',
-                'description'=>__('Iamge captcha in the login form(before submit button).',XH_SOCIAL),
+                'description'=>__('Iamge captcha in the login form.',XH_SOCIAL),
+            ),
+            'email_required'=>array(
+                'title'=>__('Email Required',XH_SOCIAL),
+                'type'=>'checkbox',
+                'description'=>__('Email is required when register.',XH_SOCIAL),
             )
         );
     }
@@ -200,7 +205,7 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
             }
         }
         
-        $userdata =apply_filters('xh_social_page_login_login_validate', $userdata);
+        $userdata =apply_filters('xh_social_page_login_login_validate', stripslashes_deep($userdata));
         if(!XH_Social_Error::is_valid($userdata)){
             echo $userdata->to_json();
             exit;
@@ -244,7 +249,7 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
             }
         }
         
-        $userdata =apply_filters('xh_social_page_login_register_validate', $userdata);
+        $userdata =apply_filters('xh_social_page_login_register_validate', stripslashes_deep($userdata));
         if(!XH_Social_Error::is_valid($userdata)){
             echo $userdata->to_json();
             exit;
@@ -545,6 +550,7 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
         $fields['register_user_email']=array(
             'title'=>__('user email',XH_SOCIAL),
             'type'=>'email',
+            'required'=>'yes'==$this->get_option('email_required'),
             'validate'=>function($name,$datas,$settings){
                 $email = isset($_POST[$name])?sanitize_email(trim($_POST[$name])):'';
                 

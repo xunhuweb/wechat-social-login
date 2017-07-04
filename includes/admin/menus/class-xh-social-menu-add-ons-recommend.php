@@ -245,7 +245,9 @@ class XH_Social_Settings_Add_Ons_Recommend_Plugins extends Abstract_XH_Social_Se
                 		}
     			};
 
-    			window.view.search(1);
+    			$(function(){
+    				window.view.search(1);
+        		});
     		})(jQuery);
 		</script>
 		<?php

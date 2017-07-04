@@ -180,14 +180,20 @@ class XH_Social_Channel_Wechat extends Abstract_XH_Social_Settings_Channel{
         if(is_user_logged_in()){
             $ext_user_info = $this->get_ext_user_info_by_wp(get_current_user_id());
             if($ext_user_info){
-                $openid=isset($ext_user_info->mp_openid)?$ext_user_info->mp_openid:null;
+                $openid=isset($ext_user_info['mp_openid'])?$ext_user_info['mp_openid']:null;
             }
+           
         }
         
         //重新获取openid
         if(empty($openid)){
             if(is_user_logged_in()){
-                wp_redirect(XH_Social::instance()->channel->get_do_unbind_uri($this->id,XH_Social_Helper_Uri::get_location_uri()));
+                //仅能在微信端，获取mp openid(避免无限循环)
+                if(!XH_Social_Helper_Uri::is_wechat_app()){
+                    XH_Social::instance()->WP->wp_die(__('请在微信客户端打开链接',XH_SOCIAL),true,true);
+                    exit;
+                }
+                wp_redirect(XH_Social::instance()->channel->get_do_bind_redirect_uri($this->id,XH_Social_Helper_Uri::get_location_uri()));
             }else{
                 wp_redirect(XH_Social::instance()->channel->get_authorization_redirect_uri($this->id,XH_Social_Helper_Uri::get_location_uri()));
             }
@@ -754,6 +760,7 @@ class XH_Social_Channel_Wechat extends Abstract_XH_Social_Settings_Channel{
     }
 }
 
+require_once XH_SOCIAL_DIR.'/includes/abstracts/abstract-xh-schema.php';
 /**
 * 微信接口
 *

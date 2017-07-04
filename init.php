@@ -4,7 +4,7 @@
  * Plugin URI: http://www.weixinsocial.com
  * Description: 支持国内最热门的社交媒体登录。如：微信、QQ、微博、手机登录、账号绑定和解绑，全新的注册页面取代原生注册页面，支持Ultimate Member、WooCommerce、Buddypress，兼容Open Social。部分扩展收费，查看详情：<a href="http://www.weixinsocial.com">www.weixinsocial.com</a>
  * Author: 迅虎网络
- * Version: 1.1.3
+ * Version: 1.1.5
  * Author URI:  http://www.wpweixin.net
  */
 
@@ -19,7 +19,7 @@ final class XH_Social {
      * @since 1.0.0
      * @var string
      */
-    public $version = '1.1.3';
+    public $version = '1.1.5';
     
     /**
      * 最小wp版本
@@ -71,7 +71,12 @@ final class XH_Social {
      * @var XH_Social_WP_Api
      */
     public $WP;
- 
+    
+    /**
+     * 
+     * @var string[]
+     */
+    public $plugins_dir =array();
     /**
      * Main Social Instance.
      *
@@ -85,6 +90,7 @@ final class XH_Social {
         if ( is_null( self::$_instance ) ) {
             self::$_instance = new self();
         }
+        
         return self::$_instance;
     }
 
@@ -135,9 +141,8 @@ final class XH_Social {
         add_action( 'init', array( 'XH_Social_Shortcodes',      'init' ), 10 );
         add_action( 'init', array( 'XH_Social_Ajax',            'init' ), 10 );
         
-        //wp_enqueue_scripts,wp_loaded all required.
-        //add_action( 'wp_enqueue_scripts', array($this,'wp_enqueue_scripts'),10);
-        add_action( 'wp_loaded', array($this,'wp_enqueue_scripts'),10);  
+        add_action( 'admin_enqueue_scripts', array($this,'admin_enqueue_scripts'),10);
+        add_action('wp_enqueue_scripts', array($this,'wp_enqueue_scripts'),10);
         XH_Social_Log::instance( new XH_Social_Log_File_Handler ( XH_SOCIAL_DIR . "/logs/" . date ( 'Y/m/d' ) . '.log' ));
         register_activation_hook ( XH_SOCIAL_FILE, array($this,'_register_activation_hook'),10 );
         register_deactivation_hook(XH_SOCIAL_FILE,  array($this,'_register_deactivation_hook'),10);        
@@ -197,6 +202,18 @@ final class XH_Social {
         }
         
         foreach ($installed as $file){
+            $file = str_replace('\\', '/', $file);
+            $valid = false;
+            foreach ($this->plugins_dir as $dir){
+                if(strpos($file, $dir)===0){
+                    $valid=true;
+                    break;
+                }
+            }
+            if(!$valid){
+                continue;
+            }
+            
             $add_on=null;
             if(isset($this->plugins[$file])){
                 $add_on=$this->plugins[$file];
@@ -350,6 +367,13 @@ final class XH_Social {
         self::define( 'XH_SOCIAL_DIR', rtrim (str_replace('\\', '/',  plugin_dir_path ( XH_SOCIAL_FILE )), '/' ));
         self::define( 'XH_SOCIAL_URL', rtrim ( plugin_dir_url ( XH_SOCIAL_FILE ), '/' ) );
         self::define( 'XH_SOCIAL_SESSION_CACHE_GROUP', 'xh_social_session_id' );
+        
+        $content_dir = WP_CONTENT_DIR;
+        $this->plugins_dir=array(
+            str_replace('\\', '/', $content_dir).'/wechat-social-login/add-ons/',
+            str_replace('\\', '/', $content_dir).'/xh-social/add-ons/',
+            XH_SOCIAL_DIR.'/add-ons/',
+        );
     }
 
     /**
@@ -394,6 +418,7 @@ final class XH_Social {
         require_once 'includes/error/class-xh-error.php';
         require_once 'includes/logger/class-xh-log.php';
         require_once 'includes/abstracts/abstract-xh-settings.php';
+        require_once 'includes/abstracts/abstract-xh-schema.php';
         require_once 'includes/abstracts/abstract-xh-channel.php';
         require_once 'includes/abstracts/abstract-xh-add-ons.php';
         require_once 'includes/class-xh-cache-helper.php';
@@ -406,6 +431,7 @@ final class XH_Social {
         if ( self::is_request( 'frontend' ) || self::is_request( 'cron' ) ) {
             
         }
+        
         require_once 'includes/admin/abstracts/abstract-xh-view-form.php';
         require_once 'includes/admin/abstracts/abstract-xh-settings-menu.php';
         require_once 'includes/admin/abstracts/abstract-xh-settings-page.php';
@@ -416,6 +442,7 @@ final class XH_Social {
         require_once 'includes/social/class-xh-social-hooks.php';
         require_once 'includes/social/class-xh-social-channel-api.php';
         require_once 'includes/social/class-xh-social-settings-default-other.php';
+     
     }
 
     /**
@@ -440,23 +467,30 @@ final class XH_Social {
         do_action( 'xh_social_init' );
     }
     
-   
-    public function wp_enqueue_scripts(){
+    public function admin_enqueue_scripts(){
         $min = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
-        wp_enqueue_style('wsocial',XH_SOCIAL_URL."/assets/css/social$min.css",array(),$this->version);
+        wp_enqueue_style('wsocial-admin',XH_SOCIAL_URL."/assets/css/admin$min.css",array(),$this->version);
         
         wp_enqueue_script('jquery');
-        if(is_admin()){
-            //current plugins require jquery.js
-            wp_enqueue_script('jquery-loading',XH_SOCIAL_URL."/assets/js/jquery-loading$min.js",array('jquery'),$this->version);
-            wp_enqueue_script('qrcode',XH_SOCIAL_URL."/assets/js/qrcode$min.js",array('jquery'),$this->version);
-            wp_enqueue_script('media-upload');
-            wp_enqueue_script('thickbox');
-            
-            wp_enqueue_style('thickbox');
-        }
+        //current plugins require jquery.js
+        wp_enqueue_script('jquery-loading',XH_SOCIAL_URL."/assets/js/jquery-loading$min.js",array('jquery'),$this->version,true);
+        wp_enqueue_script('qrcode',XH_SOCIAL_URL."/assets/js/qrcode$min.js",array('jquery'),$this->version,true);
+        wp_enqueue_script('media-upload');
+        wp_enqueue_script('thickbox');
         
-        do_action('xh_social_enqueue_scripts');
+        wp_enqueue_style('thickbox');
+        
+        do_action('xh_social_admin_enqueue_scripts');
+        
+    }
+    
+    public function wp_enqueue_scripts(){
+        $min = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+        wp_enqueue_script('jquery');
+        
+        wp_enqueue_style('wsocial-front',XH_SOCIAL_URL."/assets/css/social$min.css",array(),$this->version);
+ 
+        do_action('xh_social_wp_enqueue_scripts');
     }
 }
 

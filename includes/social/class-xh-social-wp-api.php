@@ -37,6 +37,28 @@ class XH_Social_WP_Api{
     private function __construct(){}
     
     /**
+     * 判断当前用户是否允许操作
+     * @param array $roles
+     * @since 1.0.0
+     */
+    public function capability($roles=array('administrator')){
+        global $current_user;
+        if(!is_user_logged_in()){
+        }
+         
+        if(!$current_user->roles||!is_array($current_user->roles)){
+            $current_user->roles=array();
+        }
+         
+        foreach ($roles as $role){
+            if(in_array($role, $current_user->roles)){
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    /**
      * 根据昵称，创建user_login
      * @param string $nickname
      * @return string
@@ -45,11 +67,11 @@ class XH_Social_WP_Api{
     public function generate_user_login($nickname){
         $nickname = sanitize_user(XH_Social_Helper_String::remove_emoji($nickname));
         if(empty($nickname)){
-            $nickname = XH_Social_Helper_String::guid();
+            $nickname = mb_substr(str_shuffle("abcdefghigklmnopqrstuvwxyz123456") ,0,8,'utf-8');
         }
         
         if(mb_strlen($nickname)>32){
-            $nickname = mb_substr($nickname, 0,32);
+            $nickname = mb_substr($nickname, 0,32,'utf-8');
         }
         
         $pre_nickname =$nickname;
@@ -283,14 +305,9 @@ class XH_Social_WP_Api{
      * @return NULL|Abstract_XH_Social_Add_Ons[]
      */
     public function get_plugin_list_from_system(){
-        $base_dirs= array(
-            WP_CONTENT_DIR.'/wechat-social-login/add-ons/',
-            WP_CONTENT_DIR.'/xh-social/add-ons/',
-            XH_SOCIAL_DIR.'/add-ons/',
-        );
-    
+        $base_dirs = XH_Social::instance()->plugins_dir;
+        
         $plugins = array();
-
         $include_files = array();
         
         foreach ($base_dirs as $base_dir){
