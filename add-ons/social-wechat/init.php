@@ -48,7 +48,7 @@ class XH_Social_Add_On_Social_Wechat extends Abstract_XH_Social_Add_Ons{
         $this->min_core_version = '1.0.0';
         $this->author=__('xunhuweb',XH_SOCIAL);
         $this->author_uri='https://www.wpweixin.net';
-        $this->dir= rtrim ( plugin_dir_path ( __FILE__ ), '/' );
+        $this->dir= rtrim ( trailingslashit( dirname( __FILE__ ) ), '/' );
     }
 
     public function on_update($old_version){
@@ -112,21 +112,21 @@ class XH_Social_Add_On_Social_Wechat extends Abstract_XH_Social_Add_Ons{
     
     public function do_ajax(){
         $action ="xh_social_{$this->id}";
-        $datas = array(
-            'notice_str'=>isset($_REQUEST['notice_str'])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST['notice_str']):'',
+        $datas=shortcode_atts(array(
+            'notice_str'=>null,
             'action'=>$action,
-            $action=>isset($_REQUEST[$action])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST[$action]):'',
-            'tab'=>isset($_REQUEST['tab'])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST['tab']):''
-        );
+            $action=>null,
+            'tab'=>null
+        ), stripslashes_deep($_REQUEST));
         
         if(isset($_REQUEST['uid'])){
-            $datas['uid']=XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST['uid']);
+            $datas['uid']=stripslashes($_REQUEST['uid']);
         }
         if(isset($_REQUEST['s'])){
-            $datas['s']=XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST['s']);
+            $datas['s']=stripslashes($_REQUEST['s']);
         }
         if(isset($_REQUEST['uuid'])){
-            $datas['uuid']=XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST['uuid']);
+            $datas['uuid']=stripslashes($_REQUEST['uuid']);
         }
         
         if(!XH_Social::instance()->WP->ajax_validate($datas,isset($_REQUEST['hash'])?$_REQUEST['hash']:null,true)){

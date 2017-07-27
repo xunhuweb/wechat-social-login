@@ -1204,8 +1204,8 @@ abstract class Abstract_XH_Social_Settings {
     	       }
     	    ?>
     	    
-    	    <h5><?php echo wp_kses_post( $data['title'] ); ?> </h5>
-        	<p class="description"><?php echo wp_kses_post( $data['description'] ); ?></p>
+    	    <h2><?php echo wp_kses_post( $data['title'] ); ?> </h2>
+        	<p class="description"><?php echo wp_kses_post( isset($data['description'])?$data['description']:null ); ?></p>
 
 	    </td>
 	    </tr>

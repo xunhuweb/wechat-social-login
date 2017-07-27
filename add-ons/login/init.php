@@ -48,7 +48,7 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
         $this->author=__('xunhuweb',XH_SOCIAL);
         $this->author_uri='https://www.wpweixin.net';
         $this->setting_uri = admin_url('admin.php?page=social_page_default&section=menu_default_account&sub=add_ons_login');
-        $this->dir= rtrim ( plugin_dir_path ( __FILE__ ), '/' );
+        $this->dir= rtrim ( trailingslashit( dirname( __FILE__ ) ), '/' );
 
         $this->init_form_fields();
         
@@ -157,13 +157,13 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
     public function do_ajax(){
         $action ="xh_social_{$this->id}";
         
-        $datas = array(
-            'notice_str'=>isset($_REQUEST['notice_str'])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST['notice_str']):'',
+        $datas=shortcode_atts(array(
+            'notice_str'=>null,
             'action'=>$action,
-            'tab'=>isset($_REQUEST['tab'])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST['tab']):'',
-            $action=>isset($_REQUEST[$action])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST[$action]):'',
-        );
-         
+            $action=>null,
+            'tab'=>null
+        ), stripslashes_deep($_REQUEST));
+        
         if(!XH_Social::instance()->WP->ajax_validate($datas,isset($_REQUEST['hash'])?$_REQUEST['hash']:null,true)){
            if($_SERVER['REQUEST_METHOD']=='GET'){
                XH_Social::instance()->WP->wp_die(XH_Social_Error::err_code(701));

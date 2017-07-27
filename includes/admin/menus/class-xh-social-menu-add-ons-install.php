@@ -65,6 +65,7 @@ class XH_Social_Settings_Add_Ons_Install_Installed extends Abstract_XH_Social_Se
    
     public function admin_options(){
         $plugins =XH_Social::instance()->WP->get_plugin_list_from_system();
+  
         $content_dir =WP_CONTENT_DIR;
         ?>
         <h2><?php echo $this->title?></h2>
@@ -75,6 +76,33 @@ class XH_Social_Settings_Add_Ons_Install_Installed extends Abstract_XH_Social_Se
 			    ,XH_Social::instance()->plugins_dir[0],
 			     admin_url("admin.php?page=social_page_add_ons&section=menu_add_ons_install&sub=settings_add_ons_install_installed"))?></p>
 		<br class="clear">	
+		
+		<script type="text/javascript">
+			(function($){
+				window.xh_plugin_view={
+					update:function(url,on_success){
+						jQuery.ajax({
+				            url: url,
+				            type: 'post',
+				            timeout: 60 * 1000,
+				            async: true,
+				            cache: false,
+				            data: {},
+				            dataType: 'json',
+				            success: function(m) {
+				            	if(on_success){
+				            		on_success(m);
+					            }
+				            },
+				            error:function(e){
+				            	console.error(e.responseText);
+				            }
+				         });
+					}
+				};
+			})(jQuery);
+		</script>
+		
             <table class="wp-list-table widefat plugins">
             	<thead>
             	<tr>
@@ -101,6 +129,16 @@ class XH_Social_Settings_Add_Ons_Install_Installed extends Abstract_XH_Social_Se
             		          $index++;
             		          $plugin_ids[]=$plugin->id;
             		          
+            		          ob_start();
+            		          if($plugin->is_authoirzed){
+                		          ?>
+                		           <script type="text/javascript">
+                		          		 window.xh_plugin_view.update('<?php echo XH_Social::instance()->ajax_url(array('action'=>'xh_social_plugin','tab'=>'update_plugin_list','plugin_id'=>$plugin->id),true,true)?>');
+                            		</script>
+                		          <?php 
+            		          }
+            		          $scripts = ob_get_clean();
+            		          
             		          if($plugin->is_active){
                 		          ?>
                           		   <tr class="active" id="row-<?php esc_attr($plugin->id)?>">
@@ -108,9 +146,17 @@ class XH_Social_Settings_Add_Ons_Install_Installed extends Abstract_XH_Social_Se
                               		   	<td class="plugin-title column-primary">
                                   		   	<strong><?php echo $plugin->title;?></strong>
                                   		   	<div class="row-actions visible">
-                                  		   			<?php if(!empty($plugin->setting_uri)){
-                                  		   			    ?><span class="settings"><a href="<?php echo $plugin->setting_uri;?>"><?php echo __('Settings',XH_SOCIAL)?></a> | </span><?php                           		   			
+                                  		   			<?php 
+                                  		   			if(isset($plugin->setting_uris)&&count($plugin->setting_uris)>0){
+                                  		   			    foreach ($plugin->setting_uris as $key=>$settings){
+                                  		   			        ?><span class="settings"><a href="<?php echo $settings['url'];?>"><?php echo $settings['title']?></a> | </span><?php
+                                  		   			    }
                                   		   			}
+                                  		   			
+                                  		   			if(!empty($plugin->setting_uri)){
+                                  		   			    ?><span class="settings"><a href="<?php echo $plugin->setting_uri;?>"><?php echo __('Settings',XH_SOCIAL)?></a> | </span><?php                        		   			
+                                  		   			}
+                                  		   			
                                   		   			$params = array(
                                   		   			      'action'=>'xh_social_plugin',
                                   		   			      'tab'=>'uninstall',
@@ -125,6 +171,7 @@ class XH_Social_Settings_Add_Ons_Install_Installed extends Abstract_XH_Social_Se
                                   		   			</script>
                                   		   			<span class="deactivate"><a href="javascript:void(0);" id="plugin-<?php print $plugin->id?>" onclick="window.view.plugin(plugin_<?php print$index?>);"><?php echo __('Deactivate',XH_SOCIAL)?></a></span>
                                   		   	</div>
+                                  		   	<?php echo $scripts;?>
                               		   	</td>
                               		   	
                               		   	<td class="column-description desc">
@@ -166,6 +213,7 @@ class XH_Social_Settings_Add_Ons_Install_Installed extends Abstract_XH_Social_Se
                           		   			</script>
                 		              		<span class="activate"><a href="javascript:void(0);" id="plugin-<?php print $plugin->id?>" onclick="window.view.plugin(plugin_<?php print $index?>);" class="edit"><?php echo __('Activate',XH_SOCIAL)?></a></span>
                 		              	</div>
+                		              		<?php echo $scripts;?>
             		              	</td>
             		              	<td class="column-description desc">
                 						<div class="plugin-description"><p><?php echo empty($plugin->description)?$plugin->title:$plugin->description;?></p></div>

@@ -65,9 +65,9 @@ class XH_Social_WP_Api{
      * @since 1.0.1
      */
     public function generate_user_login($nickname){
-        $nickname = sanitize_user(XH_Social_Helper_String::remove_emoji($nickname));
+        $nickname = XH_Social_Helper_String::remove_emoji($nickname);
         if(empty($nickname)){
-            $nickname = mb_substr(str_shuffle("abcdefghigklmnopqrstuvwxyz123456") ,0,8,'utf-8');
+            $nickname = mb_substr(str_shuffle("abcdefghigklmnopqrstuvwxyz123456") ,0,4,'utf-8');
         }
         
         if(mb_strlen($nickname)>32){
@@ -99,6 +99,18 @@ class XH_Social_WP_Api{
         return $nickname;
     }
 
+    public function get_plugin_settings_url(){
+        $page =XH_Social_Helper_Array::first_or_default(XH_Social_Admin::instance()->get_admin_pages(),function($m){
+            return $m&&$m instanceof Abstract_XH_Social_Settings_Page&&count($m->menus())>0;
+        });
+        
+        if(!$page){
+            return null;
+        }
+        
+        return $page->get_page_url();
+    }
+    
     /**
      * @since 1.0.9
      * @param array $request
@@ -109,13 +121,13 @@ class XH_Social_WP_Api{
         if(XH_Social_Helper::generate_hash($request, XH_Social::instance()->get_hash_key())!=$hash){
             return false;
         }
-        
-        if($validate_notice
-            &&isset($request['action'])
-            &&isset($request[$request['action']])
-            &&'yes'===XH_Social_Settings_Default_Other_Default::instance()->get_option('defense_CSRF','no')){
-
-            return check_ajax_referer($request['action'],$request['action'],false);
+       
+        if($validate_notice&&'yes'===XH_Social_Settings_Default_Other_Default::instance()->get_option('defense_CSRF','no')){
+            if(isset($request['action'])&&isset($request[$request['action']])){
+                 return check_ajax_referer($request['action'],$request['action'],false);
+            }else{
+                return false;
+            }
         }
         
         return true;
@@ -342,16 +354,16 @@ class XH_Social_WP_Api{
                                 $file=str_replace("\\", "/",$base_dir.$file."/init.php");
                             }
         
-                           
+                            
                             if(file_exists($file)){
                                 $add_on=null;
-                                
                                 if(isset(XH_Social::instance()->plugins[$file])){
                                     //已安装
                                     $add_on=XH_Social::instance()->plugins[$file];
                                 }else{
                                     //未安装
                                     $add_on = require_once $file;
+                                   
                                     if($add_on&&$add_on instanceof Abstract_XH_Social_Add_Ons){
                                         $add_on->is_active=false;
                                         XH_Social::instance()->plugins[$file]=$add_on;
@@ -359,7 +371,7 @@ class XH_Social_WP_Api{
                         	            $add_on=null;
                         	        }
                                 } 
-                                
+                               
                                 if($add_on){
                                     $plugins[$file]=$add_on;
                                 }
@@ -376,7 +388,7 @@ class XH_Social_WP_Api{
                 
             }
         }
-    
+  
         $results = array();
         $plugin_ids=array();
         foreach ($plugins as $file=>$plugin){

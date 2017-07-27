@@ -2,22 +2,16 @@
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
+if ( ! $guessurl = site_url() ){
+    $guessurl = wp_guess_url();
+}
 ?>
 <!DOCTYPE html>
 <html lang="zh-cn">
 <head>
     <meta charset="utf-8">
     <title><?php echo __('Wechat Share',XH_SOCIAL)?></title>
-    <?php 
-    global $wp_scripts;
-    if(isset($wp_scripts->registered['jquery-core'])&&isset($wp_scripts->registered['jquery-core']->src)){
-        ?>
-	    <script src="<?php echo $wp_scripts->base_url.$wp_scripts->registered['jquery-core']->src; ?>"></script>
-	    <?php 
-	}else{
-	    ?><script src="https://code.jquery.com/jquery-3.2.1.min.js"></script><?php 
-	}
-    ?>
+  	<script src="<?php echo $guessurl.'/wp-includes/js/jquery/jquery.js'; ?>"></script>
     <script src="<?php echo XH_SOCIAL_URL.'/assets/js/qrcode.js'?>"></script>
 </head>
 <body>

@@ -40,7 +40,7 @@ class XH_Social_Log_File_Handler implements XH_Social_Log_Handler {
 	               //不是目录，则创建目录
 	                if(is_dir($dir)||@mkdir($dir,0777,true)){
 	                   
-	                   $this->handle = fopen ( $this->file, 'a' );
+	                   $this->handle = @fopen ( $this->file, 'a' );
 	                }
 	            } catch (Exception $e) {
 	                //ignore

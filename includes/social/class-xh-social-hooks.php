@@ -3,6 +3,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 require_once 'class-xh-social-wp-api.php';
+
 /**
  * wordpress apis
  * 
@@ -23,7 +24,6 @@ class XH_Social_Hooks{
         add_filter( 'sanitize_user', __CLASS__.'::sanitize_user', 10, 3);
         //add_filter( 'get_avatar', __CLASS__.'::get_avatar', 100, 6);
         add_action( 'admin_init', __CLASS__.'::check_add_ons_update',10);
-        add_action( 'admin_footer', __CLASS__.'::admin_footer',10);
         add_action( 'the_content', __CLASS__.'::share',10,1);
         
         //------change by hoter@xunhuweb.com --------
@@ -159,24 +159,6 @@ class XH_Social_Hooks{
         return $content.xh_social_share(false);
     }
     
-    public static function admin_footer(){
-        //垃圾回收触发
-        ?>
-        <script type="text/javascript">
-		(function($){
-			//回收系统垃圾
-			$.ajax({
-	            url: '<?php echo XH_Social::instance()->ajax_url('xh_social_gc',true,true)?>',
-	            type: 'post',
-	            timeout: 60 * 1000,
-	            async: true,
-	            cache: false
-	         });
-		})(jQuery);
-		</script>
-        <?php 
-    }
-    
     /**
      * 检查扩展更新状态
      */
@@ -225,6 +207,8 @@ class XH_Social_Hooks{
      * @param bool $strict
      */
     public static  function sanitize_user( $username, $raw_username, $strict ) {
+        $username = XH_Social_Helper_String::remove_emoji($username);
+        
         if( !$strict )
             return $username;
     

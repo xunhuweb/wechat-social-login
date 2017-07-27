@@ -2,15 +2,19 @@
 /*
  * Plugin Name: Wechat Social
  * Plugin URI: http://www.weixinsocial.com
- * Description: 支持国内最热门的社交媒体登录。如：微信、QQ、微博、手机登录、账号绑定和解绑，全新的注册页面取代原生注册页面，支持Ultimate Member、WooCommerce、Buddypress，兼容Open Social。部分扩展收费，查看详情：<a href="http://www.weixinsocial.com">www.weixinsocial.com</a>
+ * Description: 支持国内最热门的社交媒体登录。如：微信、QQ、微博、手机登录、账号绑定和解绑，全新的注册页面取代原生注册页面，支持Ultimate Member、WooCommerce、Buddypress，兼容Open Social。部分扩展收费，查看详情：<a href="http://www.weixinsocial.com">Wechat Social</a>
  * Author: 迅虎网络
- * Version: 1.1.5
+ * Version: 1.1.6
  * Author URI:  http://www.wpweixin.net
  */
 
 if (! defined ( 'ABSPATH' ))
 	exit (); // Exit if accessed directly
 
+if(!defined('WSOCIAL_OPEN')){
+    define('WSOCIAL_OPEN', 1);
+}
+	
 if ( ! class_exists( 'XH_Social' ) ) :
 final class XH_Social {
     /**
@@ -19,7 +23,7 @@ final class XH_Social {
      * @since 1.0.0
      * @var string
      */
-    public $version = '1.1.5';
+    public $version = '1.1.6';
     
     /**
      * 最小wp版本
@@ -32,7 +36,7 @@ final class XH_Social {
      * 
      * @var string
      */
-    public $license_id='wechat_social';
+    const license_id='wechat_social';
   
     /**
      * The single instance of the class.
@@ -77,6 +81,7 @@ final class XH_Social {
      * @var string[]
      */
     public $plugins_dir =array();
+    
     /**
      * Main Social Instance.
      *
@@ -123,6 +128,8 @@ final class XH_Social {
         $this->includes();  
         $this->init_hooks();
         
+        XH_Social_Install::instance();
+        
         do_action( 'xh_social_loaded' );
     }
 
@@ -142,37 +149,12 @@ final class XH_Social {
         add_action( 'init', array( 'XH_Social_Ajax',            'init' ), 10 );
         
         add_action( 'admin_enqueue_scripts', array($this,'admin_enqueue_scripts'),10);
+        add_action('login_enqueue_scripts', array($this,'login_enqueue_scripts'),10);
         add_action('wp_enqueue_scripts', array($this,'wp_enqueue_scripts'),10);
         XH_Social_Log::instance( new XH_Social_Log_File_Handler ( XH_SOCIAL_DIR . "/logs/" . date ( 'Y/m/d' ) . '.log' ));
         register_activation_hook ( XH_SOCIAL_FILE, array($this,'_register_activation_hook'),10 );
         register_deactivation_hook(XH_SOCIAL_FILE,  array($this,'_register_deactivation_hook'),10);        
         add_action ( 'plugin_action_links_'. plugin_basename( XH_SOCIAL_FILE ),array($this,'_plugin_action_links'),10,1);
-        
-        if(is_admin()){
-            if(!$this->supported_wp_version()){
-                add_action ( 'admin_notices',function(){
-                    ?>
-                    <div class="notice notice-error is-dismissible"><b>Wechat Social:</b><p>allowed min wordpress version is 3.7</p></div>
-                    <?php 
-                });
-            }
-            
-            if(!function_exists('curl_init')){
-                add_action ( 'admin_notices',function(){
-                    ?>
-                    <div class="notice notice-error is-dismissible"><b>Wechat Social:</b><p>php curl libs is missing!</p></div>
-                    <?php 
-                });
-            }
-            
-            if(!function_exists('mb_strimwidth')){
-                add_action ( 'admin_notices',function(){
-                    ?>
-                    <div class="notice notice-error is-dismissible"><b>Wechat Social:</b><p>php mb_string libs is missing!</p></div>
-                    <?php 
-                });
-            }
-        }
     }
 
     /**
@@ -192,15 +174,33 @@ final class XH_Social {
     }
     
     /**
+     * 获取已安装的扩展
+     * @param string $add_on_id
+     * @return Abstract_XH_Social_Add_Ons|NULL
+     * @since 1.1.7
+     */
+    public function get_installed_addon($add_on_id){
+        foreach ($this->plugins as $file=>$plugin){
+            if($plugin->id==$add_on_id){
+                return $plugin;
+            }
+        }
+    
+        return null;
+    }
+    
+    /**
      * 加载扩展
      * @since 1.0.0
      */
     private function include_plugins(){
+       
         $installed = get_option('xh_social_plugins_installed',array());
         if(!$installed){
             return;
         }
         
+        $dirty=false;
         foreach ($installed as $file){
             $file = str_replace('\\', '/', $file);
             $valid = false;
@@ -213,21 +213,27 @@ final class XH_Social {
             if(!$valid){
                 continue;
             }
-            
+
             $add_on=null;
             if(isset($this->plugins[$file])){
                 $add_on=$this->plugins[$file];
             }else{
                 if(file_exists($file)){
                     $add_on = require_once $file;
+                   
                     if($add_on&&$add_on instanceof Abstract_XH_Social_Add_Ons){
                         $this->plugins[$file]=$add_on;
+                        
                     }else{
+                       
         	            $add_on=null;
         	        }
+                }else{ 
+                    unset($installed[$file]);
+                    $dirty =true;
                 }
             }
-            
+           
             if($add_on){
                 $add_on->is_active=true;
                 //初始化插件
@@ -236,6 +242,10 @@ final class XH_Social {
                 //监听init
                 add_action('init', array($add_on,'on_init'),10);
             }
+        }
+       
+        if($dirty){
+            update_option('xh_social_plugins_installed', $installed,false);
         }
     }
     
@@ -325,6 +335,9 @@ final class XH_Social {
         $session_db =new XH_Social_Session_Handler_Model();
         $session_db->init();
         
+        do_action('wsocial_flush_rewrite_rules');
+        flush_rewrite_rules();
+        
         do_action('xh_social_register_activation_hook');     
     }
     
@@ -344,18 +357,27 @@ final class XH_Social {
      * @since 1.0.0
      */
     public function _plugin_action_links($links){
-        $page =XH_Social_Helper_Array::first_or_default(XH_Social_Admin::instance()->get_admin_pages(),function($m){
-            return $m&&$m instanceof Abstract_XH_Social_Settings_Page&&count($m->menus())>0;
-        });
-        
-        if(!$page){
-            return $links;
+        $install =XH_Social_Install::instance();
+        if($install->is_plugin_installed()){
+            return array_merge ( array (
+                'settings' => '<a href="' . $this->WP->get_plugin_settings_url().'">'.__('Settings').'</a>',
+                'license'=>'<a href="' . $install->get_plugin_license_url().'">'.__('License',XH_SOCIAL).'</a>',
+            ), $links );
+        }else{
+            if(WSOCIAL_OPEN){
+                return array_merge ( array (
+                    'settings' => '<a href="' . $this->WP->get_plugin_settings_url().'">'.__('Settings').'</a>',
+                ), $links );
+            }else{
+                return array_merge ( array (
+                    'setup'=>'<a href="' . $install->get_plugin_install_url().'">'.__('Setup',XH_SOCIAL).'</a>',
+                ), $links );
+            }
+            
         }
-        
-        return array_merge ( array (
-            'settings' => '<a href="' . $page->get_page_url().'">'.__('Settings').'</a>'
-        ), $links );
+       
     }
+    
     
     /**
      * Define Constants.
@@ -364,8 +386,10 @@ final class XH_Social {
     private function define_constants() {
         self::define( 'XH_SOCIAL', 'xh_social' );
         self::define( 'XH_SOCIAL_FILE', __FILE__ );
-        self::define( 'XH_SOCIAL_DIR', rtrim (str_replace('\\', '/',  plugin_dir_path ( XH_SOCIAL_FILE )), '/' ));
-        self::define( 'XH_SOCIAL_URL', rtrim ( plugin_dir_url ( XH_SOCIAL_FILE ), '/' ) );
+        
+        require_once 'includes/class-xh-helper.php';
+        self::define( 'XH_SOCIAL_DIR', XH_Social_Helper_Uri::wp_dir(__FILE__));
+        self::define( 'XH_SOCIAL_URL', XH_Social_Helper_Uri::wp_url(__FILE__));
         self::define( 'XH_SOCIAL_SESSION_CACHE_GROUP', 'xh_social_session_id' );
         
         $content_dir = WP_CONTENT_DIR;
@@ -414,7 +438,6 @@ final class XH_Social {
      * @since  1.0.0
      */
     private function includes() {
-        require_once 'includes/class-xh-helper.php';
         require_once 'includes/error/class-xh-error.php';
         require_once 'includes/logger/class-xh-log.php';
         require_once 'includes/abstracts/abstract-xh-settings.php';
@@ -424,6 +447,7 @@ final class XH_Social {
         require_once 'includes/class-xh-cache-helper.php';
         require_once 'includes/class-xh-session-handler.php';
        
+        require_once 'install/class-xh-install.php';
         if ( self::is_request( 'admin' ) ) {
             require_once 'includes/admin/class-xh-social-admin.php';
         }
@@ -483,7 +507,12 @@ final class XH_Social {
         do_action('xh_social_admin_enqueue_scripts');
         
     }
-    
+    public function login_enqueue_scripts(){
+        $min = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+        wp_enqueue_script('jquery');
+        wp_enqueue_style('wsocial-front',XH_SOCIAL_URL."/assets/css/social$min.css",array(),$this->version);
+        do_action('xh_social_login_enqueue_scripts');
+    }
     public function wp_enqueue_scripts(){
         $min = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
         wp_enqueue_script('jquery');

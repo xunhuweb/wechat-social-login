@@ -41,10 +41,6 @@ class XH_Social_Helper{
             
         }
       
-        if(get_magic_quotes_gpc()){
-            $arg = stripslashes($arg);
-        }
-    
         return md5($arg.$hashkey);
     }
 }
@@ -186,13 +182,7 @@ class XH_Social_Helper_String{
          */
         return apply_filters( 'sanitize_key_ignorecase', $key, $raw_key );
     }
-    
-    
-    public static function stripslashes($arg){
-        if(get_magic_quotes_gpc()){return stripslashes($arg);}
-        return $arg;
-    }
-    
+ 
     public static function guid(){
         $guid = '';
         //extension=php_com_dotnet.dll
@@ -211,27 +201,29 @@ class XH_Social_Helper_String{
     }
     
     public static function remove_emoji($source) {
-        // Match Emoticons
-        $regexEmoticons = '/[\x{1F600}-\x{1F64F}]/u';
-        $clean_text = preg_replace($regexEmoticons, '', $source);
+        return preg_replace("/[^\x{4e00}-\x{9fa5}a-zA-Z\d\-\_\.\@\+]/u", '', $source);
+        //change at 2017年7月26日 18:26:39
+//         // Match Emoticons
+//         $regexEmoticons = '/[\x{1F600}-\x{1F64F}]/u';
+//         $clean_text = preg_replace($regexEmoticons, '', $source);
     
-        // Match Miscellaneous Symbols and Pictographs
-        $regexSymbols = '/[\x{1F300}-\x{1F5FF}]/u';
-        $clean_text = preg_replace($regexSymbols, '', $clean_text);
+//         // Match Miscellaneous Symbols and Pictographs
+//         $regexSymbols = '/[\x{1F300}-\x{1F5FF}]/u';
+//         $clean_text = preg_replace($regexSymbols, '', $clean_text);
     
-        // Match Transport And Map Symbols
-        $regexTransport = '/[\x{1F680}-\x{1F6FF}]/u';
-        $clean_text = preg_replace($regexTransport, '', $clean_text);
+//         // Match Transport And Map Symbols
+//         $regexTransport = '/[\x{1F680}-\x{1F6FF}]/u';
+//         $clean_text = preg_replace($regexTransport, '', $clean_text);
     
-        // Match Miscellaneous Symbols
-        $regexMisc = '/[\x{2600}-\x{26FF}]/u';
-        $clean_text = preg_replace($regexMisc, '', $clean_text);
+//         // Match Miscellaneous Symbols
+//         $regexMisc = '/[\x{2600}-\x{26FF}]/u';
+//         $clean_text = preg_replace($regexMisc, '', $clean_text);
     
-        // Match Dingbats
-        $regexDingbats = '/[\x{2700}-\x{27BF}]/u';
-        $clean_text = preg_replace($regexDingbats, '', $clean_text);
+//         // Match Dingbats
+//         $regexDingbats = '/[\x{2700}-\x{27BF}]/u';
+//         $clean_text = preg_replace($regexDingbats, '', $clean_text);
     
-        return $clean_text;
+//         return $clean_text;
     }
 }
 
@@ -242,6 +234,40 @@ class XH_Social_Helper_String{
  * @since    1.0.0
  */
 class XH_Social_Helper_Uri{
+    /**
+     * 获取当前文件的url路径(wp-content/wp-plugins)
+     * @param string $file
+     * @return string
+     * @since 1.0.0
+     */
+    public static function wp_url($file)
+    {
+        $file_path = wp_normalize_path($file);
+        $file_folder=str_replace("\\", "/",dirname($file_path));
+    
+        if(strpos($file_folder, str_replace("\\", "/",WP_CONTENT_DIR))===0){
+            return set_url_scheme(WP_CONTENT_URL).substr($file_folder, strlen(WP_CONTENT_DIR));
+        }
+    
+        if(strpos($file_folder, str_replace("\\", "/",WP_PLUGIN_DIR))===0){
+            return set_url_scheme(WP_PLUGIN_URL).substr($file_folder, strlen(WP_PLUGIN_DIR));
+        }
+    
+        return null;
+    }
+    
+    /**
+     * 获取当前文件的目录
+     * @param string $file
+     * @return string
+     * @since 1.0.0
+     */
+    public static function wp_dir($file)
+    {
+        $dir = trailingslashit( dirname( $file ));
+        return rtrim (str_replace('\\', '/',  $dir), '/' );
+    }
+    
     public static function is_wechat_app(){
         return strripos($_SERVER['HTTP_USER_AGENT'],'micromessenger')!=false;
     }

@@ -55,7 +55,7 @@ msgid "Enable Account Bind Page"
 msgstr "启用账户绑定页面"
 
 #: add-ons/account-bind/init.php:71
-msgid "第三方登陆成功后，允许编辑邮箱等信息或绑定现有账户。"
+msgid "第三方登录成功后，允许编辑邮箱等信息或绑定现有账户。"
 msgstr ""
 
 #: add-ons/account-bind/init.php:75
@@ -703,7 +703,7 @@ msgid ""
 "<br/>\n"
 "                                                                                             模"
 "式三：<b>(公众平台API)</b>手机扫描桌面登录二维码后，移动端显示关注公众号界面(若已关注，直接进"
-"入公众号聊天界面)，(已)关注后，桌面端自动登陆。"
+"入公众号聊天界面)，(已)关注后，桌面端自动登录。"
 msgstr ""
 
 #: add-ons/social-wechat-ext/init.php:152
@@ -788,7 +788,7 @@ msgstr "请使用微信扫描二维码登录"
 #: add-ons/social-wechat-ext/init.php:442
 #, fuzzy
 msgid "Login successfully!"
-msgstr "登陆成功！"
+msgstr "登录成功！"
 
 #: add-ons/social-wechat-ext/init.php:443
 #, fuzzy
@@ -866,7 +866,7 @@ msgstr "插入数据时发生未知错误！"
 
 #: add-ons/social-wechat/init.php:38
 msgid ""
-"微信登录：PC端开放平台登录，微信端公众号登录。(支持公众平台(PC+微信端)登陆，请使用<a href="
+"微信登录：PC端开放平台登录，微信端公众号登录。(支持公众平台(PC+微信端)登录，请使用<a href="
 "\"https://www.wpweixin.net/product/1135.html\">微信扩展高级版</a>)"
 msgstr ""
 

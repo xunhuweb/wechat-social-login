@@ -831,14 +831,16 @@ class XH_Social_Channel_Wechat_Model extends Abstract_XH_Social_Schema{
                 XH_Social_Log::error($wpdb->last_error);
                 throw new Exception($wpdb->last_error);
             }
-        
-            if($wpdb->get_var("show index from `{$wpdb->prefix}xh_social_channel_wechat` where Column_name='uid' and Key_name='uid_key'")!= "{$wpdb->prefix}xh_social_channel_wechat"){
-                $wpdb->query ( "ALTER TABLE `{$wpdb->prefix}xh_social_channel_wechat` ADD INDEX uid_key(uid);" );
-                if(!empty($wpdb->last_error)){
-                    XH_Social_Log::error($wpdb->last_error);
-                    throw new Exception($wpdb->last_error);
-                }
-            }
+        //remove useless codes 
+        //@date 2017年7月20日 15:19:18
+        //@by ranj
+//             if($wpdb->get_var("show index from `{$wpdb->prefix}xh_social_channel_wechat` where Column_name='uid' and Key_name='uid_key'")!= "{$wpdb->prefix}xh_social_channel_wechat"){
+//                 $wpdb->query ( "ALTER TABLE `{$wpdb->prefix}xh_social_channel_wechat` ADD INDEX uid_key(uid);" );
+//                 if(!empty($wpdb->last_error)){
+//                     XH_Social_Log::error($wpdb->last_error);
+//                     throw new Exception($wpdb->last_error);
+//                 }
+//             }
              
             if($wpdb->get_var("show index from `{$wpdb->prefix}xh_social_channel_wechat` where Column_name='uid' and Key_name='uid_unique'")!= "{$wpdb->prefix}xh_social_channel_wechat"){
                 $wpdb->query ( "ALTER TABLE `{$wpdb->prefix}xh_social_channel_wechat` ADD UNIQUE INDEX uid_unique(uid);" );

@@ -21,7 +21,7 @@ class XH_Social_Ajax {
 		    'xh_social_plugin'=>__CLASS__ . '::plugin',
 		    'xh_social_service'=>__CLASS__ . '::service',
 		    'xh_social_captcha'=>__CLASS__ . '::captcha',
-		    'xh_social_gc'=>__CLASS__ . '::gc',
+		    //'xh_social_gc'=>__CLASS__ . '::gc',
 		);
 		
 		$shortcodes = apply_filters('xh_social_ajax', $shortcodes);
@@ -35,22 +35,22 @@ class XH_Social_Ajax {
 	 * 回收系统垃圾
 	 * @since 1.0.0
 	 */
-    public static function gc(){
-        $action ='xh_social_gc';
-        $params = array(
-            'action'=>$action,
-            $action=>isset($_REQUEST[$action])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST[$action]):'',
-            'notice_str'=>isset($_REQUEST['notice_str'])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST['notice_str']):'',
-        );
-         
-        if(!XH_Social::instance()->WP->ajax_validate($params,isset($_REQUEST['hash'])?$_REQUEST['hash']:null,true)){
-            echo XH_Social_Error::err_code(701)->to_json();
-            exit;
-        }
-        
-        XH_Social::instance()->session->cleanup_sessions();
-        do_action('xh_social_gc');
-    }
+//     public static function gc(){
+//         $action ='xh_social_gc';
+//         $params=shortcode_atts(array(
+//             'notice_str'=>null,
+//             'action'=>$action,
+//              $action=>null
+//         ), stripslashes_deep($_REQUEST));
+//         
+//         if(!XH_Social::instance()->WP->ajax_validate($params,isset($_REQUEST['hash'])?$_REQUEST['hash']:null,true)){
+//             echo XH_Social_Error::err_code(701)->to_json();
+//             exit;
+//         }
+//        
+//         XH_Social::instance()->session->cleanup_sessions();
+//         do_action('xh_social_gc');
+//     }
 	/**
 	 * 验证码
 	 * @since 1.0.0
@@ -62,11 +62,11 @@ class XH_Social_Ajax {
 	    require_once XH_SOCIAL_DIR.'/includes/captcha/PhraseBuilder.php';
 	 
 	    $action ='xh_social_captcha';
-	    $params = array(
-	        'action'=>$action,
-	        $action=>isset($_REQUEST[$action])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST[$action]):'',
-	        'notice_str'=>isset($_REQUEST['notice_str'])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST['notice_str']):'',
-	    );
+	    $params=shortcode_atts(array(
+            'notice_str'=>null,
+            'action'=>$action,
+             $action=>null
+        ), stripslashes_deep($_REQUEST));
 	    
 	    if(!XH_Social::instance()->WP->ajax_validate($params,isset($_REQUEST['hash'])?$_REQUEST['hash']:null,true)){
             XH_Social::instance()->WP->wp_die(XH_Social_Error::err_code(701)->errmsg);
@@ -82,14 +82,15 @@ class XH_Social_Ajax {
 	
 	public static function channel(){  
 	    $action ='xh_social_channel';
-	    $params = array(
+	 
+	    $params=shortcode_atts(array(
+	        'notice_str'=>null,
 	        'action'=>$action,
-	        $action=>isset($_REQUEST[$action])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST[$action]):'',
-	        'channel_id'=>isset($_REQUEST['channel_id'])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST['channel_id']):'',
-	        'tab'=>isset($_REQUEST['tab'])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST['tab']):'',
-	        'notice_str'=>isset($_REQUEST['notice_str'])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST['notice_str']):'',
-	    );
-	    
+	        'tab'=>null,
+	        'channel_id'=>null,
+	        $action=>null
+	    ), stripslashes_deep($_REQUEST));
+	   
 	    if(!XH_Social::instance()->WP->ajax_validate($params,isset($_REQUEST['hash'])?$_REQUEST['hash']:null,true)){
 	        XH_Social::instance()->WP->wp_die(XH_Social_Error::err_code(701)->errmsg);
 	        exit;
@@ -190,12 +191,12 @@ class XH_Social_Ajax {
 	    }
 	   
 	    $action ='xh_social_service';
-	    $params = array(
+	    $params=shortcode_atts(array(
+	        'notice_str'=>null,
 	        'action'=>$action,
-	        $action=>isset($_REQUEST[$action])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST[$action]):'',
-	        'tab'=>isset($_REQUEST['tab'])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST['tab']):'',
-	        'notice_str'=>isset($_REQUEST['notice_str'])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST['notice_str']):'',
-	    );
+	        'tab'=>null,
+	        $action=>null
+	    ), stripslashes_deep($_REQUEST));
 	    
 	    if(!XH_Social::instance()->WP->ajax_validate($params,isset($_REQUEST['hash'])?$_REQUEST['hash']:null,true)){
 	        echo (XH_Social_Error::err_code(701)->to_json());
@@ -231,7 +232,7 @@ class XH_Social_Ajax {
 	            $params['pageIndex']=$page_index;
 	            $params['keywords']=$keywords;
 	            $params['action']='extensions';
-	            $params['license_id'] =XH_Social::instance()->license_id;
+	            $params['license_id'] =XH_Social::license_id;
 	            
 	            $request =wp_remote_post($api,array(
 	                'timeout'=>10,
@@ -311,20 +312,22 @@ class XH_Social_Ajax {
 	 * 管理员对插件的操作
 	 */
 	public static function plugin(){
+	    
 	   if(!XH_Social::instance()->WP->capability()){
 	        echo (XH_Social_Error::err_code(501)->to_json());
 	        exit;
 	    }
 	    
 	    $action ='xh_social_plugin';
-	    $params = array(
+	  
+	    $params=shortcode_atts(array(
+	        'notice_str'=>null,
 	        'action'=>$action,
-	        $action=>isset($_REQUEST[$action])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST[$action]):'',
-	        'tab'=>isset($_REQUEST['tab'])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST['tab']):'',
-	        'plugin_id'=>isset($_REQUEST['plugin_id'])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST['plugin_id']):'',
-	        'notice_str'=>isset($_REQUEST['notice_str'])?XH_Social_Helper_String::sanitize_key_ignorecase($_REQUEST['notice_str']):'',
-	    );
-	   
+	        'tab'=>null,
+	        'plugin_id'=>null,
+	        $action=>null
+	    ), stripslashes_deep($_REQUEST));
+	    
 	    if(!XH_Social::instance()->WP->ajax_validate($params,isset($_REQUEST['hash'])?$_REQUEST['hash']:null,true)){
 	        echo (XH_Social_Error::err_code(701)->to_json());
 	        exit;
@@ -397,13 +400,14 @@ class XH_Social_Ajax {
     	                        exit;
     	                    }
 	                    }
-	                    
+	                    $add_on->on_load();
 	                    $add_on->on_install();
+	                    do_action('wsocial_flush_rewrite_rules');
+	                    flush_rewrite_rules();
 	                } catch (Exception $e) {
 	                    echo (XH_Social_Error::error_custom($e)->to_json());
 	                    exit;
 	                }
-	               
 	            }
 	           
 	            $plugins_find = XH_Social::instance()->WP->get_plugin_list_from_system();
@@ -500,7 +504,7 @@ class XH_Social_Ajax {
 	           if(!$info||!is_array($info)){
 	               $info=array();
 	           }
-	           
+	          
 	           if(!isset($info['_last_cache_time'])||$info['_last_cache_time']<time()){
 	               $api ='https://www.wpweixin.net/wp-content/plugins/xh-hash/api-add-ons.php';
 	               $params = array(
@@ -510,9 +514,19 @@ class XH_Social_Ajax {
 	                   'a'=>'update'
 	               );
 	               //插件为非授权插件
-	                $license = $add_on->get_option('license','');
+	                $license =null;
+	                $info =XH_Social_Install::instance()->get_plugin_options();
+	                if($info){
+	                    if(isset($info[$add_on->id])){
+	                        $license=$info[$add_on->id];
+	                    }
+	                    
+	                    if(empty($license)){
+	                        $license = isset($info['license'])?$info['license']:null;
+	                    }
+	                }
 	                if(empty($license)){
-	                    echo XH_Social_Error::error_unknow();
+	                    echo XH_Social_Error::error_unknow()->to_json();
 	                    exit;
 	                }
 	                
