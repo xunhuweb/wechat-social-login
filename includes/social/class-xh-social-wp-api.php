@@ -100,15 +100,7 @@ class XH_Social_WP_Api{
     }
 
     public function get_plugin_settings_url(){
-        $page =XH_Social_Helper_Array::first_or_default(XH_Social_Admin::instance()->get_admin_pages(),function($m){
-            return $m&&$m instanceof Abstract_XH_Social_Settings_Page&&count($m->menus())>0;
-        });
-        
-        if(!$page){
-            return null;
-        }
-        
-        return $page->get_page_url();
+        return admin_url('admin.php?page=social_page_add_ons');
     }
     
     /**

@@ -17,6 +17,7 @@ class XH_Social_Ajax {
 	 */
 	public static function init() {
 		$shortcodes = array(
+		    'wsocial_cron'   =>__CLASS__ . '::cron',
 		    'xh_social_channel'=>__CLASS__ . '::channel',
 		    'xh_social_plugin'=>__CLASS__ . '::plugin',
 		    'xh_social_service'=>__CLASS__ . '::service',
@@ -31,26 +32,36 @@ class XH_Social_Ajax {
 		}
 	}
 
-	/**
-	 * 回收系统垃圾
-	 * @since 1.0.0
-	 */
-//     public static function gc(){
-//         $action ='xh_social_gc';
-//         $params=shortcode_atts(array(
-//             'notice_str'=>null,
-//             'action'=>$action,
-//              $action=>null
-//         ), stripslashes_deep($_REQUEST));
-//         
-//         if(!XH_Social::instance()->WP->ajax_validate($params,isset($_REQUEST['hash'])?$_REQUEST['hash']:null,true)){
-//             echo XH_Social_Error::err_code(701)->to_json();
-//             exit;
-//         }
-//        
-//         XH_Social::instance()->session->cleanup_sessions();
-//         do_action('xh_social_gc');
-//     }
+	//插件定时服务
+	public static function cron(){
+	    header("Access-Control-Allow-Origin:*");
+	    $last_execute_time = intval(get_option('wsocial_cron',0));
+	    $now = time();
+	     
+	    //间隔30秒
+	    $step =$last_execute_time-($now-60);
+	    if($step>0){
+	        echo 'next step:'.$step;
+	        exit;
+	    }
+	     
+	    update_option('wsocial_cron',$now,false);
+	     
+	    try {
+	        do_action('wsocial_cron');
+	    } catch (Exception $e) {
+	        XH_Social_Log::error($e);
+	        //ignore
+	    }
+	     
+	    //清楚session 数据
+	    XH_Social::instance()->session->cleanup_sessions();
+	    XH_Social_Hooks::check_add_ons_update();
+	     
+	    echo 'hello wshop cron';
+	    exit;
+	}
+	
 	/**
 	 * 验证码
 	 * @since 1.0.0
@@ -161,7 +172,7 @@ class XH_Social_Ajax {
 	                wp_redirect(wp_login_url($redirect_to));
 	                exit;
 	            }
-	            
+	           
 	            //判断是否允许解绑
 	            $error = apply_filters('xh_social_channel_unbind_before',new WP_Error(), $channel);
 	            if($error&&$error instanceof  WP_Error && $error->get_error_code()){
@@ -403,6 +414,7 @@ class XH_Social_Ajax {
 	                    $add_on->on_load();
 	                    $add_on->on_install();
 	                    do_action('wsocial_flush_rewrite_rules');
+	                    ini_set('memory_limit','128M');
 	                    flush_rewrite_rules();
 	                } catch (Exception $e) {
 	                    echo (XH_Social_Error::error_custom($e)->to_json());
@@ -430,7 +442,7 @@ class XH_Social_Ajax {
 	            }
 	            
 	           wp_cache_delete("xh_social_plugins_installed",'options');
-	           update_option('xh_social_plugins_installed', $options,false);
+	           update_option('xh_social_plugins_installed', $options,true);
 	           
 	           echo (XH_Social_Error::success()->to_json());
 	           exit;
@@ -493,7 +505,7 @@ class XH_Social_Ajax {
 	            }
 	            
 	            wp_cache_delete('xh_social_plugins_installed', 'options');
-	            $update =update_option('xh_social_plugins_installed', $options,false);
+	            $update =update_option('xh_social_plugins_installed', $options,true);
 	            echo (XH_Social_Error::success()->to_json());
 	            exit;
 	        //插件更新

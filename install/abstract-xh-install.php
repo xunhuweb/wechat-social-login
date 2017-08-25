@@ -383,7 +383,7 @@ if (! class_exists('Abstract_XH_Install')) {
             }
             
             $xh_install_plugins[$key] = array_merge($xh_install_plugins[$key], $option); 
-            update_option('xh_install_plugins', $xh_install_plugins, false);
+            update_option('xh_install_plugins', $xh_install_plugins, true);
         }
 
         protected function capability($roles = array('administrator'))

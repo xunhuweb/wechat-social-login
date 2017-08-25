@@ -15,7 +15,7 @@ class XH_Social_Admin {
      * @var string
      * @since  1.0.0
      */
-    const menu_tag='xh_social_social';
+    const menu_tag='wsocial';
     
     /**
      * 实例

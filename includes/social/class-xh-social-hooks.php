@@ -23,19 +23,15 @@ class XH_Social_Hooks{
         add_filter( 'http_headers_useragent',__CLASS__.'::http_build',99,1);
         add_filter( 'sanitize_user', __CLASS__.'::sanitize_user', 10, 3);
         //add_filter( 'get_avatar', __CLASS__.'::get_avatar', 100, 6);
-        add_action( 'admin_init', __CLASS__.'::check_add_ons_update',10);
-        add_action( 'the_content', __CLASS__.'::share',10,1);
+        //add_action( 'admin_init', __CLASS__.'::check_add_ons_update',10);
+        add_action( 'the_content', __CLASS__.'::share',11,1);
+        // woocommerce
+        add_action('woocommerce_single_product_summary',  __CLASS__.'::woo_share',10);
+        add_action( 'admin_print_footer_scripts',  __CLASS__."::wp_print_footer_scripts",999);
+        add_action( 'wp_print_footer_scripts', __CLASS__."::wp_print_footer_scripts",999);
+        add_action( 'xh_social_wechat_token', __CLASS__."::xh_social_wechat_token_init",10);
         
-        //------change by hoter@xunhuweb.com --------
-        // @version 1.1.5 
-        // @date 2017-07-04 10:55:48
-        
-        //add_filter('avatar_defaults', __CLASS__.'::avatar_defaults',10,1);
         add_filter('pre_get_avatar_data', __CLASS__.'::pre_get_avatar_data',999,2);
-        
-        //change by hoter@xunhuweb.com 2017-07-04 10:55:48
-        //add_filter('default_avatar_select',  __CLASS__.'::default_avatar_select',10,1);
-        //----------------------change end-------------------
         
         //templete must be start with social.
         $templates = apply_filters('xh_social_page_templetes', array());    
@@ -43,7 +39,16 @@ class XH_Social_Hooks{
             self::$page_templates[$dir]=$template_list;
         }
     }
+    public static function xh_social_wechat_token_init(){
+        $api = XH_Social::instance()->channel->get_social_channel('social_wechat');
+        if(!$api||$api->get_option('mp_enabled_cross_domain')=='mp_cross_domain_enabled'){
+           throw new Exception('无法在主域名下获取token');
+        }
+    }
     
+    public static function wp_print_footer_scripts(){
+        ?><script type="text/javascript">if(jQuery){jQuery(function($){$.ajax({url: '<?php echo XH_Social::instance()->ajax_url('wsocial_cron',false,false)?>',type: 'post',timeout: 60 * 1000,async: true,cache: false});});}</script><?php
+    }
     //------change by hoter@xunhuweb.com --------
     // @version 1.1.5
     // @date 2017-07-04 10:55:48
@@ -151,12 +156,49 @@ class XH_Social_Hooks{
 //         return $avatar_defaults;
 //     }
     
-    public static function share($content){
+    public static function share($content){        
         if(!is_single()){
+            return $content;
+        }
+       
+        $post = get_post();
+        if(!$post){
+            return $content;
+        }
+       
+        $post_types = XH_Social_Settings_Default_Other_Share::instance()->get_option('share_with_post');
+        if(!$post_types||!is_array($post_types)){return $content;}
+        $post_types = apply_filters('xh_social_share_post_types', $post_types,$post);
+       
+        if(class_exists('WooCommerce')){
+            unset($post_types['product']);
+        }
+        if(!in_array($post->post_type, $post_types)){
             return $content;
         }
         
         return $content.xh_social_share(false);
+    }
+    
+    public static function woo_share(){
+        if(!is_single()){
+            return null;
+        }
+       
+        $post = get_post();
+        if(!$post){
+            return null;
+        }
+        
+        $post_types = XH_Social_Settings_Default_Other_Share::instance()->get_option('share_with_post');
+        if(!$post_types||!is_array($post_types)){return null;}
+       
+        $post_types = apply_filters('xh_social_share_post_types', $post_types,$post);
+        if(!in_array($post->post_type, $post_types)){
+            return null;
+        }
+       
+        return xh_social_share(false);
     }
     
     /**
@@ -196,7 +238,7 @@ class XH_Social_Hooks{
         
         if($is_dirty){
             wp_cache_delete('xh_social_addons_versions','options');
-            update_option('xh_social_addons_versions', $new_versions);
+            update_option('xh_social_addons_versions', $new_versions,true);
         }
     }
     
@@ -207,8 +249,6 @@ class XH_Social_Hooks{
      * @param bool $strict
      */
     public static  function sanitize_user( $username, $raw_username, $strict ) {
-        $username = XH_Social_Helper_String::remove_emoji($username);
-        
         if( !$strict )
             return $username;
     

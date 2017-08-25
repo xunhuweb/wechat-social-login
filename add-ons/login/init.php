@@ -139,10 +139,38 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
             //禁用wordpress默认登录页面
             if('yes'==$this->get_option('disable_wp')){
                 add_action('login_init', array($this,'disable_wp_login'));
+                add_filter('login_url', array($this,'login_url'),10,3);
+                add_filter('register_url', array($this,'register_url'),10,1);
             }
         }
     }
-
+    public function login_url($login_url, $redirect, $force_reauth ){
+        $page = $this->get_page_login();
+        if($page){
+            $url =get_page_link($page);
+            if(empty($redirect)){
+                return $url;
+            }
+            
+            $params = array();
+            $login_url = XH_Social_Helper_Uri::get_uri_without_params($url,$params);
+            $params['redirect_to']=$redirect;
+            $login_url.= "?".http_build_query($params);
+            return $login_url;
+        }
+        
+        return $login_url;
+    }
+    
+    public function register_url($register_url){
+        $page = $this->get_page_register();
+        if($page){
+            return get_page_link($page);
+        }
+        
+        return $register_url;
+    }
+    
     /**
      * ajax
      * @param array $shortcodes
@@ -197,7 +225,7 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
             foreach ($fields as $name=>$settings){
                 if(isset($settings['validate'])){
                     $userdata = call_user_func_array($settings['validate'],array($name,$userdata,$settings));
-                    if(!XH_Social_Error::is_valid($userdata)){
+                    if($userdata instanceof XH_Social_Error){
                         echo $userdata->to_json();
                         exit;
                     }
@@ -206,7 +234,7 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
         }
         
         $userdata =apply_filters('xh_social_page_login_login_validate', stripslashes_deep($userdata));
-        if(!XH_Social_Error::is_valid($userdata)){
+        if($userdata instanceof XH_Social_Error){
             echo $userdata->to_json();
             exit;
         }
@@ -241,7 +269,7 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
                 
                 if(isset($settings['validate'])){
                     $userdata = call_user_func_array($settings['validate'],array($name,$userdata,$settings));
-                    if(!XH_Social_Error::is_valid($userdata)){
+                    if($userdata instanceof XH_Social_Error){
                         echo $userdata->to_json();
                         exit;
                     }
@@ -250,7 +278,7 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
         }
         
         $userdata =apply_filters('xh_social_page_login_register_validate', stripslashes_deep($userdata));
-        if(!XH_Social_Error::is_valid($userdata)){
+        if($userdata instanceof XH_Social_Error){
             echo $userdata->to_json();
             exit;
         }
@@ -282,21 +310,13 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
         
         do_action('xh_social_page_login_register_after',$wp_user,$userdata);
         
-        //手机注册
-        if('yes'==$this->get_option('enabled_mobile_login')){
-            $api =XH_Social::instance()->get_available_addon('wechat_social_add_ons_social_mobile');
-            if($api&&$api->enabled){
-                $enable_mobile = true;
-                $ext_user_id =XH_Social_Channel_Mobile::instance()->create_ext_user($userdata['mobile'],$wp_user_id);
-                if($ext_user_id instanceof XH_Social_Error){
-                    echo new XH_Social_Error(1001,__('注册成功,但手机绑定失败(你可以在用户中心重新绑定)！',XH_SOCIAL));
-                    exit;
-                }
-        
-                XH_Social_Add_On_Social_Mobile::instance()->clear_mobile_validate_code();
-            }
+        $error =apply_filters('xh_social_page_login_register_new_user', XH_Social_Error::success(), $wp_user,$userdata);
+        if(!XH_Social_Error::is_valid($error)){
+            echo $error->to_json();
+            exit;
         }
-        
+      
+        do_action( 'register_new_user', $wp_user_id );
         XH_Social::instance()->WP->do_wp_login($wp_user);
    
         echo XH_Social_Error::success()->to_json();
@@ -348,11 +368,16 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
             return;
         }
         
+        $request = $_GET;
+        unset($request['action']);
         if(!empty($redirect_to)){
+            $request['redirect_to']=$redirect_to;
+        }
+        
+        if(count($request)>0){
             $params = array();
             $redirect = XH_Social_Helper_Uri::get_uri_without_params($redirect,$params);
-            $params['redirect_to']=$redirect_to;
-            $redirect.="?".http_build_query($params);
+            $redirect.="?".http_build_query(array_merge($params,$request));
         }
         
         wp_redirect($redirect);
@@ -399,7 +424,7 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
             throw new Exception($page_id->get_error_message());
         }
     
-        $this->update_option('page_login_id', $page_id,false);
+        $this->update_option('page_login_id', $page_id,true);
         return true;
     }
     
@@ -427,7 +452,7 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
             throw new Exception($page_id->get_error_message());
         }
     
-        $this->update_option('page_register_id', $page_id,false);
+        $this->update_option('page_register_id', $page_id,true);
         return true;
     }
     
@@ -567,7 +592,7 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
                 return $datas;
             }
         );
-        
+     
         $fields=apply_filters('xh_social_page_login_register_fields',$fields,2);
 
         if('yes'==$this->get_option('enabled_mobile_login')){

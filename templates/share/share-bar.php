@@ -2,23 +2,14 @@
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
-$channels = XH_Social::instance()->channel->get_social_channels(array('share'));
-if(count($channels)<=0){
-    return;
-}
 
-$channel_share_enableds = XH_Social_Settings_Default_Other_Default::instance()->get_option('share');
+$channel_share_enableds = XH_Social_Settings_Default_Other_Share::instance()->get_option('share');
 if(count($channel_share_enableds)<=0||!is_array($channel_share_enableds)){
     return;
 }
- 
-$options = array();
-foreach ($channels as $channel){
-    if(in_array($channel->id, $channel_share_enableds)){
-        $options[]=$channel;
-    }
+if(XH_Social_Helper_Uri::is_wechat_app()&&isset($channel_share_enableds['social_wechat'])){
+    unset($channel_share_enableds['social_wechat']);
 }
-
 ob_start();
 ?>
 <script type="text/javascript">
@@ -56,12 +47,13 @@ ob_start();
 ?>
 <div class="xh_social_box" style="clear:both;">
    <?php 
-    foreach ($options as $channel){
+    foreach ($channel_share_enableds as $channel_id){
+        $channel = XH_Social::instance()->channel->get_social_channel($channel_id,array('share'));
+        if(!$channel){continue;}
         ?>
         <a href="javascript:void(0);" onclick="window.xh_social_share(<?php echo esc_attr(json_encode($channel->get_share_link()));?>);" rel="noflow" style="background:url(<?php echo $channel->icon?>) no-repeat transparent; background-size:24px 24px;height:24px;width:24px;" class="xh_social_login_bar" title="<?php echo $channel->title;?>"></a>
         <?php 
     }?>
 </div>
 <?php 
-
-echo $scripts.apply_filters('xh_social_share_html', ob_get_clean());
+echo apply_filters('xh_social_share_content',$scripts. ob_get_clean());

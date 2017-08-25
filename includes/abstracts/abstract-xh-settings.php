@@ -186,7 +186,23 @@ abstract class Abstract_XH_Social_Settings {
 	    return $options;
 	}
 	
+	public function get_post_type_options(){
+	    global $wp_post_types;
+	    $types = array();
 	
+	    if(!$wp_post_types){
+	        return $types;
+	    }
+	
+	    foreach ($wp_post_types as $key=>$type){
+	        if(in_array($key, array('page','attachment'))){continue;}
+	
+	        if($type->show_ui&&$type->public){
+	            $types[$type->name]=(empty($type->label)?$type->name:$type->label).'('.$type->name.')';
+	        }
+	    }
+	    return $types;
+	}
 	/**
 	 * Admin Panel Options Processing.
 	 * - Saves the options to the DB.
@@ -202,7 +218,7 @@ abstract class Abstract_XH_Social_Settings {
 			return false;
 		} else {
 		    wp_cache_delete($this->plugin_id . $this->id . '_settings', 'options');
-			update_option ( $this->plugin_id . $this->id . '_settings', $this->sanitized_fields,false);
+			update_option ( $this->plugin_id . $this->id . '_settings', $this->sanitized_fields,true);
 			$this->init_settings ();
 			$this->display_success();
 			return true;
@@ -225,7 +241,7 @@ abstract class Abstract_XH_Social_Settings {
 	    $options[$key]=$val;
 	    
 	    wp_cache_delete($this->plugin_id . $this->id . '_settings', 'options');
-	    update_option ( $this->plugin_id . $this->id . '_settings', $options ,false);
+	    update_option ( $this->plugin_id . $this->id . '_settings', $options ,true);
 	    $this->init_settings ();
 	    return true;
 	}
@@ -248,7 +264,7 @@ abstract class Abstract_XH_Social_Settings {
 	    }
 	   
 	    wp_cache_delete($this->plugin_id . $this->id . '_settings', 'options');
-	    update_option ( $this->plugin_id . $this->id . '_settings', $options ,false);
+	    update_option ( $this->plugin_id . $this->id . '_settings', $options ,true);
 	    $this->init_settings ();
 	    return true;
 	}
@@ -1157,20 +1173,13 @@ abstract class Abstract_XH_Social_Settings {
 	    $data = wp_parse_args ( $data, $defaults );
 	
 	    ob_start ();
-	    ?>
-	    <tr class="<?php echo isset($data['tr_css'])?$data['tr_css']:''; ?>">
-    	    <?php 
-    	    if(isset($data['func'])&&$data['func']){
-    	        echo call_user_func_array($data['func'],array(
-    	            $key,
-    	            $data,
-    	            $this
-    	        ));
-    	    }
-    	    ?>
-	    </tr>
-		<?php
-		
+	    if(isset($data['func'])&&$data['func']){
+	        echo call_user_func_array($data['func'],array(
+	            $key,
+	            $this,
+	            $data,
+	        ));
+	    }
 		return ob_get_clean ();
 	}
 		

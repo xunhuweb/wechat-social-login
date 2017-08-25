@@ -3,7 +3,109 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-include_once( 'abstracts/abstract-xh-session.php' );
+abstract class Abstract_XH_Session {
+
+	/** @var int $_customer_id */
+	protected $_customer_id;
+
+	/** @var array $_data  */
+	protected $_data = array();
+
+	/** @var bool $_dirty When something changes */
+	protected $_dirty = false;
+
+	/**
+	 * __get function.
+	 *
+	 * @param mixed $key
+	 * @return mixed
+	 */
+	public function __get( $key ) {
+		return $this->get( $key );
+	}
+
+	/**
+	 * __set function.
+	 *
+	 * @param mixed $key
+	 * @param mixed $value
+	 */
+	public function __set( $key, $value ) {
+		$this->set( $key, $value );
+	}
+
+	 /**
+	 * __isset function.
+	 *
+	 * @param mixed $key
+	 * @return bool
+	 */
+	public function __isset( $key ) {
+	    $key = $this->sanitize_key( $key );
+		return isset( $this->_data[ $key ] );
+	}
+	protected function sanitize_key( $key ) {
+	    $raw_key = $key;
+	    $key = preg_replace( '/[^a-z0-9_\-A-Z]/', '', $key );
+	
+	    /**
+	     * Filter a sanitized key string.
+	     *
+	     * @since 3.0.0
+	     *
+	     * @param string $key     Sanitized key.
+	     * @param string $raw_key The key prior to sanitization.
+	     */
+	    return apply_filters( 'sanitize_key_ignorecase', $key, $raw_key );
+	}
+	/**
+	 * __unset function.
+	 *
+	 * @param mixed $key
+	 */
+	public function __unset( $key ) {
+	    $key = $this->sanitize_key( $key );
+		if ( isset( $this->_data[ $key ] ) ) {
+			unset( $this->_data[ $key ] );
+			$this->_dirty = true;
+		}
+	}
+
+	/**
+	 * Get a session variable.
+	 *
+	 * @param string $key
+	 * @param  mixed $default used if the session variable isn't set
+	 * @return array|string value of session variable
+	 */
+	public function get( $key, $default = null ) {
+		$key =$this->sanitize_key( $key );
+		return isset( $this->_data[ $key ] ) ? maybe_unserialize( $this->_data[ $key ] ) : $default;
+	}
+	
+	/**
+	 * Set a session variable.
+	 *
+	 * @param string $key
+	 * @param mixed $value
+	 */
+	public function set( $key, $value ) {
+		if ( $value !== $this->get( $key ) ) {
+			$this->_data[ $this->sanitize_key( $key ) ] = maybe_serialize( $value );
+			$this->_dirty = true;
+		}
+	}
+
+	/**
+	 * get_customer_id function.
+	 *
+	 * @access public
+	 * @return int
+	 */
+	public function get_customer_id() {
+		return $this->_customer_id;
+	}
+}
 
 /**
  * Handle data for the current customers session.
@@ -14,7 +116,7 @@ include_once( 'abstracts/abstract-xh-session.php' );
  * @since    1.0.0
  * @author   ranj
  */
-class XH_Social_Session_Handler extends Abstract_XH_Social_Session {
+class XH_Session_Handler extends Abstract_XH_Session {
 
 	/** @var string cookie name */
 	private $_cookie;
@@ -34,8 +136,6 @@ class XH_Social_Session_Handler extends Abstract_XH_Social_Session {
 	private static $_instance;
 	
 	/**
-	 * XH_Social_Menu_Default Instance
-	 *
 	 * @since  1.0.0
 	 */
 	public static function instance() {
@@ -50,8 +150,8 @@ class XH_Social_Session_Handler extends Abstract_XH_Social_Session {
 	private function __construct() {
 		global $wpdb;
 
-		$this->_cookie = 'wp_xh_social_session_' . COOKIEHASH;
-		$this->_table  = $wpdb->prefix . 'xh_social_sessions';
+		$this->_cookie = 'wp_xh_session_' . COOKIEHASH;
+		$this->_table  = $wpdb->prefix . 'xh_sessions';
 		$cookie = $this->get_session_cookie();
 		if ( $cookie ) {
 			$this->_customer_id        = $cookie[0];
@@ -83,7 +183,7 @@ class XH_Social_Session_Handler extends Abstract_XH_Social_Session {
 	}
 
 	public function get_notice($key,$reset = false){
-	    $key = XH_Social_Helper_String::sanitize_key_ignorecase( $key );
+	    $key = $this->sanitize_key( $key );
 	    $session_id ="notice:$key";
 	    
 	    $last_value = $this->get($session_id,'');
@@ -113,7 +213,7 @@ class XH_Social_Session_Handler extends Abstract_XH_Social_Session {
     		$this->_has_cookie = true;
     
     		// Set the cookie
-    		$this->setcookie( $this->_cookie, $cookie_value, $this->_session_expiration, apply_filters( 'xh_social_session_use_secure_cookie', false ) );
+    		$this->setcookie( $this->_cookie, $cookie_value, $this->_session_expiration, apply_filters( 'xh_session_use_secure_cookie', false ) );
 	    }
 	}
 	
@@ -139,8 +239,8 @@ class XH_Social_Session_Handler extends Abstract_XH_Social_Session {
 	 * Set session expiration.
 	 */
 	public function set_session_expiration() {
-		$this->_session_expiring   = time() + intval( apply_filters( 'xh_social_session_expiring', 60 * 60 * 47 ) ); // 47 Hours.
-		$this->_session_expiration = time() + intval( apply_filters( 'xh_social_session_expiration', 60 * 60 * 48 ) ); // 48 Hours.
+		$this->_session_expiring   = time() + intval( apply_filters( 'xh_session_expiring', 60 * 60 * 47 ) ); // 47 Hours.
+		$this->_session_expiration = time() + intval( apply_filters( 'xh_session_expiration', 60 * 60 * 48 ) ); // 48 Hours.
 	}
 
 	/**
@@ -154,10 +254,25 @@ class XH_Social_Session_Handler extends Abstract_XH_Social_Session {
 		if ( is_user_logged_in() ) {
 			return get_current_user_id();
 		} else {
-			return XH_Social_Helper_String::guid();
+			return strtolower($this->guid());
 		}
 	}
-
+	private  function guid(){
+	    $guid = '';
+	    //extension=php_com_dotnet.dll
+	    if (function_exists('com_create_guid')) {
+	        $guid = com_create_guid();
+	    } else {
+	        mt_srand((double) microtime() * 10000); // optional for php 4.2.0 and up.
+	        $charid = strtoupper(md5(uniqid(rand(), true)));
+	        $hyphen = chr(45); // "-"
+	        $uuid = chr(123) . // "{"
+	        substr($charid, 0, 8) . $hyphen . substr($charid, 8, 4) . $hyphen . substr($charid, 12, 4) . $hyphen . substr($charid, 16, 4) . $hyphen . substr($charid, 20, 12) . chr(125); // "}"
+	        $guid = $uuid;
+	    }
+	
+	    return str_replace('-', '', trim($guid, '{}'));
+	}
 	/**
 	 * Get session cookie.
 	 *
@@ -196,9 +311,24 @@ class XH_Social_Session_Handler extends Abstract_XH_Social_Session {
 	 * @return string
 	 */
 	private function get_cache_prefix() {
-		return XH_Social_Cache_Helper::get_cache_prefix( XH_SOCIAL_SESSION_CACHE_GROUP );
+	    $group='xh_session_id';
+		$prefix = wp_cache_get( 'xh_' . $group . '_cache_prefix', $group );
+	
+	    if ( false === $prefix ) {
+	        $prefix = 1;
+	        wp_cache_set( 'xh_' . $group . '_cache_prefix', $prefix, $group );
+	    }
+	
+	    return 'xh_cache_' . $prefix . '_';
 	}
 
+	/**
+	 * Increment group cache prefix (invalidates cache).
+	 * @param  string $group
+	 */
+	public  function incr_cache_prefix( $group ) {
+	    wp_cache_incr( 'xh_' . $group . '_cache_prefix', 1, $group );
+	}
 	/**
 	 * Save data.
 	 */
@@ -222,7 +352,7 @@ class XH_Social_Session_Handler extends Abstract_XH_Social_Session {
 			);
 
 			// Set cache
-			wp_cache_set( $this->get_cache_prefix() . $this->_customer_id, $this->_data, XH_SOCIAL_SESSION_CACHE_GROUP, $this->_session_expiration - time() );
+			wp_cache_set( $this->get_cache_prefix() . $this->_customer_id, $this->_data, 'xh_session_id', $this->_session_expiration - time() );
 
 			// Mark session clean after saving
 			$this->_dirty = false;
@@ -234,7 +364,7 @@ class XH_Social_Session_Handler extends Abstract_XH_Social_Session {
 	 */
 	public function destroy_session() {
 		// Clear cookie
-		$this->setcookie( $this->_cookie, '', time() - YEAR_IN_SECONDS, apply_filters( 'xh_social_session_use_secure_cookie', false ) );
+		$this->setcookie( $this->_cookie, '', time() - YEAR_IN_SECONDS, apply_filters( 'xh_session_use_secure_cookie', false ) );
 
 		$this->delete_session( $this->_customer_id );
 
@@ -265,7 +395,7 @@ class XH_Social_Session_Handler extends Abstract_XH_Social_Session {
 			$wpdb->query( $wpdb->prepare( "DELETE FROM $this->_table WHERE session_expiry < %d", time() ) );
 
 			// Invalidate cache
-			XH_Social_Cache_Helper::incr_cache_prefix( XH_SOCIAL_SESSION_CACHE_GROUP );
+			$this->incr_cache_prefix( 'xh_session_id' );
 		}
 	}
 
@@ -284,7 +414,7 @@ class XH_Social_Session_Handler extends Abstract_XH_Social_Session {
 		}
 
 		// Try get it from the cache, it will return false if not present or if object cache not in use
-		$value = wp_cache_get( $this->get_cache_prefix() . $customer_id, XH_SOCIAL_SESSION_CACHE_GROUP );
+		$value = wp_cache_get( $this->get_cache_prefix() . $customer_id, 'xh_session_id' );
 
 		if ( false === $value ) {
 			$value = $wpdb->get_var( $wpdb->prepare( "SELECT session_value FROM $this->_table WHERE session_key = %s", $customer_id ) );
@@ -293,7 +423,7 @@ class XH_Social_Session_Handler extends Abstract_XH_Social_Session {
 				$value = $default;
 			}
 
-			wp_cache_add( $this->get_cache_prefix() . $customer_id, $value, XH_SOCIAL_SESSION_CACHE_GROUP, $this->_session_expiration - time() );
+			wp_cache_add( $this->get_cache_prefix() . $customer_id, $value, 'xh_session_id', $this->_session_expiration - time() );
 		}
 
 		return maybe_unserialize( $value );
@@ -307,7 +437,7 @@ class XH_Social_Session_Handler extends Abstract_XH_Social_Session {
 	public function delete_session( $customer_id ) {
 		global $wpdb;
 
-		wp_cache_delete( $this->get_cache_prefix() . $customer_id, XH_SOCIAL_SESSION_CACHE_GROUP );
+		wp_cache_delete( $this->get_cache_prefix() . $customer_id, 'xh_session_id' );
 
 		$wpdb->delete(
 			$this->_table,
@@ -348,7 +478,18 @@ include_once( 'abstracts/abstract-xh-schema.php' );
  * @author ranj
  * @since 1.0.0
  */
-class XH_Social_Session_Handler_Model extends Abstract_XH_Social_Schema{
+class XH_Session_Handler_Model{
+    protected function get_collate(){
+        global $wpdb;
+        $collate = '';
+    
+        if ( $wpdb->has_cap( 'collation' ) ) {
+            $collate = $wpdb->get_charset_collate();
+        }
+    
+        return $collate;
+    }
+    
     /**
      * {@inheritDoc}
      * @see Abstract_XH_Model_Api::init()
@@ -357,7 +498,7 @@ class XH_Social_Session_Handler_Model extends Abstract_XH_Social_Schema{
     {
         $collate=$this->get_collate();
         global $wpdb;
-        $wpdb->query("CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}xh_social_sessions` (
+        $wpdb->query("CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}xh_sessions` (
                 	`session_id` BIGINT(20) NOT NULL AUTO_INCREMENT,
                 	`session_key` CHAR(32) NOT NULL,
                 	`session_value` LONGTEXT NOT NULL,
@@ -368,7 +509,6 @@ class XH_Social_Session_Handler_Model extends Abstract_XH_Social_Schema{
                 $collate;");
         
         if(!empty($wpdb->last_error)){
-            XH_Social_Log::error($wpdb->last_error);
             throw new Exception($wpdb->last_error);
         }
     }

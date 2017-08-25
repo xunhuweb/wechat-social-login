@@ -80,7 +80,7 @@ class XH_Social_Install extends Abstract_XH_Install{
          
         $step = isset($request['step'])?$request['step']:null;
         $suffix = SCRIPT_DEBUG ? '' : '.min';
-        $current_dir =XH_Social_Helper_Uri::wp_dir(__FILE__);
+        $current_dir =XH_Social_Helper_Uri::wp_url(__FILE__);
         ?>
        <!DOCTYPE html>
 		<html lang="zh-CN">
@@ -134,6 +134,9 @@ class XH_Social_Install extends Abstract_XH_Install{
     
     public function system_status($plugin,$request){
         $this->header($plugin,$request);
+        $this->update_plugin_options(array(
+            'installed'=>false
+        ));
         $is_valid = true;
         ?>
         <div class="wc-setup-content">		
@@ -216,11 +219,11 @@ class XH_Social_Install extends Abstract_XH_Install{
         			<td><?php echo __('PHP version:',XH_SOCIAL)?></td>
         			<td class="help"><span class="xunhuweb-help-tip"></span></td>
         			<td><?php 
-        			     if(version_compare(PHP_VERSION, '5.4','>=')){
+        			     if(version_compare(PHP_VERSION, '5.3.2.7','>=')){
         			         ?><span style="color:green;"><?php echo PHP_VERSION;?></span><?php
         			     }else{
         			         $is_valid=false;
-        			         ?><div style="color: #a00;"><span class="dashicons dashicons-warning"></span> <?php echo sprintf(__("%s - We recommend a minimum php version of %s ,See: %s",XH_SOCIAL),PHP_VERSION,5.4,'<a href="http://www.wpupdatephp.com/" target="_blank">'.__('How to update your PHP version',XH_SOCIAL).'</a>');?></div><?php
+        			         ?><div style="color: #a00;"><span class="dashicons dashicons-warning"></span> <?php echo sprintf(__("%s - We recommend a minimum php version of %s ,See: %s",XH_SOCIAL),PHP_VERSION,'5.3.2.7','<a href="http://www.wpupdatephp.com/" target="_blank">'.__('How to update your PHP version',XH_SOCIAL).'</a>');?></div><?php
         			     }
         			?></td>
         		</tr>
@@ -264,6 +267,7 @@ class XH_Social_Install extends Abstract_XH_Install{
             
         	?>
         	<a href="<?php echo $this->get_plugin_install_url('system_status_skip')?>" class="button button-large"><?php echo __('Skip this step',XH_SOCIAL)?></a>
+        	<p style="color:green;">点击“继续”：高级扩展将<b>重新安装</b>到目录[Add-ons]。(如果没有正常安装，请手动解压[Bin]下的*.zip文件到[Add-ons])</p>
 		</p>
 		</div>
         <?php 

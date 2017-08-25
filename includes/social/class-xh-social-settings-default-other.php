@@ -39,22 +39,6 @@ class XH_Social_Settings_Default_Other_Default extends Abstract_XH_Social_Settin
                 'type'=>'image',
                 'default'=>XH_SOCIAL_URL.'/assets/image/wordpress-logo.png'
             ),
-            'share'=>array(
-                'title'=>__('Share Enabled',XH_SOCIAL),
-                'type'=>'multiselect',
-                'func'=>true,
-                'options'=>function(){
-                    $channels = XH_Social::instance()->channel->get_social_channels(array('share'));
-                    $options = array();
-                    if($channels){
-                        foreach ($channels as $channel){
-                            $options[$channel->id] = $channel->title;
-                        }
-                    }
-                    
-                    return $options;
-                }
-            ),
             'defense_CSRF'=>array(
                 'title'=>__('CSRF Defense ',XH_SOCIAL),
                 'label'=>__('Enabled/Disabled',XH_SOCIAL),
