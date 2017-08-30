@@ -201,29 +201,29 @@ class XH_Social_Helper_String{
     }
     
     public static function remove_emoji($source) {
-        return preg_replace("/[^\x{4e00}-\x{9fa5}a-zA-Z\d\-\_\.\@\+]/u", '', $source);
+       // return preg_replace("/[^\x{4e00}-\x{9fa5}a-zA-Z\d\-\_\.\@\+]/u", '', $source);
         //change at 2017年7月26日 18:26:39
 //         // Match Emoticons
-//         $regexEmoticons = '/[\x{1F600}-\x{1F64F}]/u';
-//         $clean_text = preg_replace($regexEmoticons, '', $source);
+        $regexEmoticons = '/[\x{1F600}-\x{1F64F}]/u';
+        $clean_text = preg_replace($regexEmoticons, '', $source);
     
-//         // Match Miscellaneous Symbols and Pictographs
-//         $regexSymbols = '/[\x{1F300}-\x{1F5FF}]/u';
-//         $clean_text = preg_replace($regexSymbols, '', $clean_text);
+        // Match Miscellaneous Symbols and Pictographs
+        $regexSymbols = '/[\x{1F300}-\x{1F5FF}]/u';
+        $clean_text = preg_replace($regexSymbols, '', $clean_text);
     
-//         // Match Transport And Map Symbols
-//         $regexTransport = '/[\x{1F680}-\x{1F6FF}]/u';
-//         $clean_text = preg_replace($regexTransport, '', $clean_text);
+        // Match Transport And Map Symbols
+        $regexTransport = '/[\x{1F680}-\x{1F6FF}]/u';
+        $clean_text = preg_replace($regexTransport, '', $clean_text);
     
-//         // Match Miscellaneous Symbols
-//         $regexMisc = '/[\x{2600}-\x{26FF}]/u';
-//         $clean_text = preg_replace($regexMisc, '', $clean_text);
+        // Match Miscellaneous Symbols
+        $regexMisc = '/[\x{2600}-\x{26FF}]/u';
+        $clean_text = preg_replace($regexMisc, '', $clean_text);
     
-//         // Match Dingbats
-//         $regexDingbats = '/[\x{2700}-\x{27BF}]/u';
-//         $clean_text = preg_replace($regexDingbats, '', $clean_text);
+        // Match Dingbats
+        $regexDingbats = '/[\x{2700}-\x{27BF}]/u';
+        $clean_text = preg_replace($regexDingbats, '', $clean_text);
     
-//         return $clean_text;
+        return $clean_text;
     }
 }
 

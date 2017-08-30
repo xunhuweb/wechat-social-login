@@ -38,12 +38,6 @@ class XH_Social_Settings_Default_Other_Default extends Abstract_XH_Social_Settin
                 'title'=>__('Website Logo',XH_SOCIAL),
                 'type'=>'image',
                 'default'=>XH_SOCIAL_URL.'/assets/image/wordpress-logo.png'
-            ),
-            'defense_CSRF'=>array(
-                'title'=>__('CSRF Defense ',XH_SOCIAL),
-                'label'=>__('Enabled/Disabled',XH_SOCIAL),
-                'type'=>'checkbox',
-                'description'=>__('If your site\' page is cached(using cache plugins(wp super cache, etc.)), Do not enable.',XH_SOCIAL)
             )
         );
     }

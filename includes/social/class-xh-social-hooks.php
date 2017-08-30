@@ -22,23 +22,22 @@ class XH_Social_Hooks{
         add_action( 'comment_form_top',__CLASS__.'::show_social_login_in_comment',10);
         add_filter( 'http_headers_useragent',__CLASS__.'::http_build',99,1);
         add_filter( 'sanitize_user', __CLASS__.'::sanitize_user', 10, 3);
-        //add_filter( 'get_avatar', __CLASS__.'::get_avatar', 100, 6);
-        //add_action( 'admin_init', __CLASS__.'::check_add_ons_update',10);
+        
         add_action( 'the_content', __CLASS__.'::share',11,1);
-        // woocommerce
+   
         add_action('woocommerce_single_product_summary',  __CLASS__.'::woo_share',10);
         add_action( 'admin_print_footer_scripts',  __CLASS__."::wp_print_footer_scripts",999);
         add_action( 'wp_print_footer_scripts', __CLASS__."::wp_print_footer_scripts",999);
-        add_action( 'xh_social_wechat_token', __CLASS__."::xh_social_wechat_token_init",10);
-        
-        add_filter('pre_get_avatar_data', __CLASS__.'::pre_get_avatar_data',999,2);
-        
+        add_action( 'xh_social_wechat_token', __CLASS__."::xh_social_wechat_token_init",10);       
+        add_filter('pre_get_avatar_data', __CLASS__.'::pre_get_avatar_data',999,2);   
+
         //templete must be start with social.
         $templates = apply_filters('xh_social_page_templetes', array());    
         foreach ($templates as $dir=>$template_list){
             self::$page_templates[$dir]=$template_list;
         }
     }
+    
     public static function xh_social_wechat_token_init(){
         $api = XH_Social::instance()->channel->get_social_channel('social_wechat');
         if(!$api||$api->get_option('mp_enabled_cross_domain')=='mp_cross_domain_enabled'){
@@ -49,15 +48,7 @@ class XH_Social_Hooks{
     public static function wp_print_footer_scripts(){
         ?><script type="text/javascript">if(jQuery){jQuery(function($){$.ajax({url: '<?php echo XH_Social::instance()->ajax_url('wsocial_cron',false,false)?>',type: 'post',timeout: 60 * 1000,async: true,cache: false});});}</script><?php
     }
-    //------change by hoter@xunhuweb.com --------
-    // @version 1.1.5
-    // @date 2017-07-04 10:55:48
-    
-    /*
-    public static function default_avatar_select($avatar_list){
-        return str_replace('&amp;forcedefault=1', '', $avatar_list);
-    }*/
-    
+   
     //----------------------change end-------------------
     
     /**
@@ -70,15 +61,7 @@ class XH_Social_Hooks{
         if ( isset( $args['url'] ) && ! is_null( $args['url'] ) ) {
     		return $args;
     	}
-    	
-    	//------change by hoter@xunhuweb.com --------
-        // @version 1.1.5
-        // @date 2017-07-04 10:55:48
-
-    	/*if(isset($args['default'])&&$args['default']!=self::AVATAR_KEY){
-    	   return $args;
-    	 }*/
-    	
+    
     	//低版本 ：判断force_default
         if(isset($args['force_default'])&&$args['force_default']){
             return $args;
@@ -150,12 +133,7 @@ class XH_Social_Hooks{
         
         return $args;
     }
-    
-//     public static function avatar_defaults($avatar_defaults){
-//         $avatar_defaults[self::AVATAR_KEY]=__('Social Avatar (Wechat Social)',XH_SOCIAL);
-//         return $avatar_defaults;
-//     }
-    
+
     public static function share($content){        
         if(!is_single()){
             return $content;
@@ -356,3 +334,178 @@ class XH_Social_Hooks{
         return $post_templates;
     }
 }
+
+//重置系统默认登录funcs
+/**
+ * 以用户ID 作为登录键
+ */
+if ( !function_exists('wp_validate_auth_cookie') ) :
+/**
+ * Validates authentication cookie.
+*
+* The checks include making sure that the authentication cookie is set and
+* pulling in the contents (if $cookie is not used).
+*
+* Makes sure the cookie is not expired. Verifies the hash in cookie is what is
+* should be and compares the two.
+*
+* @since 2.5.0
+*
+* @global int $login_grace_period
+*
+* @param string $cookie Optional. If used, will validate contents instead of cookie's
+* @param string $scheme Optional. The cookie scheme to use: auth, secure_auth, or logged_in
+* @return false|int False if invalid cookie, User ID if valid.
+*/
+function wp_validate_auth_cookie($cookie = '', $scheme = '') {
+    if ( ! $cookie_elements = wp_parse_auth_cookie($cookie, $scheme) ) {
+        /**
+         * Fires if an authentication cookie is malformed.
+         *
+         * @since 2.7.0
+         *
+         * @param string $cookie Malformed auth cookie.
+         * @param string $scheme Authentication scheme. Values include 'auth', 'secure_auth',
+         *                       or 'logged_in'.
+         */
+        do_action( 'auth_cookie_malformed', $cookie, $scheme );
+        return false;
+    }
+
+    $scheme = $cookie_elements['scheme'];
+    $user_ID = $cookie_elements['username'];
+    $hmac = $cookie_elements['hmac'];
+    $token = $cookie_elements['token'];
+    $expired = $expiration = $cookie_elements['expiration'];
+
+    //兼容低版本wordpress
+    if(function_exists('wp_doing_ajax')){
+        // Allow a grace period for POST and Ajax requests
+        if ( wp_doing_ajax() || 'POST' == $_SERVER['REQUEST_METHOD'] ) {
+            $expired += HOUR_IN_SECONDS;
+        }
+    }else{
+        if ( defined('DOING_AJAX') || 'POST' == $_SERVER['REQUEST_METHOD'] ) {
+            $expired += HOUR_IN_SECONDS;
+        }
+    }
+
+    // Quick check to see if an honest cookie has expired
+    if ( $expired < time() ) {
+        /**
+         * Fires once an authentication cookie has expired.
+         *
+         * @since 2.7.0
+         *
+         * @param array $cookie_elements An array of data for the authentication cookie.
+         */
+        do_action( 'auth_cookie_expired', $cookie_elements );
+        return false;
+    }
+
+    //now $username is ID
+    $user = get_user_by('ID', $user_ID);
+    if ( ! $user ) {
+        /**
+         * Fires if a bad username is entered in the user authentication process.
+         *
+         * @since 2.7.0
+         *
+         * @param array $cookie_elements An array of data for the authentication cookie.
+         */
+        do_action( 'auth_cookie_bad_username', $cookie_elements );
+        return false;
+    }
+
+    $pass_frag = substr($user->user_pass, 8, 4);
+
+    $key = wp_hash( $user_ID . '|' . $pass_frag . '|' . $expiration . '|' . $token, $scheme );
+
+    // If ext/hash is not present, compat.php's hash_hmac() does not support sha256.
+    $algo = function_exists( 'hash' ) ? 'sha256' : 'sha1';
+    $hash = hash_hmac( $algo, $user_ID . '|' . $expiration . '|' . $token, $key );
+
+    if ( ! hash_equals( $hash, $hmac ) ) {
+        /**
+         * Fires if a bad authentication cookie hash is encountered.
+         *
+         * @since 2.7.0
+         *
+         * @param array $cookie_elements An array of data for the authentication cookie.
+         */
+        do_action( 'auth_cookie_bad_hash', $cookie_elements );
+        return false;
+    }
+
+    $manager = WP_Session_Tokens::get_instance( $user->ID );
+    if ( ! $manager->verify( $token ) ) {
+        do_action( 'auth_cookie_bad_session_token', $cookie_elements );
+        return false;
+    }
+
+    // Ajax/POST grace period set above
+    if ( $expiration < time() ) {
+        $GLOBALS['login_grace_period'] = 1;
+    }
+
+    /**
+     * Fires once an authentication cookie has been validated.
+     *
+     * @since 2.7.0
+     *
+     * @param array   $cookie_elements An array of data for the authentication cookie.
+     * @param WP_User $user            User object.
+     */
+    do_action( 'auth_cookie_valid', $cookie_elements, $user );
+
+    return $user->ID;
+}
+endif;
+
+if ( !function_exists('wp_generate_auth_cookie') ) :
+/**
+ * Generate authentication cookie contents.
+*
+* @since 2.5.0
+*
+* @param int    $user_id    User ID
+* @param int    $expiration The time the cookie expires as a UNIX timestamp.
+* @param string $scheme     Optional. The cookie scheme to use: auth, secure_auth, or logged_in
+* @param string $token      User's session token to use for this cookie
+* @return string Authentication cookie contents. Empty string if user does not exist.
+*/
+function wp_generate_auth_cookie( $user_id, $expiration, $scheme = 'auth', $token = '' ) {
+    $user = get_userdata($user_id);
+    if ( ! $user ) {
+        return '';
+    }
+
+    if ( ! $token ) {
+        $manager = WP_Session_Tokens::get_instance( $user_id );
+        $token = $manager->create( $expiration );
+    }
+
+    $pass_frag = substr($user->user_pass, 8, 4);
+
+    $key = wp_hash( $user->ID . '|' . $pass_frag . '|' . $expiration . '|' . $token, $scheme );
+
+    // If ext/hash is not present, compat.php's hash_hmac() does not support sha256.
+    $algo = function_exists( 'hash' ) ? 'sha256' : 'sha1';
+    $hash = hash_hmac( $algo, $user->ID . '|' . $expiration . '|' . $token, $key );
+
+    $cookie = $user->ID . '|' . $expiration . '|' . $token . '|' . $hash;
+
+    /**
+     * Filters the authentication cookie.
+     *
+     * @since 2.5.0
+     *
+     * @param string $cookie     Authentication cookie.
+     * @param int    $user_id    User ID.
+     * @param int    $expiration The time the cookie expires as a UNIX timestamp.
+     * @param string $scheme     Cookie scheme used. Accepts 'auth', 'secure_auth', or 'logged_in'.
+     * @param string $token      User's session token used.
+     */
+    return apply_filters( 'auth_cookie', $cookie, $user_id, $expiration, $scheme, $token );
+}
+endif;

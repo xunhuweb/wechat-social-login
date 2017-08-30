@@ -36,7 +36,6 @@ class XH_Social_Channel_Api{
     
     
     private function __construct(){
-        
     }
 
     /**

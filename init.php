@@ -4,7 +4,7 @@
  * Plugin URI: http://www.weixinsocial.com
  * Description: 支持国内最热门的社交媒体登录。如：微信、QQ、微博、手机登录、账号绑定和解绑，全新的注册页面取代原生注册页面，支持Ultimate Member、WooCommerce、Buddypress，兼容Open Social。部分扩展收费，查看详情：<a href="http://www.weixinsocial.com">Wechat Social</a>
  * Author: 迅虎网络
- * Version: 1.1.9
+ * Version: 1.2.0
  * Author URI:  http://www.wpweixin.net
  * Text Domain: xh_social
  * Domain Path: /lang
@@ -12,11 +12,7 @@
 
 if (! defined ( 'ABSPATH' ))
 	exit (); // Exit if accessed directly
-
-if(!defined('WSOCIAL_OPEN')){
-    define('WSOCIAL_OPEN', 0);
-}
-
+	
 if ( ! class_exists( 'XH_Social' ) ) :
 final class XH_Social {
     /**
@@ -25,7 +21,7 @@ final class XH_Social {
      * @since 1.0.0
      * @var string
      */
-    public $version = '1.1.9';
+    public $version = '1.2.0';
     
     /**
      * 最小wp版本
@@ -146,10 +142,10 @@ final class XH_Social {
         $this->include_plugins();
         
         add_action( 'init', array( $this,                       'init' ), 1 );
-        add_action( 'init', array( 'XH_Social_Hooks',           'init' ), 9 );
         add_action( 'init', array( 'XH_Social_Shortcodes',      'init' ), 10 );
         add_action( 'init', array( 'XH_Social_Ajax',            'init' ), 10 );
         
+        XH_Social_Hooks::init();
         add_action( 'admin_enqueue_scripts', array($this,'admin_enqueue_scripts'),10);
         add_action('login_enqueue_scripts', array($this,'login_enqueue_scripts'),10);
         add_action('wp_enqueue_scripts', array($this,'wp_enqueue_scripts'),10);
@@ -173,6 +169,18 @@ final class XH_Social {
         }
         
         return null;
+    }
+    
+    public function on_update($version){
+        if(version_compare($version, '1.1.9','<')){
+            //更新了session数据表
+            $session_db =new XH_Session_Handler_Model();
+            $session_db->init();
+        }
+        
+        do_action('xh_social_on_update',$version);
+        
+        XH_Social_Hooks::check_add_ons_update();
     }
     
     /**

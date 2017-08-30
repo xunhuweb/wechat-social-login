@@ -56,8 +56,19 @@ class XH_Social_Ajax {
 	     
 	    //清楚session 数据
 	    XH_Social::instance()->session->cleanup_sessions();
-	    XH_Social_Hooks::check_add_ons_update();
-	     
+	  
+	    $plugin_options = XH_Social_Install::instance()->get_plugin_options();
+	    $version = $plugin_options&&isset($plugin_options['version'])?$plugin_options['version']:'1.0.0';
+	   
+	    if(version_compare($version, XH_Social::instance()->version,'<')){
+	        XH_Social::instance()->on_update($version);
+	        
+	        XH_Social_Install::instance()->update_plugin_options(array(
+	            'version'=>XH_Social::instance()->version
+	        ));
+	        
+	    }
+	    
 	    echo 'hello wshop cron';
 	    exit;
 	}

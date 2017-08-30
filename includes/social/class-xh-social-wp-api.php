@@ -114,14 +114,6 @@ class XH_Social_WP_Api{
             return false;
         }
        
-        if($validate_notice&&'yes'===XH_Social_Settings_Default_Other_Default::instance()->get_option('defense_CSRF','no')){
-            if(isset($request['action'])&&isset($request[$request['action']])){
-                 return check_ajax_referer($request['action'],$request['action'],false);
-            }else{
-                return false;
-            }
-        }
-        
         return true;
     }
     
