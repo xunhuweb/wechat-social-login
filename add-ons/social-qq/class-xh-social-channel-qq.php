@@ -57,7 +57,7 @@ class XH_Social_Channel_QQ extends Abstract_XH_Social_Settings_Channel{
                 'title' => __ ( 'Enable/Disable', XH_SOCIAL ),
                 'type' => 'checkbox',
                 'label' => __ ( 'Enable QQ connect', XH_SOCIAL ),
-                'default' => 'no'
+                'default' => 'yes'
             ),
             'appid'=>array(
                 'title' => __ ( 'App ID', XH_SOCIAL ),
@@ -119,9 +119,9 @@ class XH_Social_Channel_QQ extends Abstract_XH_Social_Settings_Channel{
                 'user_pass'=>str_shuffle(time())
             );
             
-            $wp_user_id =wp_insert_user($userdata);
-            if(is_wp_error($wp_user_id)){
-                return XH_Social_Error::wp_error($wp_user_id);
+            $wp_user_id = $this->wp_insert_user_Info($ext_user_id, $userdata);
+            if($wp_user_id instanceof XH_Social_Error){
+                return $wp_user_id;
             }
         }
         
@@ -194,6 +194,7 @@ class XH_Social_Channel_QQ extends Abstract_XH_Social_Settings_Channel{
                 'ext_user_id'=>$user->id,
                 'nickname'=>$user->nickname,
                 'user-img'=>$user->img,
+                'user_img'=>$user->img,
                 'user_login'=>null,
                 'user_email'=>null,
                 'nicename'=>$guid,
@@ -357,14 +358,22 @@ class XH_Social_Channel_QQ extends Abstract_XH_Social_Settings_Channel{
                 }
             
                 $obj = json_decode($response,true);
-                 
+                
+                $img =null;
+                if(isset($obj['figureurl_qq_2'])&&!empty($obj['figureurl_qq_2'])){
+                    $img =$obj['figureurl_qq_2'];
+                }else if(isset($obj['figureurl_qq_1'])&&!empty($obj['figureurl_qq_1'])){
+                    $img =$obj['figureurl_qq_1'];
+                }else{
+                    $img =$obj['figureurl_2'];
+                }
                 $userdata=array(
                     'openid'=>$openid,
                     'nickname'=>XH_Social_Helper_String::remove_emoji($obj['nickname']),
                     'gender'=>$obj['gender'],
                     'province'=>$obj['province'],
                     'city'=>$obj['city'],
-                    'img'=>str_replace('http://', '//', $obj['figureurl_2']),
+                    'img'=>str_replace('http://', '//', $img),
                     'last_update'=>date_i18n('Y-m-d H:i')
                 );
             } catch (Exception $e) {

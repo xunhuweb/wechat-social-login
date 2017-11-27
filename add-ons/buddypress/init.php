@@ -48,8 +48,16 @@ class XH_Social_Add_On_Buddypress extends Abstract_XH_Social_Add_Ons{
     public function on_load(){
         add_filter('bp_core_fetch_avatar_no_grav', '__return_true');
         add_filter('bp_core_default_avatar_user', array($this,'bp_avatar_url'), 10, 2);
-       
+        add_filter('bp_get_displayed_user_mentionname', array($this,'bp_get_displayed_user_mentionname'),10,1);
     }
+    
+    public function bp_get_displayed_user_mentionname($name){
+       
+        $user = get_userdata(bp_displayed_user_id());
+        if($user){return $user->display_name;}
+        return $name;
+    }
+    
     /**
      * 重置头像
      * @param string $default_url

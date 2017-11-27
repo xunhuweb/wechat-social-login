@@ -305,7 +305,7 @@ class XH_Social_Install extends Abstract_XH_Install{
     		<p><?php echo sprintf(__('Thank you for using "%s", Please enter your license key below! Have any questions? visit our website %s or contact with %s',XH_SOCIAL),'<a href="'.$plugin['PluginURI'].'" target="_blank">'.$pname.'</a>','<a href="https://www.wpweixin.net" target="_blank">'.__('XunhuWeb',XH_SOCIAL).'</a>','<a href="http://wpa.qq.com/msgrd?v=3&uin=6347007&site=qq&menu=yes" target="_blank">'.__('Customer Service(via QQ)',XH_SOCIAL).'</a>')?></p>
     		<form action="<?php echo $this->url($params)?>" method="POST" id="form-license">
     			<input type="text" class="regular-text" value="<?php print esc_attr( $license_key)?>" name="license_key" placeholder="<?php echo __('license key',XH_SOCIAL)?>">
-				<div style="color: #999;font-size:12px;"><?php echo __('Don\'t have any license key? Just click the "continue" button.',XH_SOCIAL)?></div>
+				<div style="color: red;font-size:12px;"><?php echo __('Don\'t have any license key? Just click the "continue" button.',XH_SOCIAL)?></div>
     		</form>
     		<p class="wc-setup-actions step">
         		<a href="javascript:void(0);" onclick="window.view.submit();" class="button-primary button button-large button-next"><?php echo __('Continue',XH_SOCIAL)?></a>

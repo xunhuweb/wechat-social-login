@@ -38,6 +38,10 @@ class XH_Social_Settings_Default_Other_Default extends Abstract_XH_Social_Settin
                 'title'=>__('Website Logo',XH_SOCIAL),
                 'type'=>'image',
                 'default'=>XH_SOCIAL_URL.'/assets/image/wordpress-logo.png'
+            ),
+            'bingbg'=>array(
+                'title'=>__('调用Bing背景作为登录页背景',XH_SOCIAL),
+                'type'=>'checkbox'
             )
         );
     }

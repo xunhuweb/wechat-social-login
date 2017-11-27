@@ -56,7 +56,7 @@ class XH_Social_Shortcodes {
 	 * @param string $innerhtml 内容
 	 * @since 1.0.0
 	 */
-	public static function login_bar($attrs=array(), $innerhtml=''){
+	public static function loginbar($attrs=array(), $innerhtml=''){
 	    $redirect =self::get_attr($attrs,'redirect');
 	    return XH_Social_Hooks::show_loginbar($redirect);
 	}

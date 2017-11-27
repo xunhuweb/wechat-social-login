@@ -18,9 +18,10 @@ if ( ! $guessurl = site_url() ){
 		<link media="all" type="text/css" rel="stylesheet" href="<?php print XH_SOCIAL_URL?>/assets/css/social.css">	
 		<script src="<?php echo $guessurl.'/wp-includes/js/jquery/jquery.js'; ?>"></script>
 		<style type="text/css">body{background:#f5f5f5;}</style>
+		<?php do_action('login_head_wsocial');?>
 	</head>
 	<body>	
-	<div class="xh-reglogo"><a href="<?php echo home_url('/')?>"><img src="<?php echo XH_Social_Settings_Default_Other_Default::instance()->get_option('logo')?>"></a></div>
+	<div class="xh-reglogo"><a href="<?php echo home_url('/')?>"><img style="max-width: 400px;" src="<?php echo XH_Social_Settings_Default_Other_Default::instance()->get_option('logo')?>"></a></div>
 	 <?php
 	    while ( have_posts() ) : 
 	       the_post();

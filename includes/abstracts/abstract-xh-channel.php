@@ -95,6 +95,39 @@ abstract class Abstract_XH_Social_Settings_Channel extends Abstract_XH_Social_Se
         return XH_Social_Error::success();
     }
     
+    public function wp_insert_user_Info($ext_user_id,$userdata){
+        //解决wp_insert_user时因发邮件卡顿，用户关闭页面，再次登录时，登陆出错的问题
+        $session = XH_Social::instance()->session->get('wp_insert_user',array());
+        if(!$session||!is_array($session)){
+            $session = array();
+        }
+        
+        $now = time();
+        if(isset($session['ext_user_id'])&&$session['ext_user_id']==$ext_user_id){
+            $boundary = isset($session['time'])?intval($session['time']):$now;
+            if($boundary>$now){
+                return XH_Social_Error::error_custom(sprintf(__('Please try again after %s seconds!'),($boundary-$now)));
+            }
+        }
+        
+        $session['ext_user_id']=$ext_user_id;
+        $session['time'] = $now+60;
+        XH_Social::instance()->session->set('wp_insert_user', $session);
+        
+        try {
+            $wp_user_id =wp_insert_user($userdata);
+            if(is_wp_error($wp_user_id)){
+                throw new Exception($wp_user_id->get_error_message());
+            }
+        } catch (Exception $e) {
+            XH_Social::instance()->session->__unset('wp_insert_user');
+            return XH_Social_Error::wp_error($e->getMessage());
+        }
+        
+        XH_Social::instance()->session->__unset('wp_insert_user');
+        return $wp_user_id;
+    }
+    
     /**
      * 获取扩展用户信息
      * @param int $ext_user_id 扩展用户ID
@@ -203,7 +236,11 @@ abstract class Abstract_XH_Social_Settings_Channel extends Abstract_XH_Social_Se
                 return $login_location_uri;
             }
             
-            XH_Social::instance()->WP->do_wp_login($wp_user);
+            $error = XH_Social::instance()->WP->do_wp_login($wp_user);
+            if($error instanceof XH_Social_Error){
+                XH_Social::instance()->WP->set_wp_error($login_location_uri,$error->errmsg);
+            }
+            
             return $login_location_uri;
         }
         
@@ -222,7 +259,10 @@ abstract class Abstract_XH_Social_Settings_Channel extends Abstract_XH_Social_Se
                 return $login_location_uri;
             }
             
-            XH_Social::instance()->WP->do_wp_login($wp_user);
+            $error = XH_Social::instance()->WP->do_wp_login($wp_user);
+            if($error instanceof XH_Social_Error){
+                XH_Social::instance()->WP->set_wp_error($login_location_uri,$error->errmsg);
+            }
             return $login_location_uri;
         }
         
@@ -241,7 +281,10 @@ abstract class Abstract_XH_Social_Settings_Channel extends Abstract_XH_Social_Se
             return $login_location_uri;
         }
        
-        XH_Social::instance()->WP->do_wp_login($wp_user);
+        $error = XH_Social::instance()->WP->do_wp_login($wp_user);
+        if($error instanceof XH_Social_Error){
+            XH_Social::instance()->WP->set_wp_error($login_location_uri,$error->errmsg);
+        }
         return $login_location_uri;
     }
    

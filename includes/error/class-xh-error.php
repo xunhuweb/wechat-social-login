@@ -105,7 +105,10 @@ class XH_Social_Error{
 	    if($xh_social_error instanceof XH_Social_Error){
 	        return $xh_social_error->errcode == 0;
 	    }
-	    
+
+	    if(isset($xh_social_error->errcode)){
+	        return $xh_social_error->errcode == 0;
+	    }
 	    return true;
 	}
 	

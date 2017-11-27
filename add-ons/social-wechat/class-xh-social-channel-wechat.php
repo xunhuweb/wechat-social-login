@@ -63,7 +63,7 @@ class XH_Social_Channel_Wechat extends Abstract_XH_Social_Settings_Channel{
                 'title' => __ ( 'Enable/Disable', XH_SOCIAL ),
                 'type' => 'checkbox',
                 'label' => __ ( 'Enable wechat login', XH_SOCIAL ),
-                'default' => 'no'
+                'default' => 'yes'
             ),
            'client'=>array(
                'type'=>'tabs',
@@ -244,10 +244,10 @@ class XH_Social_Channel_Wechat extends Abstract_XH_Social_Settings_Channel{
                 'nickname'=>$ext_user_info['nickname'],
                 'user_pass'=>str_shuffle(time())
             );
-      
-            $wp_user_id =wp_insert_user($userdata);
-            if(is_wp_error($wp_user_id)){
-                return XH_Social_Error::wp_error($wp_user_id);
+            
+            $wp_user_id = $this->wp_insert_user_Info($ext_user_id, $userdata);
+            if($wp_user_id instanceof XH_Social_Error){
+                return $wp_user_id;
             }
         }
         
@@ -319,7 +319,7 @@ class XH_Social_Channel_Wechat extends Abstract_XH_Social_Settings_Channel{
         
         global $wpdb;
         $user = $wpdb->get_row(
-            "select w.*
+           "select w.*
             from {$wpdb->prefix}xh_social_channel_wechat w
             where w.user_id=$wp_user_id
             limit 1;");
@@ -327,6 +327,7 @@ class XH_Social_Channel_Wechat extends Abstract_XH_Social_Settings_Channel{
         if(!$user) {
             return null;
         }
+        
         $guid = XH_Social_Helper_String::guid();
         return array(
                 'wp_user_id'=>$user->user_id,
@@ -593,9 +594,6 @@ class XH_Social_Channel_Wechat extends Abstract_XH_Social_Settings_Channel{
         
         if(isset($user_data['headimgurl'])&&!empty($user_data['headimgurl'])){
             $update['img']=str_replace('http://', '//', $user_data['headimgurl']);
-            if($user->user_id){
-                update_user_meta($user->user_id, '_social_img', $update['img']);
-            }
         }
         
         if(isset($user_data['unionid'])&&!empty($user_data['unionid'])){
@@ -674,7 +672,7 @@ class XH_Social_Channel_Wechat extends Abstract_XH_Social_Settings_Channel{
      * @return string
      * @since 1.0.0
      */
-    private function _login_get_authorization_uri($user_ID=0,$uid=null,$error_times=null){
+    public function _login_get_authorization_uri($user_ID=0,$uid=null,$error_times=null){
         if(XH_Social_Helper_Uri::is_wechat_app()){
            return $this->login_get_wechatclient_authorization_uri(is_null($user_ID)?0:$user_ID,$uid,$error_times);
         }else{
@@ -706,7 +704,7 @@ class XH_Social_Channel_Wechat extends Abstract_XH_Social_Settings_Channel{
         $redirect_uri=$url."?".http_build_query($params);
         
         $uri=null;
-        $uri = apply_filters('xh_social_channel_wechat_login_get_authorization_uri', $uri,$redirect_uri,$state,$uid,is_null($user_ID)?0:$user_ID);
+        $uri = apply_filters('xh_social_channel_wechat_login_get_authorization_uri', $uri,$redirect_uri,$state,$uid,is_null($user_ID)?0:$user_ID,$error_times);
         if(!empty($uri)){
             return $uri;
         }
@@ -723,7 +721,14 @@ class XH_Social_Channel_Wechat extends Abstract_XH_Social_Settings_Channel{
     public function login_get_wechatclient_authorization_uri($user_ID=0,$uid=null,$error_times=null){
         if(empty($uid)){
             $uid = XH_Social_Helper_String::guid();
+        }else{
+            $wp_user = $this->get_wp_user('uid', $uid);
+            if($wp_user){
+                XH_Social::instance()->WP->wp_die(__('Please refresh login page and try scan qrcode again!',XH_SOCIAL));
+                exit;
+            }
         }
+        
         $state="mp";
         $api = XH_Social_Add_On_Social_Wechat::instance();
      
@@ -741,11 +746,10 @@ class XH_Social_Channel_Wechat extends Abstract_XH_Social_Settings_Channel{
             $params['err_times']=$error_times;
         }
 
-      
         $redirect_uri= $url."?".http_build_query($params);
         
         $uri=null;
-        $uri = apply_filters('xh_social_channel_wechat_login_get_authorization_uri', $uri,$redirect_uri,$state,$uid,is_null($user_ID)?0:$user_ID);
+        $uri = apply_filters('xh_social_channel_wechat_login_get_authorization_uri', $uri,$redirect_uri,$state,$uid,is_null($user_ID)?0:$user_ID,$error_times);
         if(!empty($uri)){ 
             return $uri;
         }

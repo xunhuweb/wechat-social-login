@@ -45,6 +45,30 @@ class XH_Social_Helper{
     }
 }
 class  XH_Social_Helper_Http{
+    public static function get_client_ip()
+    {
+        $ip = getenv('HTTP_CLIENT_IP');
+        if ($ip && strcasecmp($ip, 'unknown')) {
+            return preg_match('/[\d\.]{7,15}/', $ip, $matches) ? $matches[0] : null;
+        }
+    
+        $ip = getenv('HTTP_X_FORWARDED_FOR');
+        if ($ip && strcasecmp($ip, 'unknown')) {
+            return preg_match('/[\d\.]{7,15}/', $ip, $matches) ? $matches[0] : null;
+        }
+    
+        $ip = getenv('REMOTE_ADDR');
+        if ($ip && strcasecmp($ip, 'unknown')) {
+            return preg_match('/[\d\.]{7,15}/', $ip, $matches) ? $matches[0] : null;
+        }
+    
+        $ip = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : null;
+        if ($ip && strcasecmp($ip, 'unknown')) {
+            return preg_match('/[\d\.]{7,15}/', $ip, $matches) ? $matches[0] : null;
+        }
+    
+        return null;
+    }
     public static function http_get($url,$require_ssl=false){
         if (! function_exists('curl_init')) {
             throw new Exception('php libs not found!', 500);
@@ -74,12 +98,14 @@ class  XH_Social_Helper_Http{
         return $response;
     }
     
-    public static function http_post($url,$data=null,$require_ssl=false){
+    public static function http_post($url,$data=null,$require_ssl=false,$ch = null){
         if (! function_exists('curl_init')) {
             throw new Exception('php libs not found!', 500);
         }
     
-        $ch = curl_init();
+        if(!$ch){
+            $ch = curl_init();
+        }
         curl_setopt($ch,CURLOPT_POST,1);
         curl_setopt($ch, CURLOPT_TIMEOUT, 60);
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -99,6 +125,7 @@ class  XH_Social_Helper_Http{
             if(is_array($data)){
                 $data = http_build_query($data);
             }
+           
             curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
         }
         
@@ -269,15 +296,15 @@ class XH_Social_Helper_Uri{
     }
     
     public static function is_wechat_app(){
-        return strripos($_SERVER['HTTP_USER_AGENT'],'micromessenger')!=false;
+        return isset($_SERVER['HTTP_USER_AGENT'])&& strripos(strtolower($_SERVER['HTTP_USER_AGENT']),'micromessenger')!=false;
     }
     
     public static function is_ios() {
-        $ua = $_SERVER ['HTTP_USER_AGENT'];
+        $ua =isset($_SERVER ['HTTP_USER_AGENT'])? strtolower( $_SERVER ['HTTP_USER_AGENT']):null;
         return strripos ( $ua, 'iphone' ) != false || strripos ( $ua, 'ipad' ) != false;
     }
     public static function is_android() {
-        return strripos ( $_SERVER ['HTTP_USER_AGENT'], 'android' ) != false;
+        return isset($_SERVER['HTTP_USER_AGENT'])&&strripos (strtolower( $_SERVER ['HTTP_USER_AGENT']), 'android' ) != false;
     }
     
     /**
@@ -480,20 +507,9 @@ class XH_Social_Helper_Array{
 
 class XH_Social_Helper_Html_Form{
    public static function generate_submit_data($form_id,$data_name){
-       ob_start();
        ?>
-        /*old version codes,willbe removed next version START*/
-        if(window._submit_<?php echo esc_attr($form_id);?>_temps){
-        	for(var i=0;i < window._submit_<?php echo esc_attr($form_id);?>_temps.length;i++){
-        		window._submit_<?php echo esc_attr($form_id);?>_temps[i](<?php echo $data_name?>);
-        	}
-        }
-       /*old version codes,willbe removed next version END*/
-       
-       
        $(document).trigger('on_form_<?php echo esc_attr($form_id);?>_submit',<?php echo $data_name;?>);
        <?php 
-       echo ob_get_clean();
    }
     
    /**
@@ -505,17 +521,10 @@ class XH_Social_Helper_Html_Form{
    public static function generate_field_scripts($form_id,$data_name){
        $form_name = $data_name;
        $name = $form_id."_".$data_name;
-       ob_start();
+       
        ?>
       <script type="text/javascript">
       	(function($){
-      		if(window._submit_<?php echo esc_attr($form_id);?>){
-				window._submit_<?php echo esc_attr($form_id);?>(function(data){
-					if(!data){data={};}
-					data.<?php echo esc_attr($form_name)?>=$('#<?php echo esc_attr($name)?>').val();
-				});
-			}
-			
 			$(document).bind('on_form_<?php echo esc_attr($form_id);?>_submit',function(e,m){
 				m.<?php echo esc_attr($form_name)?>=$('#<?php echo esc_attr($name)?>').val();
 			});
@@ -523,7 +532,6 @@ class XH_Social_Helper_Html_Form{
 		})(jQuery);
 		</script>
       <?php 
-      echo ob_get_clean();
    }
    
     /**
@@ -549,17 +557,7 @@ class XH_Social_Helper_Html_Form{
             'generate_html'=>null
         );
         
-       ob_start();
-        ?>
-        <script type="text/javascript">
-        /*old version codes,willbe removed next version */
-        window._submit_<?php echo esc_attr($form_id);?>=function(callback){
-			if(!window._submit_<?php echo esc_attr($form_id);?>_temps){window._submit_<?php echo esc_attr($form_id);?>_temps=[];}
-        	window._submit_<?php echo esc_attr($form_id);?>_temps.push(callback);	
-		};
-		</script>
-        <?php 
-        $html=ob_get_clean();
+        $html='';
         
         foreach ($fields as $name=>$settings){
             $settings = wp_parse_args ( $settings, $defaults );
@@ -577,7 +575,7 @@ class XH_Social_Helper_Html_Form{
         $name = $form_id."_".$data_name;
         ob_start();
         ?>
-        <input type="hidden" id="<?php echo esc_attr($name)?>" name="<?php echo esc_attr($name)?>" value="<?php echo esc_attr($settings['default'])?>"  />
+        <input type="hidden" id="<?php echo esc_attr($name)?>" name="<?php echo esc_attr($name)?>" value="<?php echo esc_attr(isset($settings['default'])?$settings['default']:'')?>"  />
         <?php
         self::generate_field_scripts($form_id, $data_name);
         return ob_get_clean();
@@ -588,10 +586,10 @@ class XH_Social_Helper_Html_Form{
         ob_start();
         ?>
         <div class="xh-form-group">
-            <label class="<?php echo $settings['required']?'required':'';?>"><?php echo esc_html($settings['title'])?></label>
-            <input type="text" id="<?php echo esc_attr($name)?>" name="<?php echo esc_attr($name)?>" value="<?php echo esc_attr($settings['default'])?>" placeholder="<?php echo esc_attr($settings['placeholder'])?>" class="form-control <?php echo esc_attr($settings['class'])?>" style="<?php echo esc_attr($settings['css'])?>" <?php disabled( $settings['disabled'], true ); ?> <?php echo self::get_custom_attribute_html( $settings ); ?> />
-            <?php if(!empty($settings['descroption'])){
-                ?><span class="help-block"><?php echo $settings['descroption'];?></span><?php 
+            <label class="<?php echo isset($settings['required'])&&$settings['required']?'required':'';?>"><?php echo isset($settings['title'])?esc_html($settings['title']):null?></label>
+            <input type="text" id="<?php echo esc_attr($name)?>" name="<?php echo esc_attr($name)?>" value="<?php echo esc_attr(isset($settings['default'])?$settings['default']:'')?>" placeholder="<?php echo isset($settings['placeholder'])?esc_attr($settings['placeholder']):null?>" class="form-control <?php echo isset($settings['class'])?esc_attr($settings['class']):null?>" style="<?php echo isset($settings['css'])?esc_attr($settings['css']):null?>" <?php disabled( isset($settings['disabled'])?$settings['disabled']:'', true ); ?> <?php echo self::get_custom_attribute_html( $settings ); ?> />
+            <?php if(isset($settings['description'])&&!empty($settings['description'])){
+                ?><span class="help-block"><?php echo isset($settings['description'])?$settings['description']:null;?></span><?php 
             }?>
         </div>
         <?php 
@@ -605,10 +603,10 @@ class XH_Social_Helper_Html_Form{
         ob_start();
         ?>
             <div class="xh-form-group">
-                <label class="<?php echo $settings['required']?'required':'';?>"><?php echo esc_html($settings['title'])?></label>
-                <input type="email" id="<?php echo esc_attr($name)?>" name="<?php echo esc_attr($name)?>" value="<?php echo esc_attr($settings['default'])?>" placeholder="<?php echo esc_attr($settings['placeholder'])?>" class="form-control <?php echo esc_attr($settings['class'])?>" style="<?php echo esc_attr($settings['css'])?>" <?php disabled( $settings['disabled'], true ); ?> <?php echo self::get_custom_attribute_html( $settings ); ?> />
-                <?php if(!empty($settings['descroption'])){
-                    ?><span class="help-block"><?php echo $settings['descroption'];?></span><?php 
+                <label class="<?php echo isset($settings['required'])&&$settings['required']?'required':'';?>"><?php echo isset($settings['title'])?esc_html($settings['title']):null?></label>
+                <input type="email" id="<?php echo esc_attr($name)?>" name="<?php echo esc_attr($name)?>" value="<?php echo esc_attr(isset($settings['default'])?$settings['default']:'')?>" placeholder="<?php echo isset($settings['placeholder'])?esc_attr($settings['placeholder']):null?>" class="form-control <?php echo isset($settings['class'])?esc_attr($settings['class']):null?>" style="<?php echo isset($settings['css'])?esc_attr($settings['css']):null?>" <?php disabled( isset($settings['disabled'])?$settings['disabled']:'', true ); ?> <?php echo self::get_custom_attribute_html( $settings ); ?> />
+                <?php if(isset($settings['description'])&&!empty($settings['description'])){
+                    ?><span class="help-block"><?php echo isset($settings['description'])?$settings['description']:null;?></span><?php 
                 }?>
             </div>
         <?php 
@@ -617,14 +615,14 @@ class XH_Social_Helper_Html_Form{
     }
     public static function generate_password_html($form_id,$data_name,$settings){
         $form_name = $data_name;
-        $name = $form_id."_".$data_name;
+        $name = $form_id."_".$data_name; 
         ob_start();
         ?>
         <div class="xh-form-group">
-            <label class="<?php echo $settings['required']?'required':'';?>"><?php echo esc_html($settings['title'])?></label>
-            <input type="password" id="<?php echo esc_attr($name)?>" name="<?php echo esc_attr($name)?>" value="<?php echo esc_attr($settings['default'])?>" placeholder="<?php echo esc_attr($settings['placeholder'])?>" class="form-control <?php echo esc_attr($settings['class'])?>" style="<?php echo esc_attr($settings['css'])?>" <?php disabled( $settings['disabled'], true ); ?> <?php echo self::get_custom_attribute_html( $settings ); ?> />
-            <?php if(!empty($settings['descroption'])){
-                ?><span class="help-block"><?php echo $settings['descroption'];?></span><?php 
+            <label class="<?php echo isset($settings['required'])&&$settings['required']?'required':'';?>"><?php echo isset($settings['title'])?esc_html($settings['title']):null?></label>
+            <input type="password" id="<?php echo esc_attr($name)?>" name="<?php echo esc_attr($name)?>" value="<?php echo esc_attr(isset($settings['default'])?$settings['default']:'')?>" placeholder="<?php echo isset($settings['placeholder'])?esc_attr($settings['placeholder']):null?>" class="form-control <?php echo isset($settings['class'])?esc_attr($settings['class']):null?>" style="<?php echo isset($settings['css'])?esc_attr($settings['css']):null?>" <?php disabled( isset($settings['disabled'])?$settings['disabled']:'', true ); ?> <?php echo self::get_custom_attribute_html( $settings ); ?> />
+            <?php if(isset($settings['description'])&&!empty($settings['description'])){
+                ?><span class="help-block"><?php echo isset($settings['description'])?$settings['description']:null;?></span><?php 
             }?>
         </div>
         <?php 
@@ -639,18 +637,18 @@ class XH_Social_Helper_Html_Form{
         ob_start();
         ?>
         <div class="xh-form-group">
-            <label class="<?php echo $settings['required']?'required':'';?>"><?php echo esc_html($settings['title'])?></label>
-            <select id="<?php echo esc_attr($name)?>" name="<?php echo esc_attr($name)?>" class="form-control <?php echo esc_attr($settings['class'])?>" style="<?php echo esc_attr($settings['css'])?>" <?php disabled( $settings['disabled'], true ); ?> <?php echo self::get_custom_attribute_html( $settings ); ?> >
+            <label class="<?php echo isset($settings['required'])&&$settings['required']?'required':'';?>"><?php echo isset($settings['title'])?esc_html($settings['title']):null?></label>
+            <select id="<?php echo esc_attr($name)?>" name="<?php echo esc_attr($name)?>" class="form-control <?php echo isset($settings['class'])?esc_attr($settings['class']):null?>" style="<?php echo isset($settings['css'])?esc_attr($settings['css']):null?>" <?php disabled( isset($settings['disabled'])?$settings['disabled']:'', true ); ?> <?php echo self::get_custom_attribute_html( $settings ); ?> >
             	<?php 
             	   if(isset($settings['options'])){
             	       foreach ($settings['options'] as $key=>$val){
-            	          ?><option <?php selected( $key, esc_attr( $settings['default']) ); ?> value="<?php echo esc_html($key);?>"><?php echo esc_html($val);?></option><?php
+            	          ?><option <?php selected( $key, esc_attr( isset($settings['default'])?$settings['default']:'') ); ?> value="<?php echo esc_html($key);?>"><?php echo esc_html($val);?></option><?php
             	       }
             	   }
             	?>
             </select>
-            <?php if(!empty($settings['descroption'])){
-                ?><span class="help-block"><?php echo $settings['descroption'];?></span><?php 
+            <?php if(isset($settings['description'])&&!empty($settings['description'])){
+                ?><span class="help-block"><?php echo isset($settings['description'])?$settings['description']:null;?></span><?php 
             }?>
         </div>
     <?php 
@@ -664,10 +662,10 @@ class XH_Social_Helper_Html_Form{
         ob_start();
         ?>
         <div class="xh-form-group">
-            <label class="<?php echo $settings['required']?'required':'';?>"><?php echo esc_html($settings['title'])?></label>
-            <textarea id="<?php echo esc_attr($name)?>" name="<?php echo esc_attr($name)?>" placeholder="<?php echo esc_attr($settings['placeholder'])?>" class="form-control <?php echo esc_attr($settings['class'])?>" style="<?php echo esc_attr($settings['css'])?>" <?php disabled( $settings['disabled'], true ); ?> <?php echo self::get_custom_attribute_html( $settings ); ?> ><?php echo esc_textarea($settings['default'])?></textarea>
-            <?php if(!empty($settings['descroption'])){
-                ?><span class="help-block"><?php echo $settings['descroption'];?></span><?php 
+            <label class="<?php echo $settings['required']?'required':'';?>"><?php echo isset($settings['title'])?esc_html($settings['title']):null?></label>
+            <textarea id="<?php echo esc_attr($name)?>" name="<?php echo esc_attr($name)?>" placeholder="<?php echo isset($settings['placeholder'])?esc_attr($settings['placeholder']):null?>" class="form-control <?php echo isset($settings['class'])?esc_attr($settings['class']):null?>" style="<?php echo isset($settings['css'])?esc_attr($settings['css']):null?>" <?php disabled( isset($settings['disabled'])?$settings['disabled']:'', true ); ?> <?php echo self::get_custom_attribute_html( $settings ); ?> ><?php echo esc_textarea(isset($settings['default'])?$settings['default']:'')?></textarea>
+            <?php if(isset($settings['description'])&&!empty($settings['description'])){
+                ?><span class="help-block"><?php echo isset($settings['description'])?$settings['description']:null;?></span><?php 
             }?>
         </div>
         <?php 
@@ -681,10 +679,10 @@ class XH_Social_Helper_Html_Form{
         ob_start();
         ?>
         <div class="xh-form-group">
-            <label class="<?php echo $settings['required']?'required':'';?>"><?php echo esc_html($settings['title'])?></label>
-            <input type="checkbox" id="<?php echo esc_attr($name)?>" name="<?php echo esc_attr($name)?>" placeholder="<?php echo esc_attr($settings['placeholder'])?>" class="form-control <?php echo esc_attr($settings['class'])?>" style="<?php echo esc_attr($settings['css'])?>" <?php disabled( $settings['disabled'], true ); ?> <?php echo self::get_custom_attribute_html( $settings ); ?>  value="yes" <?php checked( $settings['default'], 'yes' ); ?>  />
-            <?php if(!empty($settings['descroption'])){
-                ?><span class="help-block"><?php echo $settings['descroption'];?></span><?php 
+            <label class="<?php echo $settings['required']?'required':'';?>"><?php echo isset($settings['title'])?esc_html($settings['title']):null?></label>
+            <input type="checkbox" id="<?php echo esc_attr($name)?>" name="<?php echo esc_attr($name)?>" placeholder="<?php echo isset($settings['placeholder'])?esc_attr($settings['placeholder']):null?>" class="form-control <?php echo isset($settings['class'])?esc_attr($settings['class']):null?>" style="<?php echo isset($settings['css'])?esc_attr($settings['css']):null?>" <?php disabled( isset($settings['disabled'])?$settings['disabled']:'', true ); ?> <?php echo self::get_custom_attribute_html( $settings ); ?>  value="yes" <?php checked( isset($settings['default'])?$settings['default']:'', 'yes' ); ?>  />
+            <?php if(isset($settings['description'])&&!empty($settings['description'])){
+                ?><span class="help-block"><?php echo isset($settings['description'])?$settings['description']:null;?></span><?php 
             }?>
         </div>
         <?php 

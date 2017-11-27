@@ -41,9 +41,7 @@ abstract class Abstract_XH_Social_Settings {
 	public $description = '';
 	
 	/**
-	 * 'yes' if the method is enabled.
-	 * 
-	 * @var string
+	 * @var boolean
 	 */
 	public $enabled;
 	
@@ -470,7 +468,7 @@ abstract class Abstract_XH_Social_Settings {
 	 * @return string
 	 */
 	public function get_tooltip_html($data) {
-		if ($data ['desc_tip'] === true) {
+	    if (isset($data ['desc_tip'])&&$data ['desc_tip'] === true) {
 			$tip = $data ['description'];
 		} elseif (! empty ( $data ['desc_tip'] )) {
 			$tip = $data ['desc_tip'];
@@ -521,7 +519,40 @@ abstract class Abstract_XH_Social_Settings {
 		
 		return implode ( ' ', $custom_attributes );
 	}
+	/**
+	 * Generate Text Input HTML.
+	 *
+	 * @param mixed $key
+	 * @param mixed $data
+	 * @since 1.0.0
+	 * @return string
+	 */
+	public function generate_hidden_html($key, $data) {
+	    $field = $this->get_field_key ( $key );
+	    $defaults = array (
+	        'title' => '',
+	        'disabled' => false,
+	        'class' => '',
+	        'css' => 'min-width:400px;',
+	        'placeholder' => '',
+	        'type' => 'hidden',
+	        'desc_tip' => false,
+	        'description' => '',
+	        'custom_attributes' => array ()
+	    );
 	
+	    $data = wp_parse_args ( $data, $defaults );
+	
+	    ob_start ();
+	        ?>
+        <tr style="display:none;">
+        	<td>
+        		<input class="input-text regular-input <?php echo esc_attr( $data['class'] ); ?>" type="<?php echo esc_attr( $data['type'] ); ?>" name="<?php echo esc_attr( $field ); ?>" id="<?php echo esc_attr( $field ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" value="<?php echo $data['type']!='password'? esc_attr( $this->get_option( $key ) ):null; ?>" placeholder="<?php echo esc_attr( $data['placeholder'] ); ?>" <?php disabled( $data['disabled'], true ); ?> <?php echo $this->get_custom_attribute_html( $data ); ?> />
+        	</td>
+        </tr><?php 
+		
+		return ob_get_clean ();
+	}
 	/**
 	 * Generate Select HTML.
 	 *
@@ -761,7 +792,7 @@ abstract class Abstract_XH_Social_Settings {
             			<legend class="screen-reader-text">
             				<span><?php echo wp_kses_post( $data['title'] ); ?></span>
             			</legend>
-            			<input class="wc_input_price input-text regular-input <?php echo esc_attr( $data['class'] ); ?>" type="text" name="<?php echo esc_attr( $field ); ?>" id="<?php echo esc_attr( $field ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" value="<?php echo esc_attr( wc_format_localized_price( $this->get_option( $key ) ) ); ?>" placeholder="<?php echo esc_attr( $data['placeholder'] ); ?>" <?php disabled( $data['disabled'], true ); ?> <?php echo $this->get_custom_attribute_html( $data ); ?> />
+            			<input class="wc_input_price input-text regular-input <?php echo esc_attr( $data['class'] ); ?>" type="text" name="<?php echo esc_attr( $field ); ?>" id="<?php echo esc_attr( $field ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" value="<?php echo esc_attr( ( $this->get_option( $key ) ) ); ?>" placeholder="<?php echo esc_attr( $data['placeholder'] ); ?>" <?php disabled( $data['disabled'], true ); ?> <?php echo $this->get_custom_attribute_html( $data ); ?> />
 						<?php echo $this->get_description_html( $data ); ?>
 					</fieldset>
             	</td>
@@ -807,7 +838,7 @@ abstract class Abstract_XH_Social_Settings {
         			<legend class="screen-reader-text">
         				<span><?php echo wp_kses_post( $data['title'] ); ?></span>
         			</legend>
-        			<input class="wc_input_decimal input-text regular-input <?php echo esc_attr( $data['class'] ); ?>" type="text" name="<?php echo esc_attr( $field ); ?>" id="<?php echo esc_attr( $field ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" value="<?php echo esc_attr( wc_format_localized_decimal( $this->get_option( $key ) ) ); ?>" placeholder="<?php echo esc_attr( $data['placeholder'] ); ?>" <?php disabled( $data['disabled'], true ); ?> <?php echo $this->get_custom_attribute_html( $data ); ?> />
+        			<input class="wc_input_decimal input-text regular-input <?php echo esc_attr( $data['class'] ); ?>" type="text" name="<?php echo esc_attr( $field ); ?>" id="<?php echo esc_attr( $field ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" value="<?php echo esc_attr( ( $this->get_option( $key ) ) ); ?>" placeholder="<?php echo esc_attr( $data['placeholder'] ); ?>" <?php disabled( $data['disabled'], true ); ?> <?php echo $this->get_custom_attribute_html( $data ); ?> />
         			<?php echo $this->get_description_html( $data ); ?>
         		</fieldset>
         	</td>
@@ -845,12 +876,6 @@ abstract class Abstract_XH_Social_Settings {
 	        			<legend class="screen-reader-text">
 	        				<span><?php echo wp_kses_post( $data['title'] ); ?></span>
 	        			</legend>
-	        			
-	        			<script type="text/javascript">
-	        			if(!window.thickboxL10n){
-							window.thickboxL10n = {"next":"\u4e0b\u4e00\u9875 >","prev":"< \u4e0a\u4e00\u9875","image":"\u56fe\u50cf","of":"\/","close":"\u5173\u95ed","noiframes":"\u8fd9\u4e2a\u529f\u80fd\u9700\u8981iframe\u7684\u652f\u6301\u3002\u60a8\u53ef\u80fd\u7981\u6b62\u4e86iframe\u7684\u663e\u793a\uff0c\u6216\u60a8\u7684\u6d4f\u89c8\u5668\u4e0d\u652f\u6301\u6b64\u529f\u80fd\u3002","loadingAnimation":"http:\/\/ranj.mabaodian.com\/wp-includes\/js\/thickbox\/loadingAnimation.gif"};
-	        			}
-						</script>
 						<img id="<?php echo esc_attr( $field ); ?>-img" style="max-width:100px;max-height:100px;" src="<?php echo esc_attr(  $this->get_option( $key ) ); ?>">
 						<input type="hidden" name="<?php echo esc_attr( $field ); ?>" id="<?php echo esc_attr( $field ); ?>" value="<?php echo esc_attr(  $this->get_option( $key ) ); ?>" />
 						<input type="button" class="button" id="btn-<?php echo esc_attr( $field ); ?>-upload-img" value="<?php echo __('Upload Image',XH_SOCIAL)?>" />
@@ -858,23 +883,15 @@ abstract class Abstract_XH_Social_Settings {
 						<script type="text/javascript">
 						(function($){
 							$('#btn-<?php echo esc_attr( $field ); ?>-upload-img').click(function() {  
-								 window.send_to_editor = function(html) { 
-									 var imgurl='';
-									 var $img = $(html).children('img');
-									 if($img.length>0){
-										 imgurl=$img.attr('src');  
-								    }else{
-								    	imgurl = $(html).attr('src');  
-									 }
-							      
-							          $('#<?php echo esc_attr( $field ); ?>').val(imgurl);
-							          $('#<?php echo esc_attr( $field ); ?>-img').attr('src',imgurl);
-							     
-							         tb_remove();   
-							    } ;   
-							    
-						         tb_show('', 'media-upload.php?type=image&amp;TB_iframe=true');   
-						         return false;   
+								var send_attachment_bkp = wp.media.editor.send.attachment;
+							    wp.media.editor.send.attachment = function(props, attachment) {
+								    
+							        $('#<?php echo esc_attr( $field ); ?>').val(attachment.url);
+							        $('#<?php echo esc_attr( $field ); ?>-img').attr('src',attachment.url);
+							        wp.media.editor.send.attachment = send_attachment_bkp;
+							    }
+							    wp.media.editor.open();
+							    return false;    
 						    });   
 						    $('#btn-<?php echo esc_attr( $field ); ?>-remove').click(function(){
 								if(confirm('<?php echo __('Are you sure?',XH_SOCIAL)?>')){
@@ -1247,7 +1264,11 @@ abstract class Abstract_XH_Social_Settings {
 			$type = empty ( $field ['type'] ) ? 'text' : $field ['type'];
 			
 			// Look for a validate_FIELDID_field method for special handling
-			if (method_exists ( $this, 'validate_' . $key . '_field' )) {
+			if(isset($field['validate'])){
+			    $func =$field['validate'];
+			    $field = call_user_func_array($func,array( $key ,$this));
+			}
+			elseif (method_exists ( $this, 'validate_' . $key . '_field' )) {
 				$field = $this->{'validate_' . $key . '_field'} ( $key );
 				
 				// Exclude certain types from saving
@@ -1284,7 +1305,13 @@ abstract class Abstract_XH_Social_Settings {
 		$field = $this->get_field_key ( $key );
 		
 		if (isset ( $_POST [$field] )) {
-			$text = wp_kses_post ( trim ( stripslashes ( $_POST [$field] ) ) );
+		    $settings = $this->form_fields[$key];
+		    if(isset($settings['ignore_kses_post'])&&$settings['ignore_kses_post']){
+		        $text =  ( trim ( stripslashes ( $_POST [$field] ) ) );
+		    }else{
+		        $text = wp_kses_post ( trim ( stripslashes ( $_POST [$field] ) ) );
+		    }
+			
 		}
 		
 		return $text;
@@ -1306,7 +1333,7 @@ abstract class Abstract_XH_Social_Settings {
 		if (isset ( $_POST [$field] )) {
 			
 			if ($_POST [$field] !== '') {
-				$text = wc_format_decimal ( trim ( stripslashes ( $_POST [$field] ) ) );
+				$text = trim ( stripslashes ( $_POST [$field] ) ) ;
 			} else {
 				$text = '';
 			}
@@ -1330,7 +1357,7 @@ abstract class Abstract_XH_Social_Settings {
 		if (isset ( $_POST [$field] )) {
 			
 			if ($_POST [$field] !== '') {
-				$text = wc_format_decimal ( trim ( stripslashes ( $_POST [$field] ) ) );
+				$text =  trim ( stripslashes ( $_POST [$field] ) ) ;
 			} else {
 				$text = '';
 			}
@@ -1369,7 +1396,11 @@ abstract class Abstract_XH_Social_Settings {
 		
 		if (isset ( $_POST [$field] )) {
 			
-			$text = wp_kses ( trim ( stripslashes ( $_POST [$field] ) ), array_merge ( array (
+		    $settings = $this->form_fields[$key];
+		    if(isset($settings['ignore_kses_post'])&&$settings['ignore_kses_post']){
+		        $text =   trim ( stripslashes ( $_POST [$field]  ));
+	    }else{
+		        $text = wp_kses ( trim ( stripslashes ( $_POST [$field] ) ), array_merge ( array (
 					'iframe' => array (
 							'src' => true,
 							'style' => true,
@@ -1377,6 +1408,9 @@ abstract class Abstract_XH_Social_Settings {
 							'class' => true 
 					) 
 			), wp_kses_allowed_html ( 'post' ) ) );
+		    }
+		    
+			
 		}
 		
 		return $text;
@@ -1422,7 +1456,15 @@ abstract class Abstract_XH_Social_Settings {
 		
 		return $value;
 	}
+	public function validate_number_field($key) {
+	    $field = $this->get_field_key ( $key );
+	    $value = trim ( stripslashes ( $_POST [$field] ) );
+	    if($value===''){
+	        return null;
+	    }
 	
+	    return intval($value);
+	}
 	/**
 	 * Validate Multiselect Field.
 	 *

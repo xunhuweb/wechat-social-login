@@ -22,14 +22,6 @@ if(strcasecmp(XH_Social_Helper_Uri::get_location_uri(), $log_on_callback_uri)===
 }
 
 XH_Social::instance()->session->set('social_login_location_uri',$log_on_callback_uri);
- 
-do_action('xh_social_page_login_before');
-
-$action = apply_filters('xh_social_page_login_before', null);
-if(!empty($action)){
-    echo $action;
-    return;
-}
 
 if(is_user_logged_in()){
     if(method_exists(XH_Social::instance()->WP, 'wp_loggout_html')){
@@ -74,6 +66,11 @@ if(is_user_logged_in()){
 
 <script type="text/javascript">
 	(function($){
+	   $(document).keypress(function(e) {
+			if (e.which == 13){
+			　　window.xh_social_view.login();
+			}
+		});
 		window.xh_social_view={
 			loading:false,
 			reset:function(){
@@ -115,7 +112,7 @@ if(is_user_logged_in()){
 		            },
 		            success: function(m) {
 		            	if(m.errcode==405||m.errcode==0){
-		            		window.xh_social_view.success('<?php print __('Congratulations, log on successfully!',XH_SOCIAL);?>');   				           
+		            		window.xh_social_view.success('<?php print __('Log on successfully!',XH_SOCIAL);?>');   				           
 		            		location.href='<?php echo $log_on_callback_uri?>';
 							return;
 						}

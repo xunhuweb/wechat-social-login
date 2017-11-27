@@ -28,7 +28,7 @@ class XH_Social_Menu_Default_Account extends Abstract_XH_Social_Settings_Menu{
      */
     private function __construct(){
         $this->id='menu_default_account';
-        $this->title=__('Account Settings',XH_SOCIAL);
+        $this->title=__('Page Settings',XH_SOCIAL);
     }
     
 }

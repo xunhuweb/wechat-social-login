@@ -57,6 +57,11 @@ if(is_user_logged_in()){
 
 <script type="text/javascript">
 	(function($){
+		$(document).keypress(function(e) {
+			if (e.which == 13){
+			　　window.xh_social_view.register();
+			}
+		});
 		window.xh_social_view={
 			loading:false,
 			reset:function(){
@@ -101,7 +106,7 @@ if(is_user_logged_in()){
 		            },
 		            success: function(m) {
 		            	if(m.errcode==0){
-		            		window.xh_social_view.success('<?php print __('Congratulations, registered successfully!',XH_SOCIAL);?>');
+		            		window.xh_social_view.success('<?php print __('Registered successfully!',XH_SOCIAL);?>');
 							location.href='<?php echo $log_on_callback_uri?>';
 							return;
 						}

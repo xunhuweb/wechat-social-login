@@ -52,25 +52,25 @@ class XH_Social_Add_On_Social_Wechat extends Abstract_XH_Social_Add_Ons{
     }
 
     public function on_update($old_version){
-        if(version_compare($old_version,'1.0.1','<' )){
-            try {
-                $db = new XH_Social_Channel_Wechat_Model();
-                $db->on_version_101();
-            } catch (Exception $e) {
-                XH_Social::instance()->WP->wp_die($e->getMessage());
-            }
-        }
+//         if(version_compare($old_version,'1.0.1','<' )){
+//             try {
+//                 $db = new XH_Social_Channel_Wechat_Model();
+//                 $db->on_version_101();
+//             } catch (Exception $e) {
+//                 XH_Social::instance()->WP->wp_die($e->getMessage());
+//             }
+//         }
         
-        if(version_compare($old_version,'1.0.2','<' )){
-            //把之前的跨域登录设置移植过来
-            $api = XH_Social::instance()->get_available_addon('wechat_social_add_ons_social_wechat_ext');
-            if($api){
-                XH_Social_Channel_Wechat::instance()->update_option_array(array(
-                    'mp_enabled_cross_domain'=>$api->get_option('enabled_cross_domain')=='enabled_cross_domain'?'mp_enabled_cross_domain':'mp_cross_domain_disabled',
-                    'mp_cross_domain_url'=>$api->get_option('cross_domain_url')
-                ));
-            }
-        }
+//         if(version_compare($old_version,'1.0.2','<' )){
+//             //把之前的跨域登录设置移植过来
+//             $api = XH_Social::instance()->get_available_addon('wechat_social_add_ons_social_wechat_ext');
+//             if($api){
+//                 XH_Social_Channel_Wechat::instance()->update_option_array(array(
+//                     'mp_enabled_cross_domain'=>$api->get_option('enabled_cross_domain')=='enabled_cross_domain'?'mp_enabled_cross_domain':'mp_cross_domain_disabled',
+//                     'mp_cross_domain_url'=>$api->get_option('cross_domain_url')
+//                 ));
+//             }
+//         }
     }
     
     public function on_load(){
@@ -78,6 +78,10 @@ class XH_Social_Add_On_Social_Wechat extends Abstract_XH_Social_Add_Ons{
         add_filter('xh_social_channels', array($this,'add_channels'));
         add_filter('xh_social_admin_menu_menu_default_channel', array($this,'add_channel_menus'),10,1);
         add_filter('xh_social_channel_wechat_login_get_authorization_uri', array($this,'wechat_login_get_authorization_uri'),10,5);
+        add_filter('xh_social_shortcodes',function($m){
+            $m['wsocial_wechat']=array(XH_Social_Add_On_Social_Wechat::instance(),'wsocial_wechat');
+            return $m;
+        },10,1);
     }
 
     public function on_install(){
@@ -96,6 +100,24 @@ class XH_Social_Add_On_Social_Wechat extends Abstract_XH_Social_Add_Ons{
         return $shortcodes;
     }
 
+    public function wsocial_wechat($atts = array(),$content = null){
+        $atts = shortcode_atts(array(
+            'user_id'=>get_current_user_id(),
+            'id'=>null,
+            'ID'=>null,
+            'meta'=>null
+        ), $atts);
+        
+        if(empty($atts['user_id'])){
+            $atts['user_id']=$atts['id'];
+        }
+        if(empty($atts['user_id'])){
+            $atts['user_id']=$atts['ID'];
+        }
+        
+        return wsocial_wechat($atts['meta'],$atts['user_id'],$content,false);
+    }
+    
     public function wechat_login_get_authorization_uri($uri,$redirect_uri,$state,$uid,$wp_user_id){
         $api = XH_Social_Channel_Wechat::instance();
         if("{$state}_cross_domain_enabled"!=$api->get_option("{$state}_enabled_cross_domain")){
@@ -224,8 +246,9 @@ class XH_Social_Add_On_Social_Wechat extends Abstract_XH_Social_Add_Ons{
                 }
                 
                 wp_redirect($redirect_uri);
-                exit;
+                exit; 
         }
+       
     }
     
     
@@ -249,6 +272,54 @@ class XH_Social_Add_On_Social_Wechat extends Abstract_XH_Social_Add_Ons{
         return $menus;
     }
     
+}
+
+if(!function_exists('wsocial_wechat')){
+    function wsocial_wechat($meta_key,$user_id=null,$default=null,$echo = true){
+        if(!$user_id){
+            $user_id = get_current_user_id();
+        }
+        
+        if(empty($meta_key)){
+            if($echo){echo $default;return;}else{return $default;} 
+        }
+        $user_id = intval($user_id);
+        if($user_id<=0){
+            if($echo){echo $default;return;}else{return $default;}
+        }
+        
+        $ext_user_info = XH_Social_Temp_Helper::get($user_id,'user_wechat_metas',null);
+        if(!$ext_user_info){
+            global $wpdb;
+            $ext_user_info = $wpdb->get_row("select u.*,
+                                   w.*,
+                                   u.ID as user_ID,
+                                   w.id as ext_user_ID
+                from {$wpdb->prefix}users u
+                inner join {$wpdb->prefix}xh_social_channel_wechat w on w.user_id=u.ID
+                where u.ID={$user_id}
+                limit 1;");
+            if($ext_user_info){
+                XH_Social_Temp_Helper::set($user_id, $ext_user_info,'user_wechat_metas');
+            }
+        }
+        
+        if(!$ext_user_info){ if($echo){echo $default;return;}else{return $default;}}
+        
+        if($meta_key=='openid'){
+            $meta_key='mp_openid';
+        }
+        
+        if($meta_key=='ID'){
+            $meta_key=='user_ID';
+        }
+        $val =isset($ext_user_info->{$meta_key})?$ext_user_info->{$meta_key}:$default;
+        if($echo){
+            echo $val;return;
+        } else{
+            return $val;
+        }
+    }
 }
 
 return XH_Social_Add_On_Social_Wechat::instance();

@@ -378,7 +378,7 @@ if (! class_exists('Abstract_XH_Install')) {
             }
             
             $key = plugin_basename($this->plugin_file());
-            if (! $xh_install_plugins[$key]) {
+            if (! isset($xh_install_plugins[$key])) {
                 $xh_install_plugins[$key] = array();
             }
             

@@ -1,6 +1,6 @@
 <?php 
 /*
- Template Name: Social - Register
+ Template Name: Social - Find password
  */
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
@@ -29,6 +29,6 @@ if ( ! $guessurl = site_url() ){
 		// End the loop.
 		endwhile;
 	 ?>
-	  <div class="xh-user-register"><a href="<?php echo home_url('/')?>"><?php echo __('Home',XH_SOCIAL)?></a>|<a href="<?php echo wp_login_url(isset($_GET['redirect_to'])?urldecode($_GET['redirect_to']):'')?>"><?php echo __('Login',XH_SOCIAL)?></a></div>
+	  <div class="xh-user-register"><a href="<?php echo home_url('/')?>"><?php echo __('Home',XH_SOCIAL)?></a>|<a href="<?php echo wp_login_url(isset($_GET['redirect_to'])?urldecode($_GET['redirect_to']):'')?>"><?php echo __('Login',XH_SOCIAL)?></a>|<a href="<?php echo wp_registration_url()?>"><?php echo __('Register',XH_SOCIAL)?></a></div>
 	</body>
 </html>

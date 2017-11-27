@@ -22,9 +22,23 @@ ob_start();
 			var pic = '';
 			if(summary){
 				[].forEach.call(summary.querySelectorAll('img'), function(a){ pic += (pic?'||':'') + encodeURIComponent(a.src); });
+				
 				summary = encodeURIComponent(summary.innerText.replace(/\r|\n|\t/g,'').replace(/ +/g,' ').replace(/<!--(.*)\/\/-->/g,'').substr(0,80));
 			}
-
+			<?php 
+			global $wp_query;
+			$img_url = $wp_query->post? get_the_post_thumbnail_url($wp_query->post,array(300,300)):null;
+			if($img_url){
+			    ?>
+			    var single_img ='<?php echo esc_url($img_url)?>';
+			    pic = pic.replace(single_img+'||','');
+			    pic = pic.replace(single_img,'');
+			    
+			    pic = single_img+(pic?'||':'')+pic;
+			    
+			    <?php 
+			}
+			?>
 			var link =typeof settings.link!='undefined'?settings.link:'';
 			if(!link||link.length<=0){return;}
 			if(!/summary/.test(link) && summary) {

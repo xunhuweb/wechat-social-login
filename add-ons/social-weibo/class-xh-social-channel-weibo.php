@@ -58,7 +58,7 @@ class XH_Social_Channel_Weibo extends Abstract_XH_Social_Settings_Channel{
                 'title' => __ ( 'Enable/Disable', XH_SOCIAL ),
                 'type' => 'checkbox',
                 'label' => __ ( 'Enable weibo login', XH_SOCIAL ),
-                'default' => 'no'
+                'default' => 'yes'
             ),
             'appid'=>array(
                 'title' => __ ( 'App ID', XH_SOCIAL ),
@@ -132,9 +132,9 @@ class XH_Social_Channel_Weibo extends Abstract_XH_Social_Settings_Channel{
                 'user_pass'=>str_shuffle(time())
             );
             
-            $wp_user_id =wp_insert_user($userdata);
-            if(is_wp_error($wp_user_id)){
-                return XH_Social_Error::wp_error($wp_user_id);
+            $wp_user_id = $this->wp_insert_user_Info($ext_user_id, $userdata);
+            if($wp_user_id instanceof XH_Social_Error){
+                return $wp_user_id;
             }
         }
         

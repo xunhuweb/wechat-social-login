@@ -37,7 +37,7 @@ class XH_Social_Add_On_Open_Social extends Abstract_XH_Social_Add_Ons{
     
     protected function __construct(){
         $this->id='add_ons_open_social';
-        $this->title=__('Open Social',XH_SOCIAL);
+        $this->title=__('Compatible OS',XH_SOCIAL);
         $this->description=__('兼容open social 老用户登录',XH_SOCIAL);
         $this->version='1.0.0';
         $this->min_core_version = '1.0.0';

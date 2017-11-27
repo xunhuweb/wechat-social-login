@@ -8,7 +8,7 @@
     font:inherit;
     margin:0
 }
-
+.help-block{color:gray;}
 .xh-regbox button[disabled],.xh-regbox input[disabled]
 {
     cursor:default

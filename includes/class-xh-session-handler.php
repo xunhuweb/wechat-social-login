@@ -149,7 +149,6 @@ class XH_Session_Handler extends Abstract_XH_Session {
 	 */
 	private function __construct() {
 		global $wpdb;
-
 		$this->_cookie = 'wp_xh_session_' . COOKIEHASH;
 		$this->_table  = $wpdb->prefix . 'xh_sessions';
 		$cookie = $this->get_session_cookie();
@@ -165,18 +164,19 @@ class XH_Session_Handler extends Abstract_XH_Session {
 				$this->update_session_timestamp( $this->_customer_id, $this->_session_expiration );
 			}
 
+			$this->_data = $this->get_session_data();			
 		} else {
 			$this->set_session_expiration();
 			$this->_customer_id = $this->generate_customer_id();
+			$this->_data = $this->get_session_data();
 		}
-
-		$this->_data = $this->get_session_data();
 
 		// Actions
 		add_action( 'wp', array( $this, 'set_customer_session_cookie' ), 99 ); // Set cookies
 		add_action( 'shutdown', array( $this, 'set_customer_session_cookie' ), 0 ); // Set cookies before shutdown and ob flushing
 		add_action( 'shutdown', array( $this, 'save_data' ), 20 );
 		add_action( 'wp_logout', array( $this, 'destroy_session' ) );
+		add_action( 'wp_login', array( $this, 'destroy_session' ));
 		if ( ! is_user_logged_in() ) {
 			add_filter( 'nonce_user_logged_out', array( $this, 'nonce_user_logged_out' ) );
 		}
@@ -251,11 +251,11 @@ class XH_Session_Handler extends Abstract_XH_Session {
 	 * @return int|string
 	 */
 	public function generate_customer_id() {
-		if ( is_user_logged_in() ) {
-			return get_current_user_id();
-		} else {
+// 		if ( is_user_logged_in() ) {
+// 			return get_current_user_id();
+// 		} else {
 			return strtolower($this->guid());
-		}
+		//}
 	}
 	private  function guid(){
 	    $guid = '';
@@ -350,7 +350,7 @@ class XH_Session_Handler extends Abstract_XH_Session {
 					'%d'
 				)
 			);
-
+			
 			// Set cache
 			wp_cache_set( $this->get_cache_prefix() . $this->_customer_id, $this->_data, 'xh_session_id', $this->_session_expiration - time() );
 

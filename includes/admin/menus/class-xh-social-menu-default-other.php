@@ -42,6 +42,7 @@ class XH_Social_Menu_Default_Other extends Abstract_XH_Social_Settings_Menu{
         return apply_filters("xh_social_admin_menu_{$this->id}", array(
             XH_Social_Settings_Default_Other_Default::instance(),
             XH_Social_Settings_Default_Other_Share::instance(),
+            XH_Social_Email_Api::instance(),
         ));
     }
 }

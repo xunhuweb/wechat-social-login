@@ -65,7 +65,7 @@ class XH_Social_WP_Api{
      * @since 1.0.1
      */
     public function generate_user_login($nickname){
-        $nickname = XH_Social_Helper_String::remove_emoji($nickname);
+        $nickname = sanitize_user(XH_Social_Helper_String::remove_emoji($nickname));
         if(empty($nickname)){
             $nickname = mb_substr(str_shuffle("abcdefghigklmnopqrstuvwxyz123456") ,0,4,'utf-8');
         }
@@ -194,11 +194,17 @@ class XH_Social_WP_Api{
     /**
      * 执行登录操作
      * @param WP_User $wp_user
+     * @return XH_Social_Error
      * @since 1.0.0
      */
     public function do_wp_login($wp_user){
         XH_Social::instance()->session->__unset('social_login_location_uri');
-    
+        
+        $user = apply_filters( 'authenticate', $wp_user, $wp_user->user_login, null );
+        if(is_wp_error($user)){
+            return XH_Social_Error::wp_error($user);    
+        }
+        
         $secure_cookie='';
         if ( get_user_option('use_ssl', $wp_user->ID) ) {
             $secure_cookie = true;
@@ -215,19 +221,22 @@ class XH_Social_WP_Api{
          * @param WP_User $user       WP_User object of the logged-in user.
          */
         do_action( 'wp_login', $wp_user->user_login, $wp_user );
+        
+        return XH_Social_Error::success();
     }
     
     public function clear_captcha(){
         XH_Social::instance()->session->__unset('social_captcha');
     }
 
+    const FIELD_CAPTCHA_NAME ='captcha';
     /**
      * 获取图片验证字段
      * @return array
      * @since 1.0.0
      */
     public function get_captcha_fields(){
-        $fields['captcha']=array(
+        $fields[self::FIELD_CAPTCHA_NAME]=array(
             'type'=>function($form_id,$data_name,$settings){
                     $form_name = $data_name;
                     $name = $form_id."_".$data_name;
@@ -273,7 +282,7 @@ class XH_Social_WP_Api{
             },
             'validate'=>function($name,$datas,$settings){
                 //插件未启用，那么不验证图形验证码     
-                $code_post =isset($_POST[$name])?trim($_POST[$name]):'';
+                $code_post =isset($_REQUEST[$name])?trim($_REQUEST[$name]):'';
                 if(empty($code_post)){
                     return XH_Social_Error::error_custom(__('image captcha is required!',XH_SOCIAL));
                 }
@@ -295,7 +304,7 @@ class XH_Social_WP_Api{
     
         return apply_filters('xh_social_captcha_fields', $fields);
     }
-    
+
     /**
      * 获取插件列表
      * @return NULL|Abstract_XH_Social_Add_Ons[]
