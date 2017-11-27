@@ -1035,10 +1035,12 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
                     }
                 );
                 if('yes'!=XH_Social_Email_Api::instance()->get_option('disabled_captcha')){
-                    $captcha_fields =XH_Social::instance()->WP->get_captcha_fields();
-                    $captcha_fields['captcha']['section']=array('login');
+                    $captcha_fields =XH_Social::instance()->WP->get_captcha_fields('captcha_email');
                     
-                    $email_fields=array_merge($email_fields,$captcha_fields);
+                    $_fields['captcha_email'] = $captcha_fields['captcha'];
+                    $_fields['captcha_email']['section']=array('login');
+                    
+                    $email_fields=array_merge($email_fields,$_fields);
                 }
                 $submit=__('Get new password',XH_SOCIAL);
                 break;
@@ -1049,7 +1051,7 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
                 switch ($password_mode){
                     default:
                     case 'plaintext':
-                        $email_fields['reset_password']=array(
+                        $email_fields['email_reset_password']=array(
                             'title'=>__('new password',XH_SOCIAL),
                             'type'=>'text',
                             'required'=>true,
@@ -1067,9 +1069,9 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
                         );
                         break;
                     case 'password':
-                        $email_fields['reset_password']=array(
+                        $email_fields['email_reset_password']=array(
                             'title'=>__('password',XH_SOCIAL),
-                            'type'=>'new password',
+                            'type'=>'password',
                             'required'=>true,
                             'validate'=>function($name,$datas,$settings){
                                 $password = isset($_POST[$name])?trim($_POST[$name]):'';
@@ -1084,13 +1086,13 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
                             }
                         );
                 
-                        $email_fields['reset_repassword']=array(
+                        $email_fields['email_reset_repassword']=array(
                             'title'=>__('confirm password',XH_SOCIAL),
                             'type'=>'password',
                             'required'=>true,
                             'validate'=>function($name,$datas,$settings){
                                 $repassword = isset($_POST[$name])?trim($_POST[$name]):'';
-                                $password = isset($_POST['reset_password'])?trim($_POST['reset_password']):'';
+                                $password = isset($_POST['email_reset_password'])?trim($_POST['email_reset_password']):'';
                                 if($password!=$repassword){
                                     return XH_Social_Error::error_custom(__('Password is not match twice input!',XH_SOCIAL));
                                 }
@@ -1321,10 +1323,12 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
         $fields=apply_filters('xh_social_email_valication_fields',$fields,1);
     
         if('yes'!=$this->get_option('disabled_captcha')){
-            $captcha_fields =XH_Social::instance()->WP->get_captcha_fields();
-            $captcha_fields['captcha']['section']=array('code');
-    
-            $fields=apply_filters('xh_social_email_valication_fields',array_merge($fields,$captcha_fields),2);
+            $captcha_fields =XH_Social::instance()->WP->get_captcha_fields('captcha_email');
+                    
+            $_fields['captcha_email'] = $captcha_fields['captcha'];
+            $_fields['captcha_email']['section']=array('code');
+                    
+            $fields=apply_filters('xh_social_email_valication_fields',array_merge($fields,$_fields),2);
         }
     
         $fields['email_vcode']= array(

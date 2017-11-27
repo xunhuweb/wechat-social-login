@@ -235,8 +235,9 @@ class XH_Social_WP_Api{
      * @return array
      * @since 1.0.0
      */
-    public function get_captcha_fields(){
+    public function get_captcha_fields($social_key='social_captcha'){
         $fields[self::FIELD_CAPTCHA_NAME]=array(
+            'social_key'=>$social_key,
             'type'=>function($form_id,$data_name,$settings){
                     $form_name = $data_name;
                     $name = $form_id."_".$data_name;
@@ -254,7 +255,10 @@ class XH_Social_WP_Api{
                             window.captcha_<?php echo esc_attr($name);?>_load=function(){
                             	$('#img-captcha-<?php echo esc_attr($name);?>').attr('src','');
                             	$.ajax({
-        				            url: '<?php echo XH_Social::instance()->ajax_url('xh_social_captcha',true,true)?>',
+        				            url: '<?php echo XH_Social::instance()->ajax_url(array(
+        				                'action'=>'xh_social_captcha',
+        				                'social_key'=>$settings['social_key']
+        				            ),true,true)?>',
         				            type: 'post',
         				            timeout: 60 * 1000,
         				            async: true,
@@ -287,7 +291,7 @@ class XH_Social_WP_Api{
                     return XH_Social_Error::error_custom(__('image captcha is required!',XH_SOCIAL));
                 }
                 
-                $captcha =XH_Social::instance()->session->get('social_captcha');
+                $captcha =XH_Social::instance()->session->get($settings['social_key']);
                 if(empty($captcha)){
                     return XH_Social_Error::error_custom(__('Please refresh the image captcha!',XH_SOCIAL));
                 }
@@ -296,7 +300,7 @@ class XH_Social_WP_Api{
                     return XH_Social_Error::error_custom(__('image captcha is invalid!',XH_SOCIAL));
                 }
                 
-                XH_Social::instance()->session->__unset('social_captcha');
+                XH_Social::instance()->session->__unset($settings['social_key']);
                
                 return $datas;
             }
