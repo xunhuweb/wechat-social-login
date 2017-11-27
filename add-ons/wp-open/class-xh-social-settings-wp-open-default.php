@@ -16,7 +16,7 @@ class XH_Social_Settings_WP_Open_Default extends Abstract_XH_Social_Settings{
     private static $_instance;
 
     const SECRET='xh2017';
-    const DOMAIN='http://www.weixinsocial.com';
+    const DOMAIN='https://www.weixinsocial.com';
     //注意：公众号的已放到weixinnet.com
     const APP_ID_QQ='101390507';
     const APP_SECRET_QQ='9ba1b8440a5ae5a4c7fc87f1ab6cf583';
@@ -91,7 +91,7 @@ class XH_Social_Settings_WP_Open_Default extends Abstract_XH_Social_Settings{
                         $wechat->update_option_array(array(
                             'enabled'=>'yes',
                             'mp_enabled_cross_domain'=>'mp_cross_domain_enabled',
-                            'mp_cross_domain_url'=>'https://www.wpweixin.net/cross-domain-wechat-mp.php',
+                            'mp_cross_domain_url'=>self::DOMAIN.'/cross-domain-wechat-mp.php',
                             'mp_id'=>self::APP_ID_WECHAT_MP,
                             'mp_secret'=>self::APP_SECRET_WECHAT_MP,
                             

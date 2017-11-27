@@ -1,5 +1,4 @@
 <?php 
-use Dropbox\Exception;
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit;

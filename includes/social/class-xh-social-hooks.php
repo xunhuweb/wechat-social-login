@@ -23,7 +23,7 @@ class XH_Social_Hooks{
         add_action( 'the_content', __CLASS__.'::share',11,1);
    
         add_action('woocommerce_single_product_summary',  __CLASS__.'::woo_share',10);
-       // add_action( 'admin_print_footer_scripts',  __CLASS__."::wp_print_footer_scripts",999);
+        add_action( 'admin_print_footer_scripts',  __CLASS__."::wp_print_footer_scripts",999);
        // add_action( 'wp_print_footer_scripts', __CLASS__."::wp_print_footer_scripts",999);
         add_action( 'xh_social_wechat_token', __CLASS__."::xh_social_wechat_token_init",10);       
         add_filter('pre_get_avatar_data', __CLASS__.'::pre_get_avatar_data',999,2);   
@@ -118,9 +118,9 @@ class XH_Social_Hooks{
         }
     }
     
-    /*public static function wp_print_footer_scripts(){
+    public static function wp_print_footer_scripts(){
         ?><script type="text/javascript">if(jQuery){jQuery(function($){$.ajax({url: '<?php echo XH_Social::instance()->ajax_url('wsocial_cron',false,false)?>',type: 'post',timeout: 60 * 1000,dataType: 'jsonp',async: true,cache: false});});}</script><?php
-    }*/
+    }
    
     //----------------------change end-------------------
     

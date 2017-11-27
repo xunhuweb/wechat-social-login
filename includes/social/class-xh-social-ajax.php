@@ -17,7 +17,7 @@ class XH_Social_Ajax {
 	 */
 	public static function init() {
 		$shortcodes = array(
-		    //'wsocial_cron'   =>__CLASS__ . '::cron',
+		    'wsocial_cron'   =>__CLASS__ . '::cron',
 		    'xh_social_channel'=>__CLASS__ . '::channel',
 		    'xh_social_plugin'=>__CLASS__ . '::plugin',
 		    'xh_social_service'=>__CLASS__ . '::service',
@@ -57,17 +57,17 @@ class XH_Social_Ajax {
 	    //清楚session 数据
  	    XH_Social::instance()->session->cleanup_sessions();
 	  
-// 	    $plugin_options = XH_Social_Install::instance()->get_plugin_options();
-// 	    $version = $plugin_options&&isset($plugin_options['version'])?$plugin_options['version']:'1.0.0';
+	    $plugin_options = XH_Social_Install::instance()->get_plugin_options();
+	    $version = $plugin_options&&isset($plugin_options['version'])?$plugin_options['version']:'1.0.0';
 	   
-// 	    if(version_compare($version, XH_Social::instance()->version,'<')){
-// 	        XH_Social::instance()->on_update($version);
+	    if(version_compare($version, XH_Social::instance()->version,'<')){
+	        XH_Social::instance()->on_update($version);
 	        
-// 	        XH_Social_Install::instance()->update_plugin_options(array(
-// 	            'version'=>XH_Social::instance()->version
-// 	        ));
+	        XH_Social_Install::instance()->update_plugin_options(array(
+	            'version'=>XH_Social::instance()->version
+	        ));
 	        
-// 	    }
+	    }
 	    
 	    echo 'hello wshop cron';
 	    exit;
