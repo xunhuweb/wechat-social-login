@@ -32,7 +32,11 @@ abstract class Abstract_XH_Social_Settings {
 	 * @var string
 	 */
 	public $title = '';
-	
+	/**
+	 * menu title
+	 * @var string
+	 */
+	public $menu_title='';
 	/**
 	 * Method description.
 	 * 
@@ -114,12 +118,13 @@ abstract class Abstract_XH_Social_Settings {
 	 *
 	 * @since 1.0.0
 	 */
-	public function admin_options() {	    
+	public function admin_options() {	
+	    $title = isset($this->menu_title)&&!empty($this->menu_title)?$this->menu_title:$this->title;
 	      ?>
 	    <style type="text/css">
             .form-table tr{display:block;}
         </style>
-        <h3><?php echo ( ! empty( $this->title ) ) ? $this->title : __( 'Settings') ; ?></h3>
+        <h3><?php echo  ! empty( $title)  ?$title: __( 'Settings') ; ?></h3>
         <?php echo ( ! empty( $this->description ) ) ? wpautop( $this->description ) : ''; ?>
         
         <?php do_action('xh_social_admin_options_header_'.$this->id)?>

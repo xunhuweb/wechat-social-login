@@ -3,8 +3,7 @@ if (! defined ( 'ABSPATH' ))
 	exit (); // Exit if accessed directly
 
 /**
- * 微信接口
- *
+ * 
  * @since 1.0.0
  * @author ranj
  */
@@ -87,15 +86,15 @@ class XH_Social_Channel_Dingding extends Abstract_XH_Social_Settings_Channel{
         if(!$wp_user_id){
             $user_login = XH_Social::instance()->WP->generate_user_login($ext_user_info['nickname']);
            
-            $userdata=array(
+            $userdata=apply_filters('wsocial_insert_user_Info',array(
                 'user_login'=>$user_login,
                 'user_nicename'=>$ext_user_info['nicename'],
-                'first_name'=>$ext_user_info['nickname'],
+                'first_name'=>method_exists($this, 'filter_display_name')?$this->filter_display_name($ext_user_info['nickname']):$ext_user_info['nickname'],
                 'user_email'=>null,
-                'display_name'=>$ext_user_info['nickname'],
-                'nickname'=>$ext_user_info['nickname'],
+                'display_name'=>method_exists($this, 'filter_display_name')?$this->filter_display_name($ext_user_info['nickname']):$ext_user_info['nickname'],
+                'nickname'=>method_exists($this, 'filter_display_name')?$this->filter_display_name($ext_user_info['nickname']):$ext_user_info['nickname'],
                 'user_pass'=>str_shuffle(time())
-            );
+            ),$this);
             
             $wp_user_id = $this->wp_insert_user_Info($ext_user_id, $userdata);
             if($wp_user_id instanceof XH_Social_Error){
@@ -406,7 +405,7 @@ class XH_Social_Channel_Dingding extends Abstract_XH_Social_Settings_Channel{
                 }
         
                 if($wpdb->insert_id<=0){
-                    XH_Social_Log::error(__('insert dingding user info failed',XH_SOCIAL));
+                    XH_Social_Log::error(__('insert dingding user info failed'.print_r($userdata,true),XH_SOCIAL));
                     throw new Exception(__('insert dingding user info failed',XH_SOCIAL));
                 }
         
@@ -430,7 +429,7 @@ class XH_Social_Channel_Dingding extends Abstract_XH_Social_Settings_Channel{
                 $ext_user_id=$ext_user_info->id;
             }
         
-             return $this->process_login($ext_user_id);
+             return $this->process_login($ext_user_id,$wp_user_id>0);
         } catch (Exception $e) {
             XH_Social_Log::error($e);
             XH_Social::instance()->WP->set_wp_error($login_location_uri, $e->getMessage());

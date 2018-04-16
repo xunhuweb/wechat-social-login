@@ -116,7 +116,7 @@ class XH_Social_Log
      * Debug.
      *
      * @since  1.0.0
-     * @param string|Exception $msg
+     * @param string|Exception|XH_Social_Error $msg
      */
     public static function debug($msg)
     {

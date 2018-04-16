@@ -3,7 +3,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-$attdata = XH_Social_Temp_Helper::get('atts','templete');
+$attdata = XH_Social_Temp_Helper::clear('atts','templete');
 $log_on_callback_uri = $attdata['log_on_callback_uri'];
 $include_css= $attdata['include_css'];
 $include_header_footer =$attdata['include_header_footer'];
@@ -18,7 +18,7 @@ if($include_html){
     <!DOCTYPE html>
 <html>
 	<head>
-	<title><?php echo the_title();?></title>
+	<title><?php the_title();?></title>
 		<meta charset="<?php bloginfo( 'charset' ); ?>">
 		<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
 	</head>

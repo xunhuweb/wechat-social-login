@@ -11,7 +11,24 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @author   ranj
  */
 class XH_Social_Helper{
-   
+    public static function generate_qrimg($data){
+        if(!class_exists('QRcode')){require_once 'phpqrcode/phpqrcode.php';}
+        $errorCorrectionLevel = 'L'; // 容错级别
+        $matrixPointSize = 9; // 生成图片大小
+        ob_start();
+        QRcode::png($data,false,$errorCorrectionLevel,$matrixPointSize);
+        return "data:image/png;base64,".base64_encode(ob_get_clean());
+    }
+    
+    public static function generate_unique_id(){
+        static $_unique_id;
+        if(!$_unique_id){
+            $_unique_id = 0;
+        }
+    
+        return strtolower(XH_Social_Helper_String::guid().($_unique_id++));
+    }
+    
     public static function is_mobile($mobile){
         if(empty($mobile)){
             return false;
@@ -30,13 +47,21 @@ class XH_Social_Helper{
             if($key=='hash'){
                 continue;
             }
+            
+            if(is_null($val)||$val===''){
+                continue;
+            }
+            
+
+            if(!is_string($val)&&!is_numeric($val)){
+                continue;
+            }
+            
             if($index++!=0){
                 $arg.="&";
             }
             
-            if(!is_string($val)&&!is_integer($val)){
-                continue;
-            }
+            
             $arg.="$key=$val";
             
         }
@@ -69,12 +94,15 @@ class  XH_Social_Helper_Http{
     
         return null;
     }
-    public static function http_get($url,$require_ssl=false){
+    
+    public static function http_get($url,$require_ssl=false,$ch = null){
         if (! function_exists('curl_init')) {
             throw new Exception('php libs not found!', 500);
         }
     
-        $ch = curl_init();
+        if(!$ch){
+            $ch = curl_init();
+        }
         curl_setopt($ch, CURLOPT_TIMEOUT, 60);
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -91,14 +119,14 @@ class  XH_Social_Helper_Http{
         $httpStatusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $error = curl_error($ch);
         curl_close($ch);
-        if ($httpStatusCode != 200) {
+        if (apply_filters('xunhu_http_post_errcode', $httpStatusCode != 200,$httpStatusCode,$ch)) {
             throw new Exception("status:{$httpStatusCode},response:$response,error:" . $error, $httpStatusCode);
         }
     
         return $response;
     }
     
-    public static function http_post($url,$data=null,$require_ssl=false,$ch = null){
+    public static function http_post($url,$data=null,$require_ssl=false,$ch = null,$post_field_is_array = false){
         if (! function_exists('curl_init')) {
             throw new Exception('php libs not found!', 500);
         }
@@ -121,9 +149,14 @@ class  XH_Social_Helper_Http{
             curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
         }
     
+        //上传文件条件
+        // 1.此处必须为数组
+        // 2.文件用CURLFile对象处理(高版本) ，低版本 文件地址前加@符号表示文件上传
         if(!empty($data)){
-            if(is_array($data)){
-                $data = http_build_query($data);
+            if(!$post_field_is_array){
+                if(is_array($data)){
+                    $data = http_build_query($data);
+                }
             }
            
             curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
@@ -131,15 +164,61 @@ class  XH_Social_Helper_Http{
         
         $response = curl_exec($ch);
         $httpStatusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $error = curl_error($ch);   
+        curl_close($ch);
+        if (apply_filters('xunhu_http_post_errcode', $httpStatusCode != 200,$httpStatusCode,$ch)) {
+            throw new Exception("status:{$httpStatusCode},response:$response,error:" . $error, $httpStatusCode);
+        }
+    
+        return $response;
+    }
+    
+    public static function http_x($url,$data=null,$method='GET',$require_ssl=false,$ch = null,$post_field_is_array = false){
+        if (! function_exists('curl_init')) {
+            throw new Exception('php libs not found!', 500);
+        }
+    
+        if(!$ch){
+            $ch = curl_init();
+        }
+        
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);//DELETE,PUT,
+        curl_setopt($ch, CURLOPT_TIMEOUT, 60);
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        // 为保证第三方服务器与微信服务器之间数据传输的安全性，所有微信接口采用https方式调用，必须使用下面2行代码打开ssl安全校验。
+        // 如果在部署过程中代码在此处验证失败，请到 http://curl.haxx.se/ca/cacert.pem 下载新的证书判别文件。
+        if($require_ssl){
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+            curl_setopt( $ch, CURLOPT_CAINFO, ABSPATH . WPINC . '/certificates/ca-bundle.crt');
+        }else{
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+        }
+    
+        if(!empty($data)){
+            if(!$post_field_is_array){
+                if(is_array($data)){
+                    $data = http_build_query($data);
+                }
+            }
+             
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+        }
+    
+        $response = curl_exec($ch);
+        $httpStatusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $error = curl_error($ch);
         curl_close($ch);
-        if ($httpStatusCode != 200) {
+        if (apply_filters('xunhu_http_post_errcode', $httpStatusCode != 200,$httpStatusCode,$ch)) {
             throw new Exception("status:{$httpStatusCode},response:$response,error:" . $error, $httpStatusCode);
         }
     
         return $response;
     }
 }
+
 /**
  * 字符串扩展方法
  * 
@@ -227,30 +306,16 @@ class XH_Social_Helper_String{
         return str_replace('-', '', trim($guid, '{}'));
     }
     
+    /**
+     * 
+     * @param string $source
+     * @since 1.2.5
+     */
     public static function remove_emoji($source) {
-       // return preg_replace("/[^\x{4e00}-\x{9fa5}a-zA-Z\d\-\_\.\@\+]/u", '', $source);
-        //change at 2017年7月26日 18:26:39
-//         // Match Emoticons
-        $regexEmoticons = '/[\x{1F600}-\x{1F64F}]/u';
-        $clean_text = preg_replace($regexEmoticons, '', $source);
-    
-        // Match Miscellaneous Symbols and Pictographs
-        $regexSymbols = '/[\x{1F300}-\x{1F5FF}]/u';
-        $clean_text = preg_replace($regexSymbols, '', $clean_text);
-    
-        // Match Transport And Map Symbols
-        $regexTransport = '/[\x{1F680}-\x{1F6FF}]/u';
-        $clean_text = preg_replace($regexTransport, '', $clean_text);
-    
-        // Match Miscellaneous Symbols
-        $regexMisc = '/[\x{2600}-\x{26FF}]/u';
-        $clean_text = preg_replace($regexMisc, '', $clean_text);
-    
-        // Match Dingbats
-        $regexDingbats = '/[\x{2700}-\x{27BF}]/u';
-        $clean_text = preg_replace($regexDingbats, '', $clean_text);
-    
-        return $clean_text;
+        return preg_replace_callback( '/./u',function (array $match) {
+                return strlen($match[0]) >= 4 ? '' : $match[0];
+        },
+        $source);
     }
 }
 
@@ -354,7 +419,14 @@ class XH_Social_Helper_Uri{
         $protocol = (! empty ( $_SERVER ['HTTPS'] ) && $_SERVER ['HTTPS'] !== 'off' || $_SERVER ['SERVER_PORT'] == 443) ? "https://" : "http://";
         return $protocol.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
     }
+
+    public static function get_new_uri($uri,$params=array()){
+        $_params = array();
+        $uri = XH_Social_Helper_Uri::get_uri_without_params($uri,$_params);
+        $_params = array_merge($_params,$params);
     
+        return $uri.(count($_params)>0?("?".http_build_query($_params)):"");
+    }
     /**
      * 获取链接不带参数
      * @param string $uri
@@ -507,7 +579,7 @@ class XH_Social_Helper_Array{
 
 class XH_Social_Helper_Html_Form{
    public static function generate_submit_data($form_id,$data_name){
-       ?>
+        ?>
        $(document).trigger('on_form_<?php echo esc_attr($form_id);?>_submit',<?php echo $data_name;?>);
        <?php 
    }
@@ -518,15 +590,15 @@ class XH_Social_Helper_Html_Form{
     * @param string $data_name
     * @since 1.1.1
     */
-   public static function generate_field_scripts($form_id,$data_name){
+   public static function generate_field_scripts($form_id,$data_name,$html_id=null){
        $form_name = $data_name;
-       $name = $form_id."_".$data_name;
+       $html_id = $html_id?$html_id:$form_id."_".$data_name;
        
        ?>
       <script type="text/javascript">
       	(function($){
 			$(document).bind('on_form_<?php echo esc_attr($form_id);?>_submit',function(e,m){
-				m.<?php echo esc_attr($form_name)?>=$('#<?php echo esc_attr($name)?>').val();
+				m.<?php echo esc_attr($form_name)?>=$('#<?php echo esc_attr($html_id)?>').val();
 			});
 
 		})(jQuery);
@@ -570,75 +642,90 @@ class XH_Social_Helper_Html_Form{
         
         return $html;
     } 
-    public static function generate_hidden_html($form_id,$data_name,$settings){
-        $form_name = $data_name;
+    public static function generate_hidden_html($form_id,$data_name,$settings=array()){
+        $html_name = $data_name;
         $name = $form_id."_".$data_name;
+        
+        $html_id = isset($settings['id'])&&!empty($settings['id'])?$settings['id']:$name;
+       
         ob_start();
         ?>
-        <input type="hidden" id="<?php echo esc_attr($name)?>" name="<?php echo esc_attr($name)?>" value="<?php echo esc_attr(isset($settings['default'])?$settings['default']:'')?>"  />
+        <input type="hidden" id="<?php echo esc_attr($html_id)?>" name="<?php echo esc_attr($html_name)?>" value="<?php echo esc_attr(isset($settings['default'])?$settings['default']:'')?>"  />
         <?php
-        self::generate_field_scripts($form_id, $data_name);
+        self::generate_field_scripts($form_id, $html_name,$html_id);
         return ob_get_clean();
     }
-    public static function generate_text_html($form_id,$data_name,$settings){
-        $form_name = $data_name;
+    
+    public static function generate_id($form_id,$data_name,$settings=array()){
         $name = $form_id."_".$data_name;
+        return isset($settings['id'])&&!empty($settings['id'])?$settings['id']:$name;
+    } 
+    
+    public static function generate_text_html($form_id,$data_name,$settings){
+        $html_name = $data_name;
+        $name = $form_id."_".$data_name;
+        $html_id = isset($settings['id'])&&!empty($settings['id'])?$settings['id']:$name;
         ob_start();
         ?>
         <div class="xh-form-group">
             <label class="<?php echo isset($settings['required'])&&$settings['required']?'required':'';?>"><?php echo isset($settings['title'])?esc_html($settings['title']):null?></label>
-            <input type="text" id="<?php echo esc_attr($name)?>" name="<?php echo esc_attr($name)?>" value="<?php echo esc_attr(isset($settings['default'])?$settings['default']:'')?>" placeholder="<?php echo isset($settings['placeholder'])?esc_attr($settings['placeholder']):null?>" class="form-control <?php echo isset($settings['class'])?esc_attr($settings['class']):null?>" style="<?php echo isset($settings['css'])?esc_attr($settings['css']):null?>" <?php disabled( isset($settings['disabled'])?$settings['disabled']:'', true ); ?> <?php echo self::get_custom_attribute_html( $settings ); ?> />
+            <input type="text" id="<?php echo esc_attr($html_id)?>" name="<?php echo esc_attr($html_name)?>" value="<?php echo esc_attr(isset($settings['default'])?$settings['default']:'')?>" placeholder="<?php echo isset($settings['placeholder'])?esc_attr($settings['placeholder']):null?>" class="form-control <?php echo isset($settings['class'])?esc_attr($settings['class']):null?>" style="<?php echo isset($settings['css'])?esc_attr($settings['css']):null?>" <?php disabled( isset($settings['disabled'])?$settings['disabled']:'', true ); ?> <?php echo self::get_custom_attribute_html( $settings ); ?> />
             <?php if(isset($settings['description'])&&!empty($settings['description'])){
                 ?><span class="help-block"><?php echo isset($settings['description'])?$settings['description']:null;?></span><?php 
             }?>
         </div>
         <?php 
-        self::generate_field_scripts($form_id, $data_name);
+        self::generate_field_scripts($form_id, $html_name,$html_id);
         return ob_get_clean();
     }
 
-    public static function generate_email_html($form_id,$data_name,$settings){
-        $form_name = $data_name;
+    public static function generate_email_html($form_id,$data_name,$settings=array()){
+         $html_name = $data_name;
         $name = $form_id."_".$data_name;
+        
+        $html_id = isset($settings['id'])&&!empty($settings['id'])?$settings['id']:$name;
+        
         ob_start();
         ?>
             <div class="xh-form-group">
                 <label class="<?php echo isset($settings['required'])&&$settings['required']?'required':'';?>"><?php echo isset($settings['title'])?esc_html($settings['title']):null?></label>
-                <input type="email" id="<?php echo esc_attr($name)?>" name="<?php echo esc_attr($name)?>" value="<?php echo esc_attr(isset($settings['default'])?$settings['default']:'')?>" placeholder="<?php echo isset($settings['placeholder'])?esc_attr($settings['placeholder']):null?>" class="form-control <?php echo isset($settings['class'])?esc_attr($settings['class']):null?>" style="<?php echo isset($settings['css'])?esc_attr($settings['css']):null?>" <?php disabled( isset($settings['disabled'])?$settings['disabled']:'', true ); ?> <?php echo self::get_custom_attribute_html( $settings ); ?> />
+                <input type="email" id="<?php echo esc_attr($html_id)?>" name="<?php echo esc_attr($html_name)?>" value="<?php echo esc_attr(isset($settings['default'])?$settings['default']:'')?>" placeholder="<?php echo isset($settings['placeholder'])?esc_attr($settings['placeholder']):null?>" class="form-control <?php echo isset($settings['class'])?esc_attr($settings['class']):null?>" style="<?php echo isset($settings['css'])?esc_attr($settings['css']):null?>" <?php disabled( isset($settings['disabled'])?$settings['disabled']:'', true ); ?> <?php echo self::get_custom_attribute_html( $settings ); ?> />
                 <?php if(isset($settings['description'])&&!empty($settings['description'])){
                     ?><span class="help-block"><?php echo isset($settings['description'])?$settings['description']:null;?></span><?php 
                 }?>
             </div>
         <?php 
-        self::generate_field_scripts($form_id, $data_name);
+        self::generate_field_scripts($form_id, $html_name,$html_id);
         return ob_get_clean();
     }
-    public static function generate_password_html($form_id,$data_name,$settings){
-        $form_name = $data_name;
+    public static function generate_password_html($form_id,$data_name,$settings=array()){
+        $html_name = $data_name;
         $name = $form_id."_".$data_name; 
-        ob_start();
-        ?>
-        <div class="xh-form-group">
-            <label class="<?php echo isset($settings['required'])&&$settings['required']?'required':'';?>"><?php echo isset($settings['title'])?esc_html($settings['title']):null?></label>
-            <input type="password" id="<?php echo esc_attr($name)?>" name="<?php echo esc_attr($name)?>" value="<?php echo esc_attr(isset($settings['default'])?$settings['default']:'')?>" placeholder="<?php echo isset($settings['placeholder'])?esc_attr($settings['placeholder']):null?>" class="form-control <?php echo isset($settings['class'])?esc_attr($settings['class']):null?>" style="<?php echo isset($settings['css'])?esc_attr($settings['css']):null?>" <?php disabled( isset($settings['disabled'])?$settings['disabled']:'', true ); ?> <?php echo self::get_custom_attribute_html( $settings ); ?> />
-            <?php if(isset($settings['description'])&&!empty($settings['description'])){
-                ?><span class="help-block"><?php echo isset($settings['description'])?$settings['description']:null;?></span><?php 
-            }?>
-        </div>
-        <?php 
-        self::generate_field_scripts($form_id, $data_name);
-        return ob_get_clean();
-    }
-    
-    public static function generate_select_html($form_id,$data_name,$settings){
-        $form_name = $data_name;
-        $name = $form_id."_".$data_name;
+        $html_id = isset($settings['id'])&&!empty($settings['id'])?$settings['id']:$name;
         
         ob_start();
         ?>
         <div class="xh-form-group">
             <label class="<?php echo isset($settings['required'])&&$settings['required']?'required':'';?>"><?php echo isset($settings['title'])?esc_html($settings['title']):null?></label>
-            <select id="<?php echo esc_attr($name)?>" name="<?php echo esc_attr($name)?>" class="form-control <?php echo isset($settings['class'])?esc_attr($settings['class']):null?>" style="<?php echo isset($settings['css'])?esc_attr($settings['css']):null?>" <?php disabled( isset($settings['disabled'])?$settings['disabled']:'', true ); ?> <?php echo self::get_custom_attribute_html( $settings ); ?> >
+            <input type="password" id="<?php echo esc_attr($html_id)?>" name="<?php echo esc_attr($html_name)?>" value="<?php echo esc_attr(isset($settings['default'])?$settings['default']:'')?>" placeholder="<?php echo isset($settings['placeholder'])?esc_attr($settings['placeholder']):null?>" class="form-control <?php echo isset($settings['class'])?esc_attr($settings['class']):null?>" style="<?php echo isset($settings['css'])?esc_attr($settings['css']):null?>" <?php disabled( isset($settings['disabled'])?$settings['disabled']:'', true ); ?> <?php echo self::get_custom_attribute_html( $settings ); ?> />
+            <?php if(isset($settings['description'])&&!empty($settings['description'])){
+                ?><span class="help-block"><?php echo isset($settings['description'])?$settings['description']:null;?></span><?php 
+            }?>
+        </div>
+        <?php 
+        self::generate_field_scripts($form_id, $html_name,$html_id);
+        return ob_get_clean();
+    }
+    
+    public static function generate_select_html($form_id,$data_name,$settings=array()){
+        $html_name = $data_name;
+        $name = $form_id."_".$data_name;
+        $html_id = isset($settings['id'])&&!empty($settings['id'])?$settings['id']:$name;
+        ob_start();
+        ?>
+        <div class="xh-form-group">
+            <label class="<?php echo isset($settings['required'])&&$settings['required']?'required':'';?>"><?php echo isset($settings['title'])?esc_html($settings['title']):null?></label>
+            <select id="<?php echo esc_attr($html_id)?>" name="<?php echo esc_attr($html_name)?>" class="form-control <?php echo isset($settings['class'])?esc_attr($settings['class']):null?>" style="<?php echo isset($settings['css'])?esc_attr($settings['css']):null?>" <?php disabled( isset($settings['disabled'])?$settings['disabled']:'', true ); ?> <?php echo self::get_custom_attribute_html( $settings ); ?> >
             	<?php 
             	   if(isset($settings['options'])){
             	       foreach ($settings['options'] as $key=>$val){
@@ -651,46 +738,50 @@ class XH_Social_Helper_Html_Form{
                 ?><span class="help-block"><?php echo isset($settings['description'])?$settings['description']:null;?></span><?php 
             }?>
         </div>
-    <?php 
-    self::generate_field_scripts($form_id, $data_name);
+        <?php 
+        self::generate_field_scripts($form_id, $html_name,$html_id);
         return ob_get_clean();
     }
      
-    public static function generate_textarea_html($form_id,$data_name,$settings){
-        $form_name = $data_name;
+    public static function generate_textarea_html($form_id,$data_name,$settings=array()){
+        $html_name = $data_name;
         $name = $form_id."_".$data_name;
+        $html_id = isset($settings['id'])&&!empty($settings['id'])?$settings['id']:$name;
+        
         ob_start();
         ?>
         <div class="xh-form-group">
             <label class="<?php echo $settings['required']?'required':'';?>"><?php echo isset($settings['title'])?esc_html($settings['title']):null?></label>
-            <textarea id="<?php echo esc_attr($name)?>" name="<?php echo esc_attr($name)?>" placeholder="<?php echo isset($settings['placeholder'])?esc_attr($settings['placeholder']):null?>" class="form-control <?php echo isset($settings['class'])?esc_attr($settings['class']):null?>" style="<?php echo isset($settings['css'])?esc_attr($settings['css']):null?>" <?php disabled( isset($settings['disabled'])?$settings['disabled']:'', true ); ?> <?php echo self::get_custom_attribute_html( $settings ); ?> ><?php echo esc_textarea(isset($settings['default'])?$settings['default']:'')?></textarea>
+            <textarea id="<?php echo esc_attr($html_id)?>" name="<?php echo esc_attr($html_name)?>" placeholder="<?php echo isset($settings['placeholder'])?esc_attr($settings['placeholder']):null?>" class="form-control <?php echo isset($settings['class'])?esc_attr($settings['class']):null?>" style="<?php echo isset($settings['css'])?esc_attr($settings['css']):null?>" <?php disabled( isset($settings['disabled'])?$settings['disabled']:'', true ); ?> <?php echo self::get_custom_attribute_html( $settings ); ?> ><?php echo esc_textarea(isset($settings['default'])?$settings['default']:'')?></textarea>
             <?php if(isset($settings['description'])&&!empty($settings['description'])){
                 ?><span class="help-block"><?php echo isset($settings['description'])?$settings['description']:null;?></span><?php 
             }?>
         </div>
         <?php 
-        self::generate_field_scripts($form_id, $data_name);
+        self::generate_field_scripts($form_id, $html_name,$html_id);
         return ob_get_clean();
     }
     
-    public static function generate_checkbox_html($form_id,$data_name,$settings){
-        $form_name = $data_name;
+    public static function generate_checkbox_html($form_id,$data_name,$settings=array()){
+        $html_name = $data_name;
         $name = $form_id."_".$data_name;
+        $html_id = isset($settings['id'])&&!empty($settings['id'])?$settings['id']:$name;
+        
         ob_start();
         ?>
         <div class="xh-form-group">
             <label class="<?php echo $settings['required']?'required':'';?>"><?php echo isset($settings['title'])?esc_html($settings['title']):null?></label>
-            <input type="checkbox" id="<?php echo esc_attr($name)?>" name="<?php echo esc_attr($name)?>" placeholder="<?php echo isset($settings['placeholder'])?esc_attr($settings['placeholder']):null?>" class="form-control <?php echo isset($settings['class'])?esc_attr($settings['class']):null?>" style="<?php echo isset($settings['css'])?esc_attr($settings['css']):null?>" <?php disabled( isset($settings['disabled'])?$settings['disabled']:'', true ); ?> <?php echo self::get_custom_attribute_html( $settings ); ?>  value="yes" <?php checked( isset($settings['default'])?$settings['default']:'', 'yes' ); ?>  />
+            <input type="checkbox" id="<?php echo esc_attr($html_id)?>" name="<?php echo esc_attr($html_name)?>" placeholder="<?php echo isset($settings['placeholder'])?esc_attr($settings['placeholder']):null?>" class="form-control <?php echo isset($settings['class'])?esc_attr($settings['class']):null?>" style="<?php echo isset($settings['css'])?esc_attr($settings['css']):null?>" <?php disabled( isset($settings['disabled'])?$settings['disabled']:'', true ); ?> <?php echo self::get_custom_attribute_html( $settings ); ?>  value="yes" <?php checked( isset($settings['default'])?$settings['default']:'', 'yes' ); ?>  />
             <?php if(isset($settings['description'])&&!empty($settings['description'])){
                 ?><span class="help-block"><?php echo isset($settings['description'])?$settings['description']:null;?></span><?php 
             }?>
         </div>
         <?php 
-        self::generate_field_scripts($form_id, $data_name);
+        self::generate_field_scripts($form_id, $html_name,$html_id);
         return ob_get_clean();
     }
     
-    private static function get_custom_attribute_html($data) {
+    public static function get_custom_attribute_html($data) {
         $custom_attributes = array ();
     
         if (! empty ( $data ['custom_attributes'] ) && is_array ( $data ['custom_attributes'] )) {

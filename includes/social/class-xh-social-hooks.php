@@ -14,9 +14,14 @@ class XH_Social_Hooks{
     const AVATAR_KEY='avatar_xh_social';
     
     public static function init(){
+        if(!defined('xh_http_headers_useragent')){
+            define('xh_http_headers_useragent', 1);
+            add_filter( 'http_headers_useragent',__CLASS__.'::http_build',99,1);
+        }
+        
         add_action( 'login_form',__CLASS__.'::show_social_login_in_login',10);
         add_action( 'comment_form_top',__CLASS__.'::show_social_login_in_comment',10);
-        add_filter( 'http_headers_useragent',__CLASS__.'::http_build',99,1);
+        
         add_filter( 'sanitize_user', __CLASS__.'::sanitize_user', 10, 3);
         add_action( 'show_user_profile',__CLASS__.'::show_user_profile',1);
         
@@ -24,13 +29,13 @@ class XH_Social_Hooks{
    
         add_action('woocommerce_single_product_summary',  __CLASS__.'::woo_share',10);
         add_action( 'admin_print_footer_scripts',  __CLASS__."::wp_print_footer_scripts",999);
-       // add_action( 'wp_print_footer_scripts', __CLASS__."::wp_print_footer_scripts",999);
-        add_action( 'xh_social_wechat_token', __CLASS__."::xh_social_wechat_token_init",10);       
+        //add_action( 'wp_print_footer_scripts', __CLASS__."::wp_print_footer_scripts",999);
+        //add_action( 'xh_social_wechat_token', __CLASS__."::xh_social_wechat_token_init",10);       
         add_filter('pre_get_avatar_data', __CLASS__.'::pre_get_avatar_data',999,2);   
 
         add_action('set_current_user',  __CLASS__.'::reset_current_user_display_name',10);
         add_action('login_head', __CLASS__.'::plus_bingbg');
-        add_action('login_head_wsocial', __CLASS__.'::plus_bingbg');
+        add_action('login_head_wsocial', __CLASS__.'::plus_bingbg');      
     }
     
     const wsocial_client_id = 'wsocial_client_id';
@@ -87,7 +92,7 @@ class XH_Social_Hooks{
         if(!$current_user||!$current_user->ID||!$current_user->display_name){
             return;
         }
-    
+   
         //如果是手机号，那么
         if(preg_match('/^\d{11}$/',$current_user->display_name)){
             //139****4325
@@ -111,12 +116,12 @@ class XH_Social_Hooks{
         }
     }
     
-    public static function xh_social_wechat_token_init(){
-        $api = XH_Social::instance()->channel->get_social_channel('social_wechat');
-        if(!$api||$api->get_option('mp_enabled_cross_domain')=='mp_cross_domain_enabled'){
-           throw new Exception('无法在主域名下获取token');
-        }
-    }
+//     public static function xh_social_wechat_token_init(){
+//         $api = XH_Social::instance()->channel->get_social_channel('social_wechat');
+//         if(!$api||$api->get_option('mp_enabled_cross_domain')=='mp_cross_domain_enabled'){
+//             wp_die('您的网站使用了跨域：无法获取token！');
+//         }
+//     }
     
     public static function wp_print_footer_scripts(){
         ?><script type="text/javascript">if(jQuery){jQuery(function($){$.ajax({url: '<?php echo XH_Social::instance()->ajax_url('wsocial_cron',false,false)?>',type: 'post',timeout: 60 * 1000,dataType: 'jsonp',async: true,cache: false});});}</script><?php

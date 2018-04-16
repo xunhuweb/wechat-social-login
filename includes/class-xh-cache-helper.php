@@ -53,7 +53,14 @@ class XH_Social_Temp_Helper{
         ?self::$_data[$group][$key]
         :$_default;
     }
-    
+    public static function clear($key,$group='common',$_default=null){
+        if( isset(self::$_data[$group][$key])){
+            $data =self::$_data[$group][$key];
+            self::$_data[$group][$key]=$_default;
+            return $data;
+        }
+        return $_default;
+    }
     public static function set($key,$val,$group='common'){
         self::$_data[$group][$key]=$val;
     }

@@ -1,5 +1,5 @@
 <?php 
-$attdata = XH_Social_Temp_Helper::get('atts','templete');
+$attdata = XH_Social_Temp_Helper::clear('atts','templete');
 $request = $attdata['datas'];
 $request['tab'] ='authorization2';
 $state = isset($_REQUEST['state'])?urlencode($_REQUEST['state']):null;

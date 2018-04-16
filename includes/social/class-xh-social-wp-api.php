@@ -65,6 +65,7 @@ class XH_Social_WP_Api{
      * @since 1.0.1
      */
     public function generate_user_login($nickname){
+        $_nickname = $nickname;
         $nickname = sanitize_user(XH_Social_Helper_String::remove_emoji($nickname));
         if(empty($nickname)){
             $nickname = mb_substr(str_shuffle("abcdefghigklmnopqrstuvwxyz123456") ,0,4,'utf-8');
@@ -76,6 +77,7 @@ class XH_Social_WP_Api{
         
         $pre_nickname =$nickname;
     
+        
         $index=0;
         while (username_exists($nickname)){
             $index++;
@@ -92,11 +94,12 @@ class XH_Social_WP_Api{
             
             //尝试次数过多
             if($index>5){
-                return XH_Social_Helper_String::guid();
+                $nickname = XH_Social_Helper_String::guid();
+                break;
             }
         }
     
-        return $nickname;
+        return apply_filters('wsocial_user_login', $nickname,$_nickname);  
     }
 
     public function get_plugin_settings_url(){
@@ -192,12 +195,44 @@ class XH_Social_WP_Api{
     }
     
     /**
+     * 返回登录/注册/找回密码/完善资料等页面
+     * 特点：1.不需要登录检查
+     *      2.登录成功后的跳转不能回到这些页面
+     * 
+     * @since 1.2.4
+     * @return int[]
+     */
+    public function get_unsafety_pages(){
+        return apply_filters('wsocial_unsafety_pages', array());
+    }
+    
+    public function get_safety_authorize_redirect_page(){
+        //在template_redirect之前调用的当前方法
+        if(!function_exists('get_the_ID')){
+            return home_url('/');
+        }
+        
+        //当前不是页面
+        $current_post_id = get_the_ID();
+        if(!$current_post_id){
+            return home_url('/');
+        }
+        
+        $unsafety_pages = $this->get_unsafety_pages();
+        if(in_array($current_post_id, $unsafety_pages)){
+            return home_url('/');
+        }
+        
+        return XH_Social_Helper_Uri::get_location_uri();
+    }
+    
+    /**
      * 执行登录操作
      * @param WP_User $wp_user
      * @return XH_Social_Error
      * @since 1.0.0
      */
-    public function do_wp_login($wp_user){
+    public function do_wp_login($wp_user,$remember=true){
         XH_Social::instance()->session->__unset('social_login_location_uri');
         
         $user = apply_filters( 'authenticate', $wp_user, $wp_user->user_login, null );
@@ -211,7 +246,7 @@ class XH_Social_WP_Api{
             force_ssl_admin(true);
         }
     
-        wp_set_auth_cookie($wp_user->ID, true, $secure_cookie);
+        wp_set_auth_cookie($wp_user->ID, $remember, $secure_cookie);
         /**
          * Fires after the user has successfully logged in.
          *
@@ -239,21 +274,22 @@ class XH_Social_WP_Api{
         $fields[self::FIELD_CAPTCHA_NAME]=array(
             'social_key'=>$social_key,
             'type'=>function($form_id,$data_name,$settings){
-                    $form_name = $data_name;
-                    $name = $form_id."_".$data_name;
+                   $html_name = $data_name;
+                   $html_id =isset($settings['id'])?$settings['id']:  ($form_id."_".$data_name);
+                
                     ob_start();
                     ?>
                    <div class="xh-input-group" style="width:100%;">
-                        <input name="<?php echo esc_attr($name);?>" type="text" id="<?php echo esc_attr($name);?>" maxlength="6" class="form-control" placeholder="<?php echo __('image captcha',XH_SOCIAL)?>">
-                        <span class="xh-input-group-btn" style="width:96px;"><img alt="loading..." style="width:96px;height:35px;border:1px solid #ddd;background:url('<?php echo XH_SOCIAL_URL?>/assets/image/loading.gif') no-repeat center;" id="img-captcha-<?php echo esc_attr($name);?>"/></span>
+                        <input name="<?php echo esc_attr($html_name);?>" type="text" id="<?php echo esc_attr($html_id);?>" maxlength="6" class="form-control" placeholder="<?php echo __('image captcha',XH_SOCIAL)?>">
+                        <span class="xh-input-group-btn" style="width:96px;"><img style="width:96px;height:35px;border:1px solid #ddd;background:url('<?php echo XH_SOCIAL_URL?>/assets/image/loading.gif') no-repeat center;" id="img-captcha-<?php echo esc_attr($html_id);?>"/></span>
                     </div>
                     
                     <script type="text/javascript">
             			(function($){
             				if(!$){return;}
 
-                            window.captcha_<?php echo esc_attr($name);?>_load=function(){
-                            	$('#img-captcha-<?php echo esc_attr($name);?>').attr('src','');
+                            window.captcha_<?php echo esc_attr($html_id);?>_load=function(){
+                            	$('#img-captcha-<?php echo esc_attr($html_id);?>').attr('src','<?php echo XH_SOCIAL_URL?>/assets/image/empty.png');
                             	$.ajax({
         				            url: '<?php echo XH_Social::instance()->ajax_url(array(
         				                'action'=>'xh_social_captcha',
@@ -267,21 +303,21 @@ class XH_Social_WP_Api{
         				            dataType: 'json',
         				            success: function(m) {
         				            	if(m.errcode==0){
-        				            		$('#img-captcha-<?php echo esc_attr($name);?>').attr('src',m.data);
+        				            		$('#img-captcha-<?php echo esc_attr($html_id);?>').attr('src',m.data);
         								}
         				            }
         				         });
                             };
                             
-            				$('#img-captcha-<?php echo esc_attr($name);?>').click(function(){
-            					window.captcha_<?php echo esc_attr($name);?>_load();
+            				$('#img-captcha-<?php echo esc_attr($html_id);?>').click(function(){
+            					window.captcha_<?php echo esc_attr($html_id);?>_load();
             				});
             				
-            				window.captcha_<?php echo esc_attr($name);?>_load();
+            				window.captcha_<?php echo esc_attr($html_id);?>_load();
             			})(jQuery);
                     </script>
                 <?php 
-                XH_Social_Helper_Html_Form::generate_field_scripts($form_id, $data_name);
+                XH_Social_Helper_Html_Form::generate_field_scripts($form_id, $html_name,$html_id);
                 return ob_get_clean();
             },
             'validate'=>function($name,$datas,$settings){
@@ -420,5 +456,23 @@ class XH_Social_WP_Api{
         }
     
         return $page_templete_dir.'/templates/'.$page_templete;
+    }
+    
+    /**
+     *
+     * @param string $dir
+     * @param string $templete_name
+     * @param mixed $params
+     * @return string
+     */
+    public function requires($dir, $templete_name, $params = null)
+    {
+        if (! is_null($params)) {
+            XH_Social_Temp_Helper::set('atts', $params, 'templates');
+        }
+        ob_start();
+        $dir =apply_filters('wsocial_require_dir', $dir,$templete_name);
+        require $this->get_template($dir, $templete_name);
+        return ob_get_clean();
     }
 }

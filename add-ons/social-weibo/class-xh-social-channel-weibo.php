@@ -122,15 +122,15 @@ class XH_Social_Channel_Weibo extends Abstract_XH_Social_Settings_Channel{
         global $wpdb;
         if(!$wp_user_id){
             $user_login = XH_Social::instance()->WP->generate_user_login($ext_user_info['nickname']);
-            $userdata=array(
+            $userdata=apply_filters('wsocial_insert_user_Info',array(
                 'user_login'=>$user_login,
                 'user_nicename'=>$ext_user_info['nicename'],
-                'first_name'=>$ext_user_info['nickname'],
+                'first_name'=>method_exists($this, 'filter_display_name')?$this->filter_display_name($ext_user_info['nickname']):$ext_user_info['nickname'],
                 'user_email'=>null,
-                'display_name'=>$ext_user_info['nickname'],
-                'nickname'=>$ext_user_info['nickname'],
+                'display_name'=>method_exists($this, 'filter_display_name')?$this->filter_display_name($ext_user_info['nickname']):$ext_user_info['nickname'],
+                'nickname'=>method_exists($this, 'filter_display_name')?$this->filter_display_name($ext_user_info['nickname']):$ext_user_info['nickname'],
                 'user_pass'=>str_shuffle(time())
-            );
+            ),$this);
             
             $wp_user_id = $this->wp_insert_user_Info($ext_user_id, $userdata);
             if($wp_user_id instanceof XH_Social_Error){
@@ -307,8 +307,7 @@ class XH_Social_Channel_Weibo extends Abstract_XH_Social_Settings_Channel{
                return $login_location_uri;
             }
         
-            $ohash =XH_Social_Helper::generate_hash($userdata, $this->get_option('appsecret'));
-            if($user_hash!=$ohash){
+            if($user_hash!=XH_Social_Helper::generate_hash($userdata, $this->get_option('appsecret'))&&$user_hash!=$this->__old_generate_hash($userdata, $this->get_option('appsecret'))){
                 XH_Social_Log::error(__('Please check cross-domain app secret config(equal to current website app secret)!',XH_SOCIAL));
                 return $login_location_uri;
             }
@@ -319,57 +318,11 @@ class XH_Social_Channel_Weibo extends Abstract_XH_Social_Settings_Channel{
                return $login_location_uri;
             }
             
-            $code = XH_Social_Helper_String::sanitize_key_ignorecase($_GET['code']);
-            
-            $params=array();
-            $redirect_uri = XH_Social_Helper_Uri::get_uri_without_params(XH_Social_Helper_Uri::get_location_uri(),$params);
-            if(isset($params['code'])) unset($params['code']);
-            if(isset($params['state'])) unset($params['state']);
-            $redirect_uri.="?".http_build_query($params);
-            
             try {
-                if(!class_exists('SaeTOAuthV2')){
-                    require_once 'saetv2.ex.class.php';
-                }
-                
                 $appid =$this->get_option('appid');
                 $appkey =$this->get_option('appsecret');
                 
-                $api = new SaeTOAuthV2($appid,$appkey);
-                $token = $api->getAccessToken( 'code', array(
-                    'code'=>$code,
-                    'redirect_uri'=>$redirect_uri
-                )) ;
-                
-                if(!$token||isset($token['error'])){
-                    throw new Exception(isset($token['error'])?$token['error']:XH_Social_Error::err_code(500),isset($token['error_code'])?$token['error_code']:0);
-                }
-                
-                $uapi = new SaeTClientV2( $appid , $appkey ,$token['access_token']);
-                $uid_get = $uapi->get_uid();
-                if(!$uid_get||isset($uid_get['error'])){
-                    throw new Exception(isset($uid_get['error'])?$uid_get['error']:XH_Social_Error::err_code(500),isset($uid_get['error_code'])?$uid_get['error_code']:0);
-                }
-                
-                $uid = $uid_get['uid'];
-                $obj = $uapi->show_user_by_id( $uid);
-                if(!$obj||isset($obj['error'])){
-                    throw new Exception(isset($obj['error'])?$obj['error']:XH_Social_Error::err_code(500),isset($obj['error_code'])?$obj['error_code']:0);
-                }
-                
-                $userdata = array(
-                    'uid'=>$uid,
-                    'nickname'=>XH_Social_Helper_String::remove_emoji($obj['name']),
-                    'location'=>$obj['location'],
-                    'description'=>XH_Social_Helper_String::remove_emoji($obj['description']),
-                    'city'=>$obj['city'],
-                    'province'=>$obj['province'],
-                    'description'=>$obj['description'],
-                    'img'=>str_replace('http://', '//', isset($obj['avatar_large'])&&!empty($obj['avatar_large'])?$obj['avatar_large']:(isset($obj['profile_image_url'])?$obj['profile_image_url']:'')),
-                    'gender'=>$obj['gender'],
-                    'profile_url'=>$obj['profile_url'],
-                    'last_update'=>date_i18n('Y-m-d H:i')
-                );
+                $userdata = $this->get_weibo_user_by_code($_GET['code'], $appid, $appkey);
             } catch (Exception $e) {
                 XH_Social_Log::error($e);
                 if($e->getCode()!=500){
@@ -431,7 +384,7 @@ class XH_Social_Channel_Weibo extends Abstract_XH_Social_Settings_Channel{
                 }
         
                 if($wpdb->insert_id<=0){
-                    XH_Social_Log::error('insert weibo user info failed');
+                    XH_Social_Log::error('insert weibo user info failed'.print_r($userdata,true));
                     throw new Exception('insert weibo user info failed');
                 }
         
@@ -454,7 +407,7 @@ class XH_Social_Channel_Weibo extends Abstract_XH_Social_Settings_Channel{
                 $ext_user_id=$ext_user_info->id;
             }
             
-           return $this->process_login($ext_user_id);
+           return $this->process_login($ext_user_id,$wp_user_id>0);
         } catch (Exception $e) {
             XH_Social_Log::error($e);
             XH_Social::instance()->WP->set_wp_error($login_location_uri, $e->getMessage());
@@ -462,7 +415,53 @@ class XH_Social_Channel_Weibo extends Abstract_XH_Social_Settings_Channel{
         }
     }
   
+    public function get_weibo_user_by_code($code,$appid,$appkey){
+        $params=array();
+        $redirect_uri = XH_Social_Helper_Uri::get_uri_without_params(XH_Social_Helper_Uri::get_location_uri(),$params);
+        if(isset($params['code'])) unset($params['code']);
+        if(isset($params['state'])) unset($params['state']);
+        $redirect_uri.="?".http_build_query($params);
+        
+        if(!class_exists('SaeTOAuthV2')){
+            require_once 'saetv2.ex.class.php';
+        }
     
+        $api = new SaeTOAuthV2($appid,$appkey);
+        $token = $api->getAccessToken( 'code', array(
+            'code'=>$code,
+            'redirect_uri'=>$redirect_uri
+        )) ;
+    
+        if(!$token||isset($token['error'])){
+            throw new Exception(isset($token['error'])?$token['error']:XH_Social_Error::err_code(500),isset($token['error_code'])?$token['error_code']:0);
+        }
+    
+        $uapi = new SaeTClientV2( $appid , $appkey ,$token['access_token']);
+        $uid_get = $uapi->get_uid();
+        if(!$uid_get||isset($uid_get['error'])){
+            throw new Exception(isset($uid_get['error'])?$uid_get['error']:XH_Social_Error::err_code(500),isset($uid_get['error_code'])?$uid_get['error_code']:0);
+        }
+    
+        $uid = $uid_get['uid'];
+        $obj = $uapi->show_user_by_id( $uid);
+        if(!$obj||isset($obj['error'])){
+            throw new Exception(isset($obj['error'])?$obj['error']:XH_Social_Error::err_code(500),isset($obj['error_code'])?$obj['error_code']:0);
+        }
+    
+        return array(
+            'uid'=>$uid,
+            'nickname'=>XH_Social_Helper_String::remove_emoji($obj['name']),
+            'location'=>$obj['location'],
+            'description'=>XH_Social_Helper_String::remove_emoji($obj['description']),
+            'city'=>$obj['city'],
+            'province'=>$obj['province'],
+            'description'=>$obj['description'],
+            'img'=>str_replace('http://', '//', isset($obj['avatar_large'])&&!empty($obj['avatar_large'])?$obj['avatar_large']:(isset($obj['profile_image_url'])?$obj['profile_image_url']:'')),
+            'gender'=>$obj['gender'],
+            'profile_url'=>$obj['profile_url'],
+            'last_update'=>date_i18n('Y-m-d H:i')
+        );
+    }
     /**
      * {@inheritDoc}
      * @see Abstract_XH_Social_Settings_Channel::generate_authorization_uri()
@@ -506,13 +505,18 @@ class XH_Social_Channel_Weibo extends Abstract_XH_Social_Settings_Channel{
             
             return $cross_domain_uri."?".http_build_query(array_merge($params_uri,$params));
         }else{
-            if(!class_exists('SaeTOAuthV2')){
-                require_once 'saetv2.ex.class.php';
-            }
-            
-            $api = new SaeTOAuthV2($this->get_option('appid'),$this->get_option('appsecret'));
-            return $api->getAuthorizeURL($redirect_uri);
+           
+            return $this->get_weibo_authorize_url($this->get_option('appid'),$this->get_option('appsecret'),$redirect_uri);
         }
+    }
+    
+    public function get_weibo_authorize_url($appid,$appsecret,$redirect_uri){
+        if(!class_exists('SaeTOAuthV2')){
+            require_once 'saetv2.ex.class.php';
+        }
+        
+        $api = new SaeTOAuthV2($appid,$appsecret);
+        return $api->getAuthorizeURL($redirect_uri);
     }
 }
 require_once XH_SOCIAL_DIR.'/includes/abstracts/abstract-xh-schema.php';

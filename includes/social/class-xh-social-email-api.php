@@ -156,16 +156,13 @@ class XH_Social_Email_Api extends Abstract_XH_Social_Settings
             'smtp_host' => array(
                 'title' => __('SMTP Host', XH_SOCIAL),
                 'type' => 'text',
-                'tr_css' => 'section-mailer section-smtp'
-            ),
-            'smtp_host' => array(
-                'title' => __('SMTP Host', XH_SOCIAL),
-                'type' => 'text',
+                'placeholder'=>'smtp.exmail.qq.com',
                 'tr_css' => 'section-mailer section-smtp'
             ),
             'smtp_port' => array(
                 'title' => __('SMTP Port', XH_SOCIAL),
                 'type' => 'text',
+                'placeholder'=>'465',
                 'tr_css' => 'section-mailer section-smtp'
             ),
             'smtp_ssl' => array(

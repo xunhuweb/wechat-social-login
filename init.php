@@ -4,14 +4,18 @@
  * Plugin URI: http://www.weixinsocial.com
  * Description: 支持国内最热门的社交媒体登录。如：微信、QQ、微博、手机登录、账号绑定和解绑，全新的注册页面取代原生注册页面，支持Ultimate Member、WooCommerce、Buddypress，兼容Open Social。部分扩展收费，查看详情：<a href="http://www.weixinsocial.com">Wechat Social</a>
  * Author: 迅虎网络
- * Version: 1.2.2
+ * Version: 1.2.5
  * Author URI:  http://www.wpweixin.net
  * Text Domain: xh_social
  * Domain Path: /lang
+ * WC tested up to: 3.3.1
  */
 if (! defined ( 'ABSPATH' ))
 	exit (); // Exit if accessed directly
-	
+if(defined('WP_DEBUG')&&WP_DEBUG===true){
+    ini_set('display_errors', 'On');
+    error_reporting(E_ALL);
+}	
 if ( ! class_exists( 'XH_Social' ) ) :
 final class XH_Social {
     /**
@@ -20,7 +24,7 @@ final class XH_Social {
      * @since 1.0.0
      * @var string
      */
-    public $version = '1.2.2';
+    public $version = '1.2.5';
     
     /**
      * 最小wp版本
@@ -121,7 +125,7 @@ final class XH_Social {
      */
     private function __construct() {
         $this->define_constants();
-    
+        
         $this->includes();  
         $this->init_hooks();
         
@@ -141,20 +145,40 @@ final class XH_Social {
         $this->include_plugins();
         
         add_action( 'init', array( $this,                       'init' ), 1 );
+        add_action( 'init', array( $this,                       'after_init' ), 99 );
         add_action( 'init', array( 'XH_Social_Page',            'init' ), 9 );
         add_action( 'init', array( 'XH_Social_Shortcodes',      'init' ), 10 );
         add_action( 'init', array( 'XH_Social_Ajax',            'init' ), 10 );
+        add_action('after_setup_theme', array($this,            'after_setup_theme'),10);
         
         XH_Social_Hooks::init();
-        add_action( 'admin_enqueue_scripts', array($this,'admin_enqueue_scripts'),10);
-        add_action('login_enqueue_scripts', array($this,'login_enqueue_scripts'),10);
-        add_action('wp_enqueue_scripts', array($this,'wp_enqueue_scripts'),10);
+        add_action( 'admin_enqueue_scripts', array($this,'admin_enqueue_scripts'),999);
+        add_action('login_enqueue_scripts', array($this,'login_enqueue_scripts'),999);
+        add_action('wp_enqueue_scripts', array($this,'wp_enqueue_scripts'),999);
         XH_Social_Log::instance( new XH_Social_Log_File_Handler ( XH_SOCIAL_DIR . "/logs/" . date ( 'Y/m/d' ) . '.log' ));
         register_activation_hook ( XH_SOCIAL_FILE, array($this,'_register_activation_hook'),10 );
         register_deactivation_hook(XH_SOCIAL_FILE,  array($this,'_register_deactivation_hook'),10);        
         add_action ( 'plugin_action_links_'. plugin_basename( XH_SOCIAL_FILE ),array($this,'_plugin_action_links'),10,1);
     }
 
+    public function after_setup_theme(){
+        global $pagenow;
+        // Load the functions for the active theme, for both parent and child theme if applicable.
+        if ( ! wp_installing() || 'wp-activate.php' === $pagenow ) {
+            if ( TEMPLATEPATH !== STYLESHEETPATH && file_exists( STYLESHEETPATH . '/wechat-social-login/functions.php' ) ){
+                include( STYLESHEETPATH . '/wechat-social-login/functions.php' );
+            }
+            
+            if ( file_exists( TEMPLATEPATH . '/wechat-social-login/functions.php' ) ){
+                include( TEMPLATEPATH . '/wechat-social-login/functions.php' );
+            }
+        }
+    }
+
+    public function after_init(){
+        do_action('wsocial_after_init');
+    }
+    
     /**
      * 获取已激活的扩展
      * @param string $add_on_id
@@ -402,7 +426,7 @@ final class XH_Social {
         $content_dir = WP_CONTENT_DIR;
         $this->plugins_dir=array(
             str_replace('\\', '/', $content_dir).'/wechat-social-login/add-ons/',
-            str_replace('\\', '/', $content_dir).'/xh-social/add-ons/',
+            //str_replace('\\', '/', $content_dir).'/xh-social/add-ons/',
             XH_SOCIAL_DIR.'/add-ons/',
         );
     }
@@ -507,18 +531,38 @@ final class XH_Social {
     public function admin_enqueue_scripts(){
         $min = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
         
-        
         wp_enqueue_script('jquery');
-        //current plugins require jquery.js
-        wp_enqueue_script('jquery-loading',XH_SOCIAL_URL."/assets/js/jquery-loading$min.js",array('jquery'),$this->version,true);
-        wp_enqueue_script('qrcode',XH_SOCIAL_URL."/assets/js/qrcode$min.js",array('jquery'),$this->version,true);
-       
-        wp_enqueue_style('jquery-loading',XH_SOCIAL_URL."/assets/css/jquery.loading$min.css",array(),$this->version);
-        
         wp_enqueue_script('media-upload');
         add_thickbox();
         wp_enqueue_media();
-     
+         
+        wp_enqueue_script('select2',XH_SOCIAL_URL."/assets/select2/select2.full$min.js",array('jquery'),$this->version,true);
+        wp_enqueue_script('jquery-tiptip', XH_SOCIAL_URL . "/assets/jquery-tiptip/jquery.tipTip$min.js", array( 'jquery' ), $this->version ,true);
+        wp_enqueue_script('wsocial-admin',XH_SOCIAL_URL."/assets/js/admin.js",array('jquery','select2','jquery-tiptip'),$this->version,true);
+        wp_enqueue_script('jquery-loading',XH_SOCIAL_URL."/assets/js/jquery-loading$min.js",array('jquery'),$this->version,true);
+        wp_enqueue_script('qrcode',XH_SOCIAL_URL."/assets/js/qrcode$min.js",array('jquery'),$this->version,true);
+        
+        wp_localize_script( 'wsocial-admin', 'wsocial_enhanced_select', array(
+            'i18n_no_matches'           => __( 'No matches found', XH_SOCIAL ),
+            'i18n_ajax_error'           => __( 'Loading failed', XH_SOCIAL ),
+            'i18n_input_too_short_1'    => __( 'Please enter 1 or more characters', XH_SOCIAL ),
+            'i18n_input_too_short_n'    => __( 'Please enter %qty% or more characters', XH_SOCIAL ),
+            'i18n_input_too_long_1'     => __( 'Please delete 1 character', XH_SOCIAL ),
+            'i18n_input_too_long_n'     => __( 'Please delete %qty% characters', XH_SOCIAL ),
+            'i18n_selection_too_long_1' => __( 'You can only select 1 item', XH_SOCIAL ),
+            'i18n_selection_too_long_n' => __( 'You can only select %qty% items', XH_SOCIAL ),
+            'i18n_load_more'            => __( 'Loading more results&hellip;', XH_SOCIAL ),
+            'i18n_searching'            => __( 'Loading...', XH_SOCIAL ),
+            'ajax_url'=>$this->ajax_url(array(
+                'action'=>'wsocial_obj_search'
+            ),true,true)
+        ));
+        
+        wp_enqueue_style('jquery-tiptip', XH_SOCIAL_URL . "/assets/jquery-tiptip/tipTip$min.css", array( ), $this->version );
+        wp_enqueue_style('jquery-loading',XH_SOCIAL_URL."/assets/css/jquery.loading$min.css",array(),$this->version);
+
+        wp_enqueue_style('wsocial-admin',XH_SOCIAL_URL."/assets/css/admin$min.css",array(),$this->version);
+        
         do_action('xh_social_admin_enqueue_scripts');
         
     }

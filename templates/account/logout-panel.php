@@ -3,7 +3,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-$attdata = XH_Social_Temp_Helper::get('atts','templete');
+$attdata = XH_Social_Temp_Helper::clear('atts','templete');
 $log_on_callback_uri = $attdata['log_on_callback_uri'];
 
 if(empty($log_on_callback_uri)){

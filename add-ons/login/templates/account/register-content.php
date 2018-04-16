@@ -3,7 +3,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-$attdata = XH_Social_Temp_Helper::get('atts','templete');
+$attdata = XH_Social_Temp_Helper::clear('atts','templete');
 $atts = $attdata['atts'];
 $api = XH_Social_Add_On_Login::instance();
 
@@ -28,6 +28,21 @@ do_action('xh_social_page_register_before');
 $action = apply_filters('xh_social_page_register_before', null);
 if(!empty($action)){
     echo $action;
+    return;
+}
+
+if(!get_option('users_can_register')){
+    ?>
+    <div class="xh-regbox">
+    <div class="xh-title" id="form-title"><?php echo __('Register',XH_SOCIAL)?></div>
+    	<div class="xh-form">  
+    		<div class="xh-alert xh-alert-danger">对不起，管理员已关闭了网站注册！</div>     
+    		 <div class="xh-form-group mt10">
+                   <a href="<?php echo home_url('/')?>" class="xh-btn xh-btn-primary xh-btn-block xh-btn-lg">返回首页</a>
+               </div>
+    	</div>
+    </div>
+    <?php 
     return;
 }
 

@@ -154,7 +154,7 @@
     background-color: #009a61;
     border-color: #008151;
 }
-.xh-regbox .xh-btn-warring {
+.xh-regbox .xh-btn-warning {
     color: #fff;
     background-color: #ff851b;
     border-color: #e56e06;
@@ -295,6 +295,38 @@ a.list-group-item {
 .xh_social_box .xh_social_login_bar{
 	cursor:pointer;width:30px;height: 30px;line-height: 30px;margin: 3px 5px 3px 2px;display:inline-block;display:-moz-inline-stack;zoom:1;*display:inline;z-index:99;position:relative;text-decoration:none;
 }
+/*弹窗登录*/
+.xh-cover {
+    width: 100%;
+    height: 100%;
+    z-index: 999;
+    background: rgba(0,0,0,0.2);
+    position: fixed;
+    left: 0;
+    top: 0;
+    text-align: center;
+}
+
+.xh-regbox.xh-window{
+    position: relative;
+    z-index: 1000;
+    background: #fff;
+    border-radius: 4px;
+    left:0;  
+right:0; 
+padding:10px 0;
+}
+.xh-regbox .xh-close{
+    width: 30px;
+    height: 30px;
+    background: url(../image/v2.ui2.close2.png) center no-repeat;
+    position: absolute;
+    right: 0;
+    top: 0;
+    cursor: pointer;
+}
+.xh-regbox.xh-window .xh-form{padding:25px 35px;}
+.xh-user-register.xh-w{margin:0px;}
 
 @media (max-width : 767px){
 .xh-regbox{width: 85%;}

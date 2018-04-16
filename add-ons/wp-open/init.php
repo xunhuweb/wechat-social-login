@@ -1,4 +1,8 @@
 <?php 
+
+require_once 'class-xh-social-settings-wp-open-default.php';
+require_once 'class-xh-social-menu-wp-open-default.php';
+require_once 'class-xh-social-page-wp-open.php';
 /**
  * 登录注册
  * 
@@ -43,15 +47,12 @@ class XH_Social_Add_On_WP_Open extends Abstract_XH_Social_Add_Ons{
     }
 
     public function on_init(){
-        require_once 'class-xh-social-settings-wp-open-default.php';
-        require_once 'class-xh-social-menu-wp-open-default.php';
-        require_once 'class-xh-social-page-wp-open.php';
         
         add_filter('xh_social_admin_pages', array($this,'add_pages'),10,1);
     }      
     
     public function add_pages($pages){
-        $pages[]=XH_Social_Page_WP_Open::instance();
+        $pages[80]=XH_Social_Page_WP_Open::instance();
         return $pages;
     }
     

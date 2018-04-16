@@ -50,6 +50,8 @@ abstract class Abstract_XH_Social_Settings_Page extends Abstract_XH_Social_Setti
         $menu_id = isset($_GET['section'])?$_GET['section']:null;
         
         $menus =$this->menus();
+        ksort($menus);
+        reset($menus);
         $index =0;
         $current =null;
         foreach ($menus as $menu){

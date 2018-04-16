@@ -21,7 +21,7 @@ class XH_Social_Shortcodes {
 		     */
 			'xh_social_loginbar'=> __CLASS__ . '::loginbar',
 		    'xh_social_accountbind'=> __CLASS__ . '::accountbind',
-		    'xh_social_share'=> __CLASS__ . '::share',
+		    'xh_social_share'=> __CLASS__ . '::share'
 		);
 		
 		$shortcodes =apply_filters('xh_social_shortcodes', $shortcodes);

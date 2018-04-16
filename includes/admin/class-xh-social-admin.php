@@ -92,8 +92,8 @@ class XH_Social_Admin {
      */
     public function get_admin_pages(){
         return apply_filters('xh_social_admin_pages', array(
-            XH_Social_Page_Default::instance(),
-            XH_Social_Page_Add_Ons::instance()
+            10=>XH_Social_Page_Default::instance(),
+            100=>XH_Social_Page_Add_Ons::instance()
         ));
     }
     /**
@@ -115,7 +115,7 @@ class XH_Social_Admin {
             }
     
             if($submenu){
-                $query .="&tab={$submenu->id}";
+                $query .="&sub={$submenu->id}";
             }
         }
     
@@ -189,8 +189,10 @@ class XH_Social_Admin {
         
         add_menu_page( $menu_title, $menu_title, $capability, self::menu_tag, null, null, '55.5' );      
         $pages = $this->get_admin_pages();
+        ksort($pages);
+        reset($pages);
         
-        foreach ($pages as $page){
+        foreach ($pages as $sort=>$page){
             if(!$page||!$page instanceof Abstract_XH_Social_Settings_Page){
                 continue;
             }

@@ -72,9 +72,6 @@ class XH_Social_Settings_Add_Ons_Install_Installed extends Abstract_XH_Social_Se
            <div id="field-messages"></div>
             <?php do_action('xh_social_menu_add_ons_install_installed_header');?>
             
-			<p><?php echo sprintf(__('Upload your plugins into <code>%s</code> and redirect to <a href="%s">installed page</a>,activate the plugin.',XH_SOCIAL)
-			    ,XH_Social::instance()->plugins_dir[0],
-			     admin_url("admin.php?page=social_page_add_ons&section=menu_add_ons_install&sub=settings_add_ons_install_installed"))?></p>
 		<br class="clear">	
 		
 		<script type="text/javascript">
@@ -130,7 +127,7 @@ class XH_Social_Settings_Add_Ons_Install_Installed extends Abstract_XH_Social_Se
             		          $plugin_ids[]=$plugin->id;
             		          
             		          ob_start();
-            		          if($plugin->is_authoirzed){
+            		          if($plugin->ia){
                 		          ?>
                 		           <script type="text/javascript">
                 		          		 window.xh_plugin_view.update('<?php echo XH_Social::instance()->ajax_url(array('action'=>'xh_social_plugin','tab'=>'update_plugin_list','plugin_id'=>$plugin->id),true,true)?>');
@@ -277,7 +274,7 @@ class XH_Social_Settings_Add_Ons_Install_Installed extends Abstract_XH_Social_Se
 								this.loading=true;
 								
 								var txt = $('#plugin-'+params.plugin_id).html();
-								 $('#plugin-'+params.plugin_id).html('<img src="<?php echo XH_SOCIAL_URL?>/assets/image/loading.gif" style="width:15px;margin-right:5px;"/>'+txt);
+								 $('#plugin-'+params.plugin_id).html('<img src="<?php echo XH_SOCIAL_URL?>/assets/image/loading.gif" style="width:20px;height:20px;margin-right:5px;"/>'+txt);
 								
 								jQuery.ajax({
 						            url: '<?php echo XH_Social::instance()->ajax_url()?>',
@@ -307,6 +304,7 @@ class XH_Social_Settings_Add_Ons_Install_Installed extends Abstract_XH_Social_Se
 										}
 						            	
 						            	window.view.error(m.errmsg);
+						            	location.href='#wpbody-content';
 						            },
 						            error:function(e){
 						            	window.view.error('<?php echo __('Internal Server Error!',XH_SOCIAL)?>');

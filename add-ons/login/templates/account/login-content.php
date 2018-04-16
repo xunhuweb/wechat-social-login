@@ -2,7 +2,8 @@
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
-$attdata = XH_Social_Temp_Helper::get('atts','templete');
+
+$attdata = XH_Social_Temp_Helper::clear('atts','templete');
 $atts = $attdata['atts'];
 $api = XH_Social_Add_On_Login::instance();
 
@@ -33,98 +34,14 @@ if(is_user_logged_in()){
 }
 
 ?>
+<script type="text/javascript">
+window.__wsocial_enable_entrl_submit=true;
+</script>
 <div class="xh-regbox">
-	<div class="xh-title" id="form-title"><?php echo __('Login',XH_SOCIAL)?></div>
-	<form class="xh-form">
-		<div id="fields-error"></div>
-            <?php 
-               $fields = $api->page_login_login_fields(); 
-               echo XH_Social_Helper_Html_Form::generate_html('login',$fields);
-               
-               do_action('xh_social_page_login_login_form');
-            ?>
-            <div class="xh-form-group mt10">
-                <button type="button" id="btn-login" onclick="window.xh_social_view.login();" class="xh-btn xh-btn-primary xh-btn-block xh-btn-lg"><?php echo __('Log On',XH_SOCIAL)?></button>
-            </div>
-        	<?php 
-        	$channels = XH_Social::instance()->channel->get_social_channels(array('login'));
-        	if(count($channels)>0){
-        	    ?>
-        	    <div class="xh-form-group xh-mT20">
-                    <label><?php echo __('Quick Login',XH_SOCIAL)?></label>
-                   <div class="xh-social">
-                       <?php foreach ($channels as $channel){
-                           ?><a href="<?php echo XH_Social::instance()->channel->get_authorization_redirect_uri($channel->id,$log_on_callback_uri);?>" class="xh-social-item" style="background:url(<?php echo $channel->icon?>) no-repeat transparent;"></a><?php 
-                       }?>
-                   </div>
-                </div>
-        	    <?php 
-        	}
-        	?>
-	</form>
+	<?php 
+	 echo XH_Social::instance()->WP->requires($api->dir, 'account/__login.php',array(
+	     'log_on_callback_uri'=>$log_on_callback_uri
+	 ));
+	?>
 </div>
 
-<script type="text/javascript">
-	(function($){
-	   $(document).keypress(function(e) {
-			if (e.which == 13){
-			　　window.xh_social_view.login();
-			}
-		});
-		window.xh_social_view={
-			loading:false,
-			reset:function(){
-				$('.xh-alert').empty().css('display','none');
-			},
-			error:function(msg){
-				$('#fields-error').html('<div class="xh-alert xh-alert-danger" role="alert">'+msg+' </div>').css('display','block');
-			},
-			success:function(msg){
-				$('#fields-error').html('<div class="xh-alert xh-alert-success" role="alert">'+msg+' </div>').css('display','block');
-			},
-			login:function(){
-				this.reset();
-				
-				var data={};
-				
-				<?php XH_Social_Helper_Html_Form::generate_submit_data('login', 'data');?>
-				if(this.loading){
-					return;
-				}
-				
-				$('#btn-login').attr('disabled','disabled').text('<?php print __('loading...',XH_SOCIAL)?>');
-				this.loading=true;
-
-				jQuery.ajax({
-		            url: '<?php echo XH_Social::instance()->ajax_url(array(
-		                'action'=>"xh_social_{$api->id}",
-		                'tab'=>'login'
-		            ),true,true)?>',
-		            type: 'post',
-		            timeout: 60 * 1000,
-		            async: true,
-		            cache: false,
-		            data: data,
-		            dataType: 'json',
-		            complete: function() {
-		            	$('#btn-login').removeAttr('disabled').text('<?php print __('Log On',XH_SOCIAL)?>');
-		            	window.xh_social_view.loading=false;
-		            },
-		            success: function(m) {
-		            	if(m.errcode==405||m.errcode==0){
-		            		window.xh_social_view.success('<?php print __('Log on successfully!',XH_SOCIAL);?>');   				           
-		            		location.href='<?php echo $log_on_callback_uri?>';
-							return;
-						}
-		            	
-		            	window.xh_social_view.error(m.errmsg);
-		            },
-		            error:function(e){
-		            	window.xh_social_view.error('<?php print __('Internal Server Error!',XH_SOCIAL);?>');
-		            	console.error(e.responseText);
-		            }
-		         });
-			}
-		};
-	})(jQuery);
-</script>

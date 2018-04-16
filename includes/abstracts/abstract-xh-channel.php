@@ -80,8 +80,29 @@ abstract class Abstract_XH_Social_Settings_Channel extends Abstract_XH_Social_Se
         return array(
             'link'=>'',
             'width'=>450,
-            'height'=>'450'
+            'height'=>450
         );
+    }
+    
+    public function filter_display_name($nickname_or_loginname_or_displayname){
+        $_return = $nickname_or_loginname_or_displayname;
+        //如果是手机号，那么
+        if(preg_match('/^\d{11}$/',$nickname_or_loginname_or_displayname)){
+            //139****4325
+            $_return= substr($nickname_or_loginname_or_displayname, 0,3)."****".substr($nickname_or_loginname_or_displayname, -4);
+        }else if(is_email($nickname_or_loginname_or_displayname)&&strlen($nickname_or_loginname_or_displayname)>4){
+            $index_of_at = strpos($nickname_or_loginname_or_displayname, '@');
+            if($index_of_at!==false&&$index_of_at>1){
+                //12@qq.com
+                $length =$index_of_at-4;
+                if($length<=0){$length=1;}
+                if($length>3){$length=3;}
+        
+                $_return = substr( $nickname_or_loginname_or_displayname, 0,$length)."****".substr( $nickname_or_loginname_or_displayname, $index_of_at>7?7:$index_of_at);
+            }
+        }
+        
+        return apply_filters('wsocial_filter_display_name', $_return,$nickname_or_loginname_or_displayname);
     }
     
     /**
@@ -96,6 +117,10 @@ abstract class Abstract_XH_Social_Settings_Channel extends Abstract_XH_Social_Se
     }
     
     public function wp_insert_user_Info($ext_user_id,$userdata){
+        if(!get_option('users_can_register')){
+            return XH_Social_Error::error_custom('对不起，管理员已关闭了网站注册！');
+        }
+        
         //解决wp_insert_user时因发邮件卡顿，用户关闭页面，再次登录时，登陆出错的问题
         $session = XH_Social::instance()->session->get('wp_insert_user',array());
         if(!$session||!is_array($session)){
@@ -192,7 +217,7 @@ abstract class Abstract_XH_Social_Settings_Channel extends Abstract_XH_Social_Se
         ob_start();
         if($this->get_ext_user_info_by_wp($wp_user_id)){
             ?>
-            <span class="xh-text"><?php echo __('Is binding',XH_SOCIAL)?></span> <a href="<?php echo XH_Social::instance()->channel->get_do_unbind_uri($this->id,XH_Social_Helper_Uri::get_location_uri());?>" class="xh-btn xh-btn-warring xh-btn-sm"><?php echo __('Unbind',XH_SOCIAL)?></a><?php 
+            <span class="xh-text"><?php echo __('Is binding',XH_SOCIAL)?></span> <a href="<?php echo XH_Social::instance()->channel->get_do_unbind_uri($this->id,XH_Social_Helper_Uri::get_location_uri());?>" class="xh-btn xh-btn-warning xh-btn-sm"><?php echo __('Unbind',XH_SOCIAL)?></a><?php 
         }else{
             ?>
             <span class="xh-text"><?php echo __('Unbound',XH_SOCIAL)?></span> <a href="<?php echo XH_Social::instance()->channel->get_do_bind_redirect_uri($this->id,XH_Social_Helper_Uri::get_location_uri())?>" class="xh-btn xh-btn-primary xh-btn-sm"><?php echo __('Bind',XH_SOCIAL)?></a>
@@ -208,7 +233,7 @@ abstract class Abstract_XH_Social_Settings_Channel extends Abstract_XH_Social_Se
      * @return string 回调地址
      * @since 1.0.0
      */
-    public function process_login($ext_user_id,$skip=false){
+    public function process_login($ext_user_id,$skip=false,&$wp_user=null,$process_login =true){
         $login_location_uri=XH_Social::instance()->session->get('social_login_location_uri');
         if(empty($login_location_uri)){
             $login_location_uri = home_url('/');
@@ -241,7 +266,7 @@ abstract class Abstract_XH_Social_Settings_Channel extends Abstract_XH_Social_Se
                 XH_Social::instance()->WP->set_wp_error($login_location_uri,$error->errmsg);
             }
             
-            return $login_location_uri;
+            return apply_filters('wsocial_old_user_logged_in_redirect_url', $login_location_uri,$wp_user);
         }
         
         //在此处，不可能已存在已登录的用户了
@@ -281,9 +306,11 @@ abstract class Abstract_XH_Social_Settings_Channel extends Abstract_XH_Social_Se
             return $login_location_uri;
         }
        
-        $error = XH_Social::instance()->WP->do_wp_login($wp_user);
-        if($error instanceof XH_Social_Error){
-            XH_Social::instance()->WP->set_wp_error($login_location_uri,$error->errmsg);
+        if($process_login){
+            $error = XH_Social::instance()->WP->do_wp_login($wp_user);
+            if($error instanceof XH_Social_Error){
+                XH_Social::instance()->WP->set_wp_error($login_location_uri,$error->errmsg);
+            }
         }
         return $login_location_uri;
     }
@@ -296,5 +323,35 @@ abstract class Abstract_XH_Social_Settings_Channel extends Abstract_XH_Social_Se
      */
     public function get_wp_user_info($ext_user_id){
         return null;
+    }
+    
+    /**
+     * 由于插件签名算法升级，此方法为旧签名模式，兼容
+     * @param array $datas
+     * @param string $hashkey
+     */
+    public function __old_generate_hash(array $datas,$hashkey){
+        ksort($datas);
+        reset($datas);
+         
+        $arg  = '';
+        $index=0;
+        foreach ($datas as $key=>$val){
+            if($key=='hash'){
+                continue;
+            }
+            if($index++!=0){
+                $arg.="&";
+            }
+    
+            if(!is_string($val)&&!is_numeric($val)){
+                continue;
+            }
+    
+            $arg.="$key=$val";
+    
+        }
+         
+        return md5($arg.$hashkey);
     }
 }

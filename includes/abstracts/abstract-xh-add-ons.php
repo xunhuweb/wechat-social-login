@@ -85,7 +85,7 @@ abstract class Abstract_XH_Social_Add_Ons extends Abstract_XH_Social_Settings {
      * 已授权的
      * @var bool
      */
-    public $is_authoirzed=false;
+    public $ia=false;
     
     /**
      * 插件启用时

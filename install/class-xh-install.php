@@ -245,19 +245,30 @@ class XH_Social_Install extends Abstract_XH_Install{
         			<td><?php echo __('PHP mbstring:',XH_SOCIAL)?></td>
         			<td class="help"><span class="xunhuweb-help-tip"></span></td>
         			<td><?php
-        			     if(function_exists('mb_strlen')){
+        			     if(function_exists('mb_strwidth')){
         			         ?><span style="color:green;">YES</span><?php
         			     }else{
         			         $is_valid=false;
-        			         ?><div style="color: #a00;"><span class="dashicons dashicons-warning"></span> <?php echo sprintf(__("PHP mbstring extension is missing ,See: %s",XH_SOCIAL),'<a href="https://www.wpweixin.net/blog/1370.html" target="_blank">'.__('How to install php mbstring extension',XH_SOCIAL).'</a>');?></div><?php
+        			         ?><div style="color: #a00;"><span class="dashicons dashicons-warning"></span> <?php echo sprintf(__("PHP mbstring extension is missing,You can <code>%s</code>",XH_SOCIAL),'yum install php-mbstring');?></div><?php
         			     }
         			?></td>
         		</tr>
         		
+        		<tr>
+        			<td><?php echo __('PHP openssl:',XH_SOCIAL)?>(可选,解析微信推送消息时使用)</td>
+        			<td class="help"><span class="xunhuweb-help-tip"></span></td>
+        			<td><?php
+        			     if(function_exists('openssl_decrypt')){
+        			         ?><span style="color:green;">YES</span><?php
+        			     }else{
+        			         ?><div style="color: #a00;"><span class="dashicons dashicons-warning"></span> <?php echo sprintf(__("PHP openssl extension is missing ,You can <code>%s</code>",XH_SOCIAL),'yum install php70w-mcrypt*');?></div><?php
+        			     }
+        			?></td>
+        		</tr>
         	</tbody>
         </table>
         
-        <p class="wc-setup-actions step">
+        <div class="wc-setup-actions step">
         	<?php 
             if(!$is_valid){
                 ?><a href="javascript:void(0);" class="button button-large" style="color:gray;"><?php echo __('Continue',XH_SOCIAL)?></a><?php
@@ -268,7 +279,7 @@ class XH_Social_Install extends Abstract_XH_Install{
         	?>
         	<a href="<?php echo $this->get_plugin_install_url('system_status_skip')?>" class="button button-large"><?php echo __('Skip this step',XH_SOCIAL)?></a>
         	<p style="color:green;">点击“继续”：高级扩展将<b>重新安装</b>到目录[Add-ons]。(如果没有正常安装，请手动解压[Bin]下的*.zip文件到[Add-ons])</p>
-		</p>
+		</div>
 		</div>
         <?php 
         $this->footer($plugin,$request);
@@ -527,7 +538,7 @@ class XH_Social_Install extends Abstract_XH_Install{
     			<input type="text" class="regular-text" value="<?php print esc_attr( $license_key)?>" name="license_key" placeholder="<?php echo __('license key',XH_SOCIAL)?>">
     		</form>
     		<p class="wc-setup-actions step">
-    			<?php if($add_on->is_authoirzed){
+    			<?php if($add_on->ia){
     			    ?><a href="javascript:void(0);" onclick="window.view.submit();" class="button-primary button button-large button-next"><?php echo __('Change',XH_SOCIAL)?></a><?php
     			    ?><a href="<?php echo $add_on->get_settings_url();?>" class="button button-large"><?php echo __('Back',XH_SOCIAL)?></a><?php
     			}else{

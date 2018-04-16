@@ -24,7 +24,7 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
      * @var string
      * @since 1.0.0
      */
-    private $dir;
+    public $dir;
     
     /**
      * Main Social Instance.
@@ -42,8 +42,8 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
     
     private function __construct(){
         $this->id='add_ons_login';
-        $this->title=__('Login Page(NEW)',XH_SOCIAL);
-        $this->description=__('新增一个新的登录注册页面，替换wordpress默认的登录页面。',XH_SOCIAL);
+        $this->title=__('Login/register page',XH_SOCIAL);
+        $this->description='全新的登录注册页面，替换wordpress默认的登录页面。';
         $this->version='1.0.0';
         $this->min_core_version = '1.0.0';
         $this->author=__('xunhuweb',XH_SOCIAL);
@@ -52,17 +52,10 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
         $this->dir= rtrim ( trailingslashit( dirname( __FILE__ ) ), '/' );
 
         $this->init_form_fields();
-        
-        $this->enabled ='yes'== $this->get_option('enabled');
     }
 
     public function init_form_fields(){
         $this->form_fields=array(
-            'enabled'=>array(
-                'title'=>__('Enable/Disable',XH_SOCIAL),
-                'type'=>'checkbox',
-                'default'=>'no'
-            ),
             'disable_wp'=>array(
                 'title'=>__('Disable WP Login',XH_SOCIAL),
                 'type'=>'checkbox',
@@ -91,7 +84,8 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
                 'title' => __ ( 'Login page settings', XH_SOCIAL ),
                 'type' => 'subtitle',
                 'dividing'=>false,
-                'tr_css'=>'tab-page tab-login'
+                'tr_css'=>'tab-page tab-login',
+               // 'description'=>'登录弹窗效果(可选):<code>[wsocial_dialog_login]</code> 或   <code>&lt;?php wsocial_dialog_login();?&gt;</code>'
             )
             ,
             'page_login_id'=>array(
@@ -180,6 +174,9 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
         $shortcodes['xh_social_page_login']=array($this,'page_login');
         $shortcodes['xh_social_page_register']=array($this,'page_register');
         $shortcodes['xh_social_page_findpassword']=array($this,'page_findpassword');
+        $shortcodes['wsocial_dialog_login']=function($atts=array(),$content=null){
+            return wsocial_dialog_login($atts,$content,false);
+        };
         return $shortcodes;
     }
     
@@ -192,13 +189,20 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
     public function on_load(){
         //插件模板
         add_filter('xh_social_page_templetes', array($this,'page_templetes'),10,1);
-        if($this->enabled){
-            add_filter('xh_social_shortcodes', array($this,'shortcodes'),10,1);
-            add_filter('xh_social_ajax', array($this,'ajax'),10,1);
-        }
+        add_filter('xh_social_shortcodes', array($this,'shortcodes'),10,1);
+        add_filter('xh_social_ajax', array($this,'ajax'),10,1);
         
         add_filter('retrieve_password_message', array($this,'retrieve_password_message'),10,4);
+        add_filter('wsocial_unsafety_pages', array($this,'wsocial_unsafety_pages'),10,1);
     }
+    
+    public function wsocial_unsafety_pages($page_ids){
+        $page_ids[] = $this->get_option('page_login_id');
+        $page_ids[] = $this->get_option('page_register_id');
+        $page_ids[] = $this->get_option('page_findpassword_id');
+        return $page_ids;
+    }
+    
     /**
      * 把邮件内多余的< >符号去掉
      * @param string $message
@@ -213,15 +217,13 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
     
     public function on_init(){
         add_filter('xh_social_admin_menu_menu_default_account', array($this,'admin_menu_account'),10,1);
-       
-        if($this->enabled){  
-            //禁用wordpress默认登录页面
-            if('yes'==$this->get_option('disable_wp')){
-                add_action('login_init', array($this,'disable_wp_login'));
-                add_filter('login_url', array($this,'login_url'),99,3);
-                add_filter('register_url', array($this,'register_url'),99,1);
-                add_filter('lostpassword_url', array($this,'lostpassword_url'),99,2);
-            }
+        add_action('wp_footer',array($this,'include_scripts'),999);
+        //禁用wordpress默认登录页面
+        if('yes'==$this->get_option('disable_wp')){
+            add_action('login_init', array($this,'disable_wp_login'));
+            add_filter('login_url', array($this,'login_url'),99,3);
+            add_filter('register_url', array($this,'register_url'),99,1);
+            add_filter('lostpassword_url', array($this,'lostpassword_url'),99,2);
         }
         
         /**
@@ -231,6 +233,11 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
             add_filter('authenticate', array($this,'wp_authenticate_email_password'),20, 3);
         }
     }
+    
+    public function include_scripts(){
+        echo XH_Social::instance()->WP->requires($this->dir,'account/__scripts.php');
+    }
+    
     public function wp_authenticate_email_password( $user, $email, $password ) {
         if ( $user instanceof WP_User ) {
             return $user;
@@ -305,14 +312,10 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
         if($page){
             $url =get_page_link($page);
             if(empty($redirect)){
-                return $url;
+                $redirect = XH_Social::instance()->WP->get_safety_authorize_redirect_page();
             }
             
-            $params = array();
-            $login_url = XH_Social_Helper_Uri::get_uri_without_params($url,$params);
-            $params['redirect_to']=$redirect;
-            $login_url.= "?".http_build_query($params);
-            return $login_url;
+            return XH_Social_Helper_Uri::get_new_uri($url,array('redirect_to'=>$redirect));
         }
         
         return $login_url;
@@ -335,6 +338,7 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
      */
     public function ajax($shortcodes){
         $shortcodes["xh_social_{$this->id}"]=array($this,'do_ajax');
+       
         return $shortcodes;
     }
     
@@ -432,7 +436,7 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
                  
                 $subject = apply_filters('wsocial_email_validate_subject',sprintf( __("[%s]identity verification",XH_SOCIAL),get_option('blogname')));
                 $message = apply_filters('wsocial_email_validate_subject', __("Hello!Your verification code is:",XH_SOCIAL)."\r\n\r\n".$code."\r\n\r\n".__("If this was a mistake, just ignore this email and nothing will happen.",XH_SOCIAL));
-                if(defined('XH_SOCIAL_MOBILE_TEST')){
+                if(defined('XH_MOBILE_TEST')&&XH_MOBILE_TEST){
                     echo XH_Social_Error::error_custom(print_r(array(
                         'subject'=>$subject,
                         'content'=>$message
@@ -538,6 +542,7 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
             $error=XH_Social_Error::success();
         }
         
+        $error = apply_filters('wsocial_login_succeed', $error,$wp_user);
         echo $error->to_json();
         exit;
     }
@@ -585,6 +590,49 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
            $userdata['user_login']=XH_Social::instance()->WP->generate_user_login($userdata['user_email']);
         }
         
+        global $wsocial_user_pre_insert_metas;
+        $wsocial_user_pre_insert_metas = array();
+        foreach ($userdata as $key=>$val){
+            if(!in_array($key, array(
+                'ID',
+                'user_pass',
+                'user_login',
+                'user_nicename',
+                'user_url',
+                'user_email',
+                'display_name',
+                'nickname',
+                'first_name',
+                'last_name',
+                'description',
+                'rich_editing',
+                'comment_shortcuts',
+                'admin_color',
+                'use_ssl',
+                'user_registered',
+                'show_admin_bar_front',
+                'role',
+                'locale'
+            ))){
+                $wsocial_user_pre_insert_metas[$key]=$val;
+            }
+        }
+        
+        add_filter('insert_user_meta', function($meta, $user, $update){
+            global $wsocial_user_pre_insert_metas;
+            if($wsocial_user_pre_insert_metas&&is_array($wsocial_user_pre_insert_metas)){
+                foreach ($wsocial_user_pre_insert_metas as $meta_key=>$meta_val){
+                    $meta[$meta_key]=$meta_val;
+                }
+            }
+            unset($GLOBALS['wsocial_user_pre_insert_metas']);
+            return $meta;
+        },10,3);
+        
+        if(!get_option('users_can_register')){
+            echo XH_Social_Error::error_custom('对不起，管理员已关闭了网站注册！')->to_json();
+            exit;
+        }
         $wp_user_id =wp_insert_user($userdata);
         if(is_wp_error($wp_user_id)){
             echo XH_Social_Error::wp_error($wp_user_id)->to_json();
@@ -621,10 +669,14 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
      * @since 1.0.0
      */
     public function disable_wp_login(){
-        if(!apply_filters('xh_social_disable_wp_login', $this->enabled&&empty($_POST)&&'yes'===$this->get_option('disable_wp'))){
+        if(!apply_filters('xh_social_disable_wp_login',
+            
+            !(isset($_REQUEST['r'])&&$_REQUEST['r']=='admin')
+            && empty($_POST)
+            &&'yes'===$this->get_option('disable_wp'))){
             return;
         }
-        
+      
         $redirect_to=isset($_GET['redirect_to'])?esc_url_raw(urldecode($_GET['redirect_to'])):'';
         $action = isset($_GET['action'])?XH_Social_Helper_String::sanitize_key_ignorecase($_GET['action']):'';
        
@@ -661,7 +713,9 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
             return;
         }
         
-        $request = $_GET;
+        $request = array();
+        XH_Social_Helper_Uri::get_uri_without_params(XH_Social_Helper_Uri::get_location_uri(),$request);
+       
         unset($request['action']);
         if(!empty($redirect_to)){
             $request['redirect_to']=$redirect_to;
@@ -831,7 +885,7 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
         $fields=apply_filters('xh_social_page_login_login_fields',array(),0);
         
         $fields['login_name']=array(
-                'title'=>__('Username,email or mobile',XH_SOCIAL),
+                'title'=>__('Username/email/mobile',XH_SOCIAL),
                 'type'=>'text',
                 'required'=>true,
                 'placeholder'=>__('Please enter username,email or mobile',XH_SOCIAL),
@@ -839,7 +893,7 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
                     $user_login =isset($_POST[$name])?sanitize_user(trim($_POST[$name])):'';
                     if(isset($settings['required'])&&$settings['required']){
                         if(empty($user_login)){
-                            return XH_Social_Error::error_custom(__('Username,email or mobile is required!',XH_SOCIAL));
+                            return XH_Social_Error::error_custom(__('Username/email/mobile is required!',XH_SOCIAL));
                         }
                     }
                     
@@ -932,7 +986,7 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
                 $fields= apply_filters('xh_social_page_login_register_fields',$fields,3);
             }
         }
-        
+        $fields= apply_filters('xh_social_page_login_register_fields',$fields,3.1);
         $password_mode = $this->get_option('password_mode','');
         switch ($password_mode){
             default:
@@ -1175,69 +1229,77 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
         if ( $errors->get_error_code() )
             return $errors;
     
-            if ( !$user_data ) {
-                $errors->add('invalidcombo', __('<strong>ERROR</strong>: Invalid username or email.'));
-                return $errors;
-            }
-    
-            // Redefining user_login ensures we return the right case in the email.
-            $user_login = $user_data->user_login;
-            $user_email = $user_data->user_email;
-            $key = get_password_reset_key( $user_data );
-    
-            if ( is_wp_error( $key ) ) {
-                return $key;
-            }
-    
-            $message = __('Someone has requested a password reset for the following account:') . "\r\n\r\n";
-            $message .= network_home_url( '/' ) . "\r\n\r\n";
-            $message .= sprintf(__('Username: %s'), $user_login) . "\r\n\r\n";
-            $message .= __('If this was a mistake, just ignore this email and nothing will happen.') . "\r\n\r\n";
-            $message .= __('To reset your password, visit the following address:') . "\r\n\r\n";
-            $message .= '<' . network_site_url("wp-login.php?action=rp&key=$key&login=" . rawurlencode($user_login), 'login') . ">\r\n";
-    
-            if ( is_multisite() ) {
-                $blogname = get_network()->site_name;
-            } else {
-                /*
-                 * The blogname option is escaped with esc_html on the way into the database
-                 * in sanitize_option we want to reverse this for the plain text arena of emails.
-                 */
-                $blogname = wp_specialchars_decode(get_option('blogname'), ENT_QUOTES);
-            }
-    
-            /* translators: Password reset email subject. 1: Site name */
-            $title = sprintf( __('[%s] Password Reset'), $blogname );
-    
-            /**
-             * Filters the subject of the password reset email.
-             *
-             * @since 2.8.0
-             * @since 4.4.0 Added the `$user_login` and `$user_data` parameters.
-             *
-             * @param string  $title      Default email title.
-             * @param string  $user_login The username for the user.
-             * @param WP_User $user_data  WP_User object.
+        if ( !$user_data ) {
+            $errors->add('invalidcombo', __('<strong>ERROR</strong>: Invalid username or email.'));
+            return $errors;
+        }
+
+        // Redefining user_login ensures we return the right case in the email.
+        $user_login = $user_data->user_login;
+        $user_email = $user_data->user_email;
+        $key = get_password_reset_key( $user_data );
+
+        if ( is_wp_error( $key ) ) {
+            return $key;
+        }
+
+        $message = __('Someone has requested a password reset for the following account:') . "\r\n\r\n";
+        $message .= network_home_url( '/' ) . "\r\n\r\n";
+        $message .= sprintf(__('Username: %s'), $user_login) . "\r\n\r\n";
+        $message .= __('If this was a mistake, just ignore this email and nothing will happen.') . "\r\n\r\n";
+        $message .= __('To reset your password, visit the following address:') . "\r\n\r\n";
+        $message .=  network_site_url("wp-login.php?action=rp&key=$key&login=" . rawurlencode($user_login), 'login') . " \r\n";
+
+       // if ( is_multisite() ) {
+            //$blogname = get_network()->site_name;
+        //} else {
+            /*
+             * The blogname option is escaped with esc_html on the way into the database
+             * in sanitize_option we want to reverse this for the plain text arena of emails.
              */
-            $title = apply_filters( 'retrieve_password_title', $title, $user_login, $user_data );
-    
-            /**
-             * Filters the message body of the password reset mail.
-             *
-             * @since 2.8.0
-             * @since 4.1.0 Added `$user_login` and `$user_data` parameters.
-             *
-             * @param string  $message    Default mail message.
-             * @param string  $key        The activation key.
-             * @param string  $user_login The username for the user.
-             * @param WP_User $user_data  WP_User object.
-             */
-            $message = apply_filters( 'retrieve_password_message', $message, $key, $user_login, $user_data );
-    
-            if ( $message && !wp_mail( $user_email, wp_specialchars_decode( $title ), $message ) )
-                return new WP_Error('email_send_failed', __('The email could not be sent.') . "<br />\n" . __('Possible reason: your host may have disabled the mail() function.') );
-    
-                return true;
+            $blogname = wp_specialchars_decode(get_option('blogname'), ENT_QUOTES);
+       // }
+
+        /* translators: Password reset email subject. 1: Site name */
+        $title = sprintf( __('[%s] Password Reset'), $blogname );
+
+        /**
+         * Filters the subject of the password reset email.
+         *
+         * @since 2.8.0
+         * @since 4.4.0 Added the `$user_login` and `$user_data` parameters.
+         *
+         * @param string  $title      Default email title.
+         * @param string  $user_login The username for the user.
+         * @param WP_User $user_data  WP_User object.
+         */
+        $title = apply_filters( 'retrieve_password_title', $title, $user_login, $user_data );
+
+        /**
+         * Filters the message body of the password reset mail.
+         *
+         * @since 2.8.0
+         * @since 4.1.0 Added `$user_login` and `$user_data` parameters.
+         *
+         * @param string  $message    Default mail message.
+         * @param string  $key        The activation key.
+         * @param string  $user_login The username for the user.
+         * @param WP_User $user_data  WP_User object.
+         */
+        $message = apply_filters( 'retrieve_password_message', $message, $key, $user_login, $user_data );
+       try {
+           add_action('wp_mail_failed', function($wp_error){
+               throw new Exception($wp_error->get_error_message());
+           },10,1);
+           
+           if ( $message && !wp_mail( $user_email, wp_specialchars_decode( $title ), $message ) ){
+               return new WP_Error('email_send_failed', __('The email could not be sent.') . "<br />\n" . __('Possible reason: your host may have disabled the mail() function.') );
+           }
+       } catch (Exception $e) {
+           return new WP_Error('email_send_failed',$e->getMessage());
+       }
+       
+       return true;
     }
     public function page_login($atts=array(), $content=null){
         XH_Social_Temp_Helper::set('atts', array(
@@ -1351,8 +1413,8 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
             },
             'section'=>array('login'),
             'type'=>function ($form_id,$data_name,$settings){
-                $form_name = $data_name;
-                $name = $form_id."_".$data_name;
+                $html_name = $data_name;
+                $html_id =isset($settings['id'])?$settings['id']:  ($form_id."_".$data_name);
                 $api =XH_Social_Add_On_Login::instance();
                 ob_start();
                 $action ="xh_social_{$api->id}";
@@ -1365,15 +1427,15 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
                 $params['hash']=XH_Social_Helper::generate_hash($params, XH_Social::instance()->get_hash_key());
                 ?>
                <div class="xh-input-group">
-                    <input name="<?php echo esc_attr($name);?>" type="text" id="<?php echo esc_attr($name);?>" maxlength="6" class="form-control" placeholder="<?php echo __('email captcha',XH_SOCIAL)?>">
-                    <span class="xh-input-group-btn"><button type="button" style="min-width:96px;" class="xh-btn xh-btn-default" id="btn-code-<?php echo esc_attr($name);?>"><?php echo __('Send Code',XH_SOCIAL)?></button></span>
+                    <input name="<?php echo esc_attr($html_name);?>" type="text" id="<?php echo esc_attr($html_id);?>" maxlength="6" class="form-control" placeholder="<?php echo __('email captcha',XH_SOCIAL)?>">
+                    <span class="xh-input-group-btn"><button type="button" style="min-width:96px;" class="xh-btn xh-btn-default" id="btn-code-<?php echo esc_attr($html_id);?>"><?php echo __('Send Code',XH_SOCIAL)?></button></span>
                 </div>
                 
                 <script type="text/javascript">
         			(function($){
         				if(!$){return;}
         
-        				$('#btn-code-<?php echo esc_attr($name);?>').click(function(){
+        				$('#btn-code-<?php echo esc_attr($html_id);?>').click(function(){
             				var $this = $(this);
         					var data =<?php echo json_encode($params);?>;
         					<?php XH_Social_Helper_Html_Form::generate_submit_data($form_id, 'data');?>
@@ -1428,7 +1490,7 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
         			})(jQuery);
                 </script>
                 <?php 
-                 XH_Social_Helper_Html_Form::generate_field_scripts($form_id, $data_name);
+                 XH_Social_Helper_Html_Form::generate_field_scripts($form_id, $html_name,$html_id);
                 return ob_get_clean();
             });
     
@@ -1443,6 +1505,21 @@ class XH_Social_Add_On_Login extends Abstract_XH_Social_Add_Ons{
 }
 
 
+if(!function_exists('wsocial_dialog_login')){
+    function wsocial_dialog_login($atts=array(),$content=null,$echo = true){
+        
+        $html = XH_Social::instance()->WP->requires(XH_Social_Add_On_Login::instance()->dir,'account/btn-login.php',array(
+            'atts'=>$atts,
+            'content'=>$content
+        ));
+        if($echo){
+            echo $html;
+            return;
+        }
+        
+        return $html;
+    }
+}
 
 return XH_Social_Add_On_Login::instance();
 ?>

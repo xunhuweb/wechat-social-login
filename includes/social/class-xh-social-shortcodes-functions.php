@@ -27,4 +27,3 @@ if(!function_exists('xh_social_share')){
 	    if($echo) echo ob_get_clean(); else return ob_get_clean();
     }
 }
-?>

@@ -2,7 +2,7 @@
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
-$data = XH_Social_Temp_Helper::get('atts','templates');
+$data = XH_Social_Temp_Helper::clear('atts','templates');
 $redirect=$data['redirect'];
 $channels =XH_Social::instance()->channel->get_social_channels(array('login'));    
 ?>
@@ -16,7 +16,7 @@ $channels =XH_Social::instance()->channel->get_social_channels(array('login'));
             continue;
         }
         ?>
-        <a href="<?php echo XH_Social::instance()->channel->get_authorization_redirect_uri($channel->id,$redirect);?>" rel="noflow" style="background:url(<?php echo $channel->icon?>) no-repeat transparent;" class="xh_social_login_bar" title="<?php echo $channel->title;?>"></a>
+        <a href="<?php echo XH_Social::instance()->channel->get_authorization_redirect_uri($channel->id,$redirect);?>" rel="noflow" style="background:url(<?php echo $channel->icon?>) no-repeat transparent;" class="xh_social_login_bar" title="<?php echo esc_attr($channel->title);?>"></a>
         <?php 
     }?>
 </div><?php 

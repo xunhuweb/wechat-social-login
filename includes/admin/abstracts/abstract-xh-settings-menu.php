@@ -35,6 +35,8 @@ abstract class Abstract_XH_Social_Settings_Menu extends Abstract_XH_Social_Setti
         $index=0;
         $menu =null;
         $menus = $this->menus();
+        ksort($menus);
+        reset($menus);
         foreach ($menus as $item){
             if($index++===0){
                 $menu=$item;
@@ -101,13 +103,15 @@ class XH_Social_Menu_View extends XH_Social_View_Form{
     public function menus(){
         $menus = $this->page->menus();
         $show_menus = array();
+        ksort($menus);
+        reset($menus);
         foreach ($menus as $menu){
             if(!$menu||!$menu instanceof Abstract_XH_Social_Settings_Menu){
                 continue;
             }
         
             $show_menus[]=array(
-                'name'=>$menu->title,
+                'name'=>isset($menu->menu_title)&&!empty($menu->menu_title)?$menu->menu_title: $menu->title,
                 'url'=>$menu->get_menu_url($this->page),
                 'selected'=>$this->menu->id===$menu->id
             );
@@ -121,19 +125,21 @@ class XH_Social_Menu_View extends XH_Social_View_Form{
      */
     public function sub_menus() {
         $submenus = $this->menu->menus();
+        ksort($submenus);
+        reset($submenus);
         $show_menus = array();
         if(!$this->submenu){
             return $show_menus;
         }
-        
+       
         foreach ($submenus as $menu){
             $show_menus[]=array(
-                'name'=>$menu->title,
+                'name'=>isset($menu->menu_title)&&!empty($menu->menu_title)?$menu->menu_title: $menu->title,
                 'url'=>$this->menu->get_submenu_url($this->page, $menu->id),
                 'selected'=>$this->submenu->id===$menu->id
             );
         }
-        
+       
         return $show_menus;
     }
 

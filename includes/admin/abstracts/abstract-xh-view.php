@@ -20,6 +20,8 @@ abstract class XH_Social_Abstract_View extends Abstract_XH_Social_Settings{
 			<?php 
 				$menus = $this->menus();
 				if($menus){
+				    ksort($menus);
+				    reset($menus);
 					?><h2 class="nav-tab-wrapper woo-nav-tab-wrapper"><?php 
 					foreach ($menus as $menu){
 						?><a href="<?php print esc_attr($menu['url'])?>" class="nav-tab <?php print (isset($menu['selected'])&&$menu['selected']?'nav-tab-active':'')?>"><?php print esc_html($menu['name'])?></a><?php 
@@ -27,11 +29,11 @@ abstract class XH_Social_Abstract_View extends Abstract_XH_Social_Settings{
 					?></h2><?php
 				}
 				unset($menus);
-				
 				$sub_menus = $this->sub_menus();
 				$qty =count($sub_menus);
 				if($sub_menus&&$qty>1){
-					
+				    ksort($sub_menus);
+				    reset($sub_menus);
 					$index =0;
 					?><ul class="subsubsub"><?php
 					foreach ($sub_menus as $menu){

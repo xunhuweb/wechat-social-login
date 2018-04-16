@@ -235,15 +235,15 @@ class XH_Social_Channel_Wechat extends Abstract_XH_Social_Settings_Channel{
         global $wpdb;
         if(!$wp_user_id){
             $user_login = XH_Social::instance()->WP->generate_user_login($ext_user_info['nickname']);
-            $userdata=array(
+            $userdata=apply_filters('wsocial_insert_user_Info',array(
                 'user_login'=>$user_login,
                 'user_nicename'=>$ext_user_info['nicename'],
-                'first_name'=>$ext_user_info['nickname'],
+                'first_name'=>method_exists($this, 'filter_display_name')?$this->filter_display_name($ext_user_info['nickname']):$ext_user_info['nickname'],
                 'user_email'=>null,
-                'display_name'=>$ext_user_info['nickname'],
-                'nickname'=>$ext_user_info['nickname'],
+                'display_name'=>method_exists($this, 'filter_display_name')?$this->filter_display_name($ext_user_info['nickname']):$ext_user_info['nickname'],
+                'nickname'=>method_exists($this, 'filter_display_name')?$this->filter_display_name($ext_user_info['nickname']):$ext_user_info['nickname'],
                 'user_pass'=>str_shuffle(time())
-            );
+            ),$this);
             
             $wp_user_id = $this->wp_insert_user_Info($ext_user_id, $userdata);
             if($wp_user_id instanceof XH_Social_Error){
@@ -447,42 +447,19 @@ class XH_Social_Channel_Wechat extends Abstract_XH_Social_Settings_Channel{
         $response=array();
         
         try {
-            global $wpdb;
-            $wpdb->last_error='';
-            
             //获取accesstoken
             $appid = $this->get_option("{$prefix}_id");
             $appsecret = $this->get_option("{$prefix}_secret");
-        
-            $result = XH_Social_Helper_Http::http_get("https://api.weixin.qq.com/sns/oauth2/access_token?appid=$appid&secret=$appsecret&code=$code&grant_type=authorization_code");
-            $response = json_decode($result,true);
-            if(!$response){
-                throw new Exception(__('Nothing callback when get access token!',XH_SOCIAL),500);
-            }
-           
-            if(isset($response['errcode'])){
-                throw new Exception($response['errmsg'],$response['errcode']);
-            }
-        
-            $openid =$response['openid'];
-            $access_token = $response['access_token'];
-   
-            $result = XH_Social_Helper_Http::http_get("https://api.weixin.qq.com/sns/userinfo?access_token=$access_token&openid=$openid");
-   
-            $response = json_decode($result,true);
-            if(!$response){    
-                throw new Exception(__('Nothing callback when get user info!',XH_SOCIAL),500);
+            
+            if(empty($code)){
+                return $login_location_uri;
             }
             
-            if(isset($response['errcode'])){
-                throw new Exception($response['errmsg'],$response['errcode']);
+            $response=$this->get_wechat_user_by_code($code,$appid,$appsecret);   
+            if(!$response||!isset($response['openid'])||empty($response['openid'])){
+                XH_Social_Log::error('unknow openid'.print_r($response,true));
+                throw new Exception('unknow openid');
             }
-            
-            if(!empty($wpdb->last_error)){
-                throw new Exception($wpdb->last_error,500);
-            }
-           
-           
         } catch (Exception $e) {
             XH_Social_Log::error($e);
             if($e->getCode()!=500){
@@ -500,7 +477,7 @@ class XH_Social_Channel_Wechat extends Abstract_XH_Social_Settings_Channel{
         
        try {
            $ext_user_id =$this->create_ext_user_info($prefix,$response,$wp_user_id,$uid);
-           return $this->process_login($ext_user_id);
+           return $this->process_login($ext_user_id,$wp_user_id>0);
        } catch (Exception $e) {
            XH_Social_Log::error($e);
            XH_Social::instance()->WP->set_wp_error($login_location_uri, $e->getMessage());
@@ -508,6 +485,34 @@ class XH_Social_Channel_Wechat extends Abstract_XH_Social_Settings_Channel{
        }
     }
   
+    public function get_wechat_user_by_code($code, $appid, $appsecret){
+        $result = XH_Social_Helper_Http::http_get("https://api.weixin.qq.com/sns/oauth2/access_token?appid=$appid&secret=$appsecret&code=$code&grant_type=authorization_code");
+        $response = json_decode($result,true);
+        if(!$response){
+            throw new Exception(__('Nothing callback when get access token!',XH_SOCIAL),500);
+        }
+         
+        if(isset($response['errcode'])){
+            throw new Exception($response['errmsg'],$response['errcode']);
+        }
+        
+        $openid =$response['openid'];
+        $access_token = $response['access_token'];
+         
+        $result = XH_Social_Helper_Http::http_get("https://api.weixin.qq.com/sns/userinfo?access_token=$access_token&openid=$openid");
+         
+        $response = json_decode($result,true);
+        if(!$response){
+            throw new Exception(__('Nothing callback when get user info!',XH_SOCIAL),500);
+        }
+        
+        if(isset($response['errcode'])){
+            throw new Exception($response['errmsg'],$response['errcode']);
+        }
+        
+        return $response;
+    }
+    
     /**
      * 创建扩展用户信息
      * @param string $prefix  mp|op
@@ -516,10 +521,12 @@ class XH_Social_Channel_Wechat extends Abstract_XH_Social_Settings_Channel{
      * @return number
      */
     public function create_ext_user_info($prefix,$user_data,$wp_user_id,$uid){
+        if(is_object($user_data)){$user_data = get_object_vars($user_data);}
+        
         global $wpdb;
         //same unionid
         $user=null;
-        if(!empty($user_data['unionid'])){
+        if(isset($user_data['unionid'])&&!empty($user_data['unionid'])){
             $user = $wpdb->get_row($wpdb->prepare(
                 "select w.id,
                         {$prefix}_openid as openid,
@@ -649,7 +656,8 @@ class XH_Social_Channel_Wechat extends Abstract_XH_Social_Settings_Channel{
     
             //something is wrong and data is not inserted.
             if($wpdb->insert_id<=0){
-                throw new Exception(__('unknow error when insert wechat user info.',XH_SOCIAL),500);
+                XH_Social_Log::error(__('unknow error when insert wechat user info.',XH_SOCIAL).print_r($update,true));
+                throw new Exception(__('unknow error when insert wechat user info.',XH_SOCIAL),501);
             }
     
             return $wpdb->insert_id;
@@ -709,13 +717,7 @@ class XH_Social_Channel_Wechat extends Abstract_XH_Social_Settings_Channel{
             return $uri;
         }
         
-        $params=array();
-        $params["appid"] = $this->get_option('op_id');
-        $params["redirect_uri"] = $redirect_uri;
-        $params["response_type"] = "code";
-        $params["scope"] = "snsapi_login";
-        $params["state"] = $state;
-        return "https://open.weixin.qq.com/connect/qrconnect?".http_build_query($params)."#wechat_redirect";     
+        return $this->get_wechat_op_authorize_url($this->get_option('op_id'),$state,$redirect_uri);   
     }
     
     public function login_get_wechatclient_authorization_uri($user_ID=0,$uid=null,$error_times=null){
@@ -754,8 +756,23 @@ class XH_Social_Channel_Wechat extends Abstract_XH_Social_Settings_Channel{
             return $uri;
         }
      
+        return $this->get_wechat_mp_authorize_url($this->get_option('mp_id'), $state, $redirect_uri);
+       
+    }
+    
+    public function get_wechat_op_authorize_url($appid,$state,$redirect_uri){
         $params=array();
-        $params["appid"] = $this->get_option('mp_id');
+        $params["appid"] = $appid;
+        $params["redirect_uri"] = $redirect_uri;
+        $params["response_type"] = "code";
+        $params["scope"] = "snsapi_login";
+        $params["state"] = $state;
+        return "https://open.weixin.qq.com/connect/qrconnect?".http_build_query($params)."#wechat_redirect";
+    }
+    
+    public function get_wechat_mp_authorize_url($appid,$state,$redirect_uri){
+        $params=array();
+        $params["appid"] = $appid;
         $params["redirect_uri"] = $redirect_uri;
         $params["response_type"] = "code";
         $params["scope"] = "snsapi_userinfo";

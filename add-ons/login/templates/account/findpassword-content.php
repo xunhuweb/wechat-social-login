@@ -2,7 +2,7 @@
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
-$attdata = XH_Social_Temp_Helper::get('atts','templete');
+$attdata = XH_Social_Temp_Helper::clear('atts','templete');
 $atts = $attdata['atts'];
 $api = XH_Social_Add_On_Login::instance();
 
@@ -14,11 +14,11 @@ if(is_user_logged_in()){
         wp_logout();
     }
 }
-
+$findpassword_email_mode = $api->get_option('findpassword_email_mode','');
 ?>
 <div class="xh-regbox">
 	<div class="xh-title" id="form-title"><?php echo __('Find password',XH_SOCIAL)?></div>
-	<form class="xh-form" id="wshop-resetpassword-container">
+	<form class="xh-form">
 		<div id="fields-error"></div>
             <?php 
                $methods = $api->page_login_findpassword_methods(); 
@@ -28,11 +28,17 @@ if(is_user_logged_in()){
                    $method_options[$method]= $setting['title'];
                }
                
-               echo XH_Social_Helper_Html_Form::generate_select_html('resetpassword', 'method', array(
-                   'title'=>__('method',XH_SOCIAL),
-                   'type'=>'select',
-                   'options'=>$method_options
-               ));
+               if(count($method_options)==1){
+                   foreach ($method_options as $key=>$op){
+                       echo XH_Social_Helper_Html_Form::generate_hidden_html('resetpassword', 'method',array('default'=>$key));
+                   }
+               }else{
+                   echo XH_Social_Helper_Html_Form::generate_select_html('resetpassword', 'method', array(
+                       'title'=>__('method',XH_SOCIAL),
+                       'type'=>'select',
+                       'options'=>$method_options
+                   ));
+               }
                
                foreach ($methods as $method=>$setting){
                    ?>
@@ -104,7 +110,18 @@ if(is_user_logged_in()){
 		            },
 		            success: function(m) {
 		            	if(m.errcode==0){
-		            		location.href='<?php echo wp_login_url()?>';
+			            	if($('#resetpassword_method').val()==='email'){
+    			            	<?php if($findpassword_email_mode=='code'){
+    			            	    ?>window.xh_social_view.success('登录密码已成功重置，请登录！');<?php
+    			            	}else{
+    			            	    ?> window.xh_social_view.success('重置密码的链接已发送到您的邮箱，请注意查收！');<?php
+    			            	}?>
+			            	}else if($('#resetpassword_method').val()==='mobile'){
+			            		 window.xh_social_view.success('登录密码已成功重置，请登录！');
+				            }
+		            		setTimeout(function(){
+		            			location.href='<?php echo wp_login_url()?>';
+			            	},2500);
 							return;
 						}
 		            	

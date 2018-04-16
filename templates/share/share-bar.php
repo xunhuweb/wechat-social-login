@@ -20,8 +20,15 @@ ob_start();
 			var title = encodeURIComponent(document.title);
 			var summary = document.querySelector('.entry-content') || document.querySelector('article') || document.querySelector('main') || document.querySelector('body') || '';
 			var pic = '';
+			
 			if(summary){
-				[].forEach.call(summary.querySelectorAll('img'), function(a){ pic += (pic?'||':'') + encodeURIComponent(a.src); });
+				var index = 0;
+				[].forEach.call(summary.querySelectorAll('img'), function(a){
+					 if(index++>=3){
+						return false;
+					 }
+					 pic += (pic?'||':'') + encodeURIComponent(a.src); 
+				});
 				
 				summary = encodeURIComponent(summary.innerText.replace(/\r|\n|\t/g,'').replace(/ +/g,' ').replace(/<!--(.*)\/\/-->/g,'').substr(0,80));
 			}

@@ -12,7 +12,7 @@ if ( ! $guessurl = site_url() ){
 <!DOCTYPE html>
 <html>
 	<head>
-	<title><?php echo the_title();?></title>
+	<title><?php the_title();?></title>
 		<meta charset="<?php bloginfo( 'charset' ); ?>">
 		<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
 		<link media="all" type="text/css" rel="stylesheet" href="<?php print XH_SOCIAL_URL?>/assets/css/social.css">	
@@ -29,6 +29,6 @@ if ( ! $guessurl = site_url() ){
 		// End the loop.
 		endwhile;
 	 ?>
-	  <div class="xh-user-register"><a href="<?php echo home_url('/')?>"><?php echo __('Home',XH_SOCIAL)?></a>|<a href="<?php echo wp_registration_url()?>"><?php echo __('Register',XH_SOCIAL)?></a>|<a href="<?php echo wp_lostpassword_url()?>"><?php echo __( 'Lost your password?',XH_SOCIAL )?></a></div>
+	  <div class="xh-user-register"><a href="<?php echo home_url('/')?>"><?php echo __('Home',XH_SOCIAL)?></a>|<a href="<?php echo wp_registration_url()?>"><?php echo __('Register',XH_SOCIAL)?></a>|<a href="<?php echo wp_lostpassword_url(isset($_GET['redirect_to'])?esc_url_raw($_GET['redirect_to']):'')?>"><?php echo __( 'Lost your password?',XH_SOCIAL )?></a></div>
 	</body>
 </html>

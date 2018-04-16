@@ -22,6 +22,7 @@ class XH_Social_Ajax {
 		    'xh_social_plugin'=>__CLASS__ . '::plugin',
 		    'xh_social_service'=>__CLASS__ . '::service',
 		    'xh_social_captcha'=>__CLASS__ . '::captcha',
+		    'wsocial_obj_search'   =>__CLASS__ . '::obj_search',
 		    //'xh_social_gc'=>__CLASS__ . '::gc',
 		);
 		
@@ -32,6 +33,114 @@ class XH_Social_Ajax {
 		}
 	}
 
+	/**
+	 *  查询用户
+	 * @since 1.2.5 
+	 */
+	public static function obj_search(){
+	    $action ='wsocial_obj_search';
+	    $params=shortcode_atts(array(
+	        'notice_str'=>null,
+	        'action'=>$action,
+	        $action=>null
+	    ), stripslashes_deep($_REQUEST));
+	     
+	    if(!XH_Social::instance()->WP->ajax_validate($params, isset($_REQUEST['hash'])?$_REQUEST['hash']:null,true)){
+	        echo WShop_Error::err_code(701)->to_json();
+	        exit;
+	    }
+	     
+	    $post_ID = 0;
+	    $keywords=null;
+	    if(isset($_REQUEST['term'])&&is_numeric($_REQUEST['term'])){
+	        $post_ID =absint($_REQUEST['term']);
+	    }else{
+    	    $keywords = isset($_REQUEST['term'])?trim(stripslashes($_REQUEST['term'])):null;
+    	    $keywords = mb_strimwidth(trim($keywords,'%'), 0, 32,'','utf-8');
+	    }
+	    
+	    $type = isset($_REQUEST['obj_type'])?sanitize_key($_REQUEST['obj_type']):null;
+	   
+	    $results = apply_filters("wsocial_obj_search_{$type}",null,$type, $keywords,$post_ID);
+	    if(!is_null($results)){
+	        echo json_encode(array(
+	            'items'=>$results
+	        ));
+	        exit;
+	    }
+	     
+	    global $wpdb;
+	     
+	    switch ($type){
+	        case 'customer':
+	            $users = $wpdb->get_results($wpdb->prepare(
+	               "select u.ID,
+        	               u.user_login,
+        	               u.user_email
+	               from {$wpdb->prefix}users u
+	               where ($post_ID=0 or u.ID=$post_ID)
+	                     and (%s='' or u.user_login like %s or u.user_email like %s)
+	               limit 10;",$keywords, "$keywords%","$keywords%"));
+	            
+	           $results = array();
+	           if($users){
+	               foreach ($users as $user){
+	                   if(!empty($user->user_email)){
+	                       $results[]=array(
+	                           'id'=>$user->ID,
+	                           'text'=>"{$user->user_login}({$user->user_email})"
+	                       );
+	                   }else{
+	                       $results[]=array(
+	                           'id'=>$user->ID,
+	                           'text'=>"{$user->user_login}"
+	                       );
+	                   }
+	               }
+	           }
+	            
+	           echo json_encode(array(
+	               'items'=>$results
+	           ));
+	           exit;
+	       default:
+	           if(empty($type)){
+	               $posts = $wpdb->get_results($wpdb->prepare(
+	                   "select u.ID,
+	                           u.post_title
+	                   from {$wpdb->prefix}posts u
+	                   where ($post_ID=0 or u.ID=$post_ID)
+    	                   and (%s='' or u.post_title like %s)
+    	                   and u.post_status='publish'
+	                   limit 10;",$keywords,"$keywords%"));
+	           }else{
+	               $posts = $wpdb->get_results($wpdb->prepare(
+	                   "select u.ID,
+	                           u.post_title
+	                   from {$wpdb->prefix}posts u
+	                   where ($post_ID=0 or u.ID=$post_ID)
+    	                   and (%s='' or u.post_title like %s)
+    	                   and u.post_type=%s
+    	                   and u.post_status='publish'
+	                   limit 10;",$keywords,"$keywords%", $type));
+	           }
+	           
+	               $results = array();
+	               if($posts){
+	                   foreach ($posts as $post){
+	                       $results[]=array(
+	                           'id'=>$post->ID,
+	                           'text'=>$post->post_title
+	                       );
+	                   }
+	               }
+	          
+	               echo json_encode(array(
+	                   'items'=>$results
+	               ));
+	               exit;
+	    }
+	}
 	//插件定时服务
 	public static function cron(){
 	    header("Access-Control-Allow-Origin:*");
@@ -69,7 +178,7 @@ class XH_Social_Ajax {
 	        
 	    }
 	    
-	    echo 'hello wshop cron';
+	    echo 'hello wsocial cron';
 	    exit;
 	}
 	
@@ -78,33 +187,38 @@ class XH_Social_Ajax {
 	 * @since 1.0.0
 	 */
 	public static function captcha(){
-	    require_once XH_SOCIAL_DIR.'/includes/captcha/CaptchaBuilderInterface.php';
-	    require_once XH_SOCIAL_DIR.'/includes/captcha/PhraseBuilderInterface.php';
-	    require_once XH_SOCIAL_DIR.'/includes/captcha/CaptchaBuilder.php';
-	    require_once XH_SOCIAL_DIR.'/includes/captcha/PhraseBuilder.php';
-	 
-	    $action ='xh_social_captcha';
-	    $params=shortcode_atts(array(
-            'notice_str'=>null,
-            'action'=>$action,
-             $action=>null
-        ), stripslashes_deep($_REQUEST));
+	    $func = apply_filters('wsocial_captcha', function(){
+	        require_once XH_SOCIAL_DIR.'/includes/captcha/CaptchaBuilderInterface.php';
+	        require_once XH_SOCIAL_DIR.'/includes/captcha/PhraseBuilderInterface.php';
+	        require_once XH_SOCIAL_DIR.'/includes/captcha/CaptchaBuilder.php';
+	        require_once XH_SOCIAL_DIR.'/includes/captcha/PhraseBuilder.php';
+	        
+	        $action ='xh_social_captcha';
+	        $params=shortcode_atts(array(
+	            'notice_str'=>null,
+	            'action'=>$action,
+	            $action=>null
+	        ), stripslashes_deep($_REQUEST));
+	         
+	        if(isset($_REQUEST['social_key'])){
+	            $params['social_key'] =$_REQUEST['social_key'];
+	        }else{
+	            $params['social_key'] ='social_captcha';
+	        }
+	         
+	        if(!XH_Social::instance()->WP->ajax_validate($params,isset($_REQUEST['hash'])?$_REQUEST['hash']:null,true)){
+	            echo XH_Social_Error::err_code(701)->to_json();
+	            exit;
+	        }
+	         
+	        $builder = Gregwar\Captcha\CaptchaBuilder::create() ->build();
+	        XH_Social::instance()->session->set($params['social_key'], $builder->getPhrase());
+	         
+	        return XH_Social_Error::success($builder ->inline());
+	    });
 	    
-	    if(isset($_REQUEST['social_key'])){
-	        $params['social_key'] =$_REQUEST['social_key'];
-	    }else{
-	        $params['social_key'] ='social_captcha';
-	    }
-	    
-	    if(!XH_Social::instance()->WP->ajax_validate($params,isset($_REQUEST['hash'])?$_REQUEST['hash']:null,true)){
-            XH_Social::instance()->WP->wp_die(XH_Social_Error::err_code(701)->errmsg);
-            exit;
-	    }
-	    
-	    $builder = Gregwar\Captcha\CaptchaBuilder::create() ->build();
-	    XH_Social::instance()->session->set($params['social_key'], $builder->getPhrase());
-	    
-	    echo XH_Social_Error::success($builder ->inline())->to_json();
+	    $error = call_user_func($func);
+	    echo $error->to_json();
 	    exit;
 	}
 	
@@ -434,7 +548,7 @@ class XH_Social_Ajax {
 	                    ini_set('memory_limit','128M');
 	                    flush_rewrite_rules();
 	                } catch (Exception $e) {
-	                    echo (XH_Social_Error::error_custom($e)->to_json());
+	                    echo (XH_Social_Error::error_custom($e->getMessage())->to_json());
 	                    exit;
 	                }
 	            }
@@ -536,7 +650,7 @@ class XH_Social_Ajax {
 	          
 	           if(!isset($info['_last_cache_time'])||$info['_last_cache_time']<time()){
 	               $api ='https://www.wpweixin.net/wp-content/plugins/xh-hash/api-add-ons.php';
-	               $params = array(
+	               $request_data = array(
 	                   'l'=>$add_on->id,
 	                   's'=>get_option('siteurl'),
 	                   'v'=>$add_on->version,
@@ -559,11 +673,11 @@ class XH_Social_Ajax {
 	                    exit;
 	                }
 	                
-	               $params['c']=$license;
+	               $request_data['c']=$license;
 	                
 	               $request =wp_remote_post($api,array(
-	                   'timeout'=>10,
-	                   'body'=>$params
+	                   'timeout'=>15,
+	                   'body'=>$request_data
 	               ));
 	              
 	               if(is_wp_error( $request )){

@@ -68,6 +68,12 @@ class XH_Social_Error{
 	 * @return XH_Social_Error
 	 */
 	public static function error_custom($errmsg='') {
+	    if($errmsg instanceof Exception){
+	        $errmsg ="errcode:{$errmsg->getCode()},errmsg:{$errmsg->getMessage()}";
+	    }else if($errmsg instanceof WP_Error){
+	        $errmsg ="errcode:{$errmsg->get_error_code()},errmsg:{$errmsg->get_error_message()}";
+	    }
+	    
 		return new XH_Social_Error ( - 1, $errmsg );
 	}
 	
@@ -126,7 +132,11 @@ class XH_Social_Error{
 		));
 	}
 	
+	public function to_string(){
+	    return "errcode:{$this->errcode},errmsg:{$this->errmsg}";
+	}
+	
 	public function to_wp_error(){
-	    return new WP_Error($this->errcode,$this->errmsg);
+	    return new WP_Error($this->errcode,$this->errmsg,$this->data);
 	}
 }
